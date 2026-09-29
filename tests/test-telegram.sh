@@ -92,6 +92,17 @@ $TG ascolta --una-volta >/dev/null
 check "trascrizione mandata a Claude" 'grep -q "quali sono le scadenze di ottobre" "$T/claude-chiamate.txt"'
 check "risposta con «Ho capito»" 'grep -q "Ho capito: «quali sono le scadenze di ottobre»" "$T/finto/inviati.jsonl"'
 
+echo "5b. Vocali corti o vuoti, inoltri con altri campi"
+N1=$(wc -l < "$T/claude-chiamate.txt")
+printf 'Grazie a tutti.' > "$T/finto/trascrizione.txt"
+{ echo "["; upd 30 4242 '"voice":{"file_id":"voce1","duration":1}'; echo ","; upd 31 4242 '"voice":{"file_id":"voce1","duration":5}'; echo ","
+  upd 32 4242 '"text":"Testo inoltrato da un gruppo","forward_from_chat":{"id":-100,"type":"channel"}'; echo "]"; } > "$T/finto/aggiornamenti.json"
+$TG ascolta --una-volta >/dev/null
+check "vocale di un secondo: non trascritto" 'grep -q "Il vocale è troppo corto" "$T/finto/inviati.jsonl"'
+check "vocale che Whisper riduce a «Grazie a tutti.»: scartato" 'grep -q "Non ho capito il vocale" "$T/finto/inviati.jsonl"'
+check "nessuna conversazione dai vocali scartati" '[ "$(wc -l < "$T/claude-chiamate.txt")" = "$N1" ]'
+check "inoltro da un canale (forward_from_chat) → Inbox" 'grep -rlq "Testo inoltrato da un gruppo" "$I/telegram"'
+
 echo "6. Script del modulo telegram (configurazione guidata)"
 export METIS_LAUNCHAGENTS="$T/LaunchAgents"
 rm -f "$T/cfg/telegram"

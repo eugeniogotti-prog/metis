@@ -28,6 +28,8 @@ API = os.environ.get("METIS_TELEGRAM_API", "https://api.telegram.org").rstrip("/
 GROQ = os.environ.get("METIS_GROQ_API", "https://api.groq.com").rstrip("/")
 CLAUDE = os.environ.get("METIS_CLAUDE", "")   # vuoto: dalla configurazione (METIS_CLAUDE), altrimenti «claude»
 ORE_CONVERSAZIONE = 6
+# Frasi che Whisper produce su audio vuoto o rumore: un vocale che si riduce a una di queste non si usa.
+FRASI_WHISPER = re.compile(r"^\W*(grazie( a tutti| per (la visione|l'ascolto|aver guardato))?|sottotitoli .*|thank you( for watching)?\.?|you)\W*$", re.I)
 MAX_MSG = 3900
 
 
@@ -189,11 +191,17 @@ def smista(cfg, token, chat, stato, msg):
     inbox_tg = os.path.join(cfg["inbox"], "telegram")
     doc = msg.get("document") or (msg.get("photo") or [None])[-1] or msg.get("video") or msg.get("audio")
     if msg.get("voice"):
+        # Un vocale di meno di due secondi è quasi sempre partito per sbaglio, e Whisper sul silenzio inventa frasi
+        # («Grazie a tutti.», verificato il 29/9/2026): non si trascrive.
+        if msg["voice"].get("duration", 0) < 2:
+            return "Il vocale è troppo corto: se volevi dire qualcosa, ripetilo."
         tmp = tempfile.mkdtemp(prefix="metis-vocale-")
         try:
             trascritto = trascrivi(cfg, scarica(token, msg["voice"]["file_id"], os.path.join(tmp, "vocale.oga")))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+        if not trascritto or FRASI_WHISPER.match(trascritto):
+            return "Non ho capito il vocale: ripetilo, o scrivimi."
         if re.match(r"^\W*nota\b", trascritto, re.I):
             p = scrivi_nota(os.path.join(cfg["inbox"], "voicenotes"), trascritto, quando, "Vocale", "vocale")
             return f"Nota vocale salvata nell'Inbox: {os.path.basename(p)}"
@@ -208,7 +216,8 @@ def smista(cfg, token, chat, stato, msg):
     if not testo:
         return "Messaggio non riconosciuto: mando al vault testi, link, file e vocali."
     solo_link = re.fullmatch(r"\s*https?://\S+\s*", testo) is not None
-    if msg.get("forward_origin") or msg.get("forward_date") or solo_link or re.match(r"^\W*nota\b", testo, re.I):
+    inoltrato = any(msg.get(k) for k in ("forward_origin", "forward_date", "forward_from", "forward_from_chat", "forward_sender_name"))
+    if inoltrato or solo_link or re.match(r"^\W*nota\b", testo, re.I):
         testo_nota = re.sub(r"^\W*nota\W*", "", testo, flags=re.I) if not solo_link else testo
         p = scrivi_nota(inbox_tg, testo_nota, quando, "Telegram", "telegram")
         return f"Salvato nell'Inbox: {os.path.basename(p)}"
