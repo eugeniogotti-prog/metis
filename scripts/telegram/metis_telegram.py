@@ -236,6 +236,8 @@ def ascolta(una_volta=False):
             da = str((msg.get("chat") or {}).get("id", ""))
             if da != str(chat):
                 log(cfg, f"ignorato un messaggio dalla chat {da}: non è la chat del cliente"); continue
+            # forma del messaggio (solo i nomi dei campi, mai il contenuto): serve a capire uno smistamento sbagliato
+            log(cfg, f"update {u['update_id']}: campi {','.join(sorted(k for k in msg if k not in ('chat', 'from', 'message_id', 'date')))}")
             try:
                 tg(token, "sendChatAction", {"chat_id": chat, "action": "typing"})
                 risposta = smista(cfg, token, chat, stato, msg)

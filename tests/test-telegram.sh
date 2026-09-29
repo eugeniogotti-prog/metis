@@ -68,6 +68,7 @@ check "risposta di Claude tornata nella chat" 'grep -q "Risposta di prova a: Che
 check "secondo messaggio: stessa conversazione ripresa" 'grep "E la settimana dopo" "$T/claude-chiamate.txt" | grep -q -- "--resume sessione-1"'
 check "Claude lanciato con le regole delle routine" 'grep -q -- "--settings" "$T/claude-chiamate.txt"'
 check "messaggio di un estraneo ignorato" '! grep -q "estraneo" "$T/claude-chiamate.txt" && ! grep -rq "estraneo" "$I"'
+check "forma dei messaggi nel log, senza contenuto" 'grep -q "update 3: campi forward_date,text" "$T/log/telegram.log" && ! grep -q "commercialista" "$T/log/telegram.log"'
 check "estraneo registrato nel log" 'grep -q "ignorato un messaggio dalla chat 9999" "$T/log/telegram.log"'
 check "nessuna risposta mandata all'estraneo" '! grep -q "\"chat_id\": \"9999\"" "$T/finto/inviati.jsonl"'
 
