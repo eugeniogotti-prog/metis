@@ -25,7 +25,7 @@ Serve perché le routine non dipendano dal login di claude.ai, e perché non pos
 3. `bash scripts/moduli/google.sh account`: si apre il browser; il cliente accede e consente. Google mostra l'avviso di app non verificata, perché l'app è sua e non pubblicata: si prosegue da «Avanzate».
 4. `bash scripts/moduli/google.sh routine`: dichiara il server, in sola lettura e con la versione fissata, nella configurazione MCP delle routine.
 
-**Da dire al cliente — da verificare con il primo pilota:** un'app OAuth in stato «Test» riceve da Google token che scadono dopo sette giorni. Nel vault di riferimento la cosa si è vista come un «invalid_grant» settimanale. Pubblicare l'app «in produzione» dovrebbe togliere la scadenza, ma per un'app non verificata non l'ho provato: finché non è provato, il doctor segnala il server non pronto e il rimedio è ripetere il passo 3.
+**Da dire al cliente — da verificare con il primo pilota:** un'app OAuth in stato «Test» riceve da Google token che scadono dopo sette giorni. Nell'uso reale del sistema si è vista come un errore «invalid_grant» una volta alla settimana. Pubblicare l'app «in produzione» dovrebbe togliere la scadenza, ma per un'app non verificata non l'ho provato: finché non è provato, il doctor segnala il server non pronto e il rimedio è ripetere il passo 3.
 
 **Controllo:** `bash scripts/moduli/google.sh controlla` (credenziali protette, server pronto, account autorizzato, server dichiarato per le routine).
 
