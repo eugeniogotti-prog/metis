@@ -25,10 +25,8 @@ scrivi_segreto() {  # scrivi_segreto CHIAVE valore
   chmod 600 "$SEG.tmp"; mv "$SEG.tmp" "$SEG"
 }
 leggi_segreto() { grep "^$1=" "$SEG" 2>/dev/null | tail -1 | cut -d= -f2-; }
-token_valido() {
-  local t; t=$(leggi_segreto TOKEN); [ -n "$t" ] || return 1
-  curl -s -m 20 "$API/bot$t/getMe" | grep -q '"ok":[[:space:]]*true'
-}
+token_valido() { "${TG[@]}" verifica >/dev/null 2>&1; [ $? -ne 1 ]; }   # 0 tutto a posto, 2 manca solo la chat
+chat_salvata() { "${TG[@]}" verifica >/dev/null 2>&1; }
 
 case "${1:-}" in
   token)
@@ -49,17 +47,17 @@ case "${1:-}" in
     bash "$METIS_ROOT/scripts/lib/launchd.sh" genera telegram sempre /usr/bin/python3 "$METIS_ROOT/scripts/telegram/metis_telegram.py" ascolta || exit 1
     [ "${2:-}" = --senza-caricare ] || bash "$METIS_ROOT/scripts/lib/launchd.sh" carica telegram ;;
   installa)
-    [ -n "$(leggi_segreto TOKEN)" ] || { echo "telegram: manca il token → telegram.sh token"; exit 1; }
+    V=$("${TG[@]}" verifica 2>&1)
+    case "$V" in *"token assente"*) echo "telegram: manca il token → telegram.sh token"; exit 1 ;; esac
     token_valido || { echo "telegram: il token salvato non è valido → telegram.sh token"; exit 1; }
-    [ -n "$(leggi_segreto CHAT_ID)" ] || bash "$0" chat || exit 1
+    chat_salvata || bash "$0" chat || exit 1
     bash "$0" prova || exit 1
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI telegram
     echo "telegram: uscita pronta. Per l'Inbox dal telefono e la conversazione: telegram.sh ascoltatore" ;;
   controlla)
     ERR=0
-    [ "$(stat -f %Lp "$SEG" 2>/dev/null)" = 600 ] && echo "✅ file dei segreti protetto (600)" || { echo "❌ file dei segreti assente o leggibile da altri: $SEG"; ERR=1; }
-    token_valido && echo "✅ token valido" || { echo "❌ token assente o non valido"; ERR=1; }
-    [ -n "$(leggi_segreto CHAT_ID)" ] && echo "✅ chat del cliente salvata" || { echo "❌ chat del cliente non salvata"; ERR=1; }
+    V=$("${TG[@]}" verifica 2>&1); RC=$?
+    [ "$RC" = 0 ] && echo "✅ $(printf '%s' "$V" | head -1); chat del cliente salvata" || { echo "❌ $(printf '%s' "$V" | tr '\n' ' ')"; ERR=1; }
     if [ -f "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL.telegram.plist" ]; then
       bash "$METIS_ROOT/scripts/lib/launchd.sh" stato telegram >/dev/null && echo "✅ ascoltatore caricato" || { echo "❌ ascoltatore generato ma non caricato"; ERR=1; }
     else echo "ℹ️ ascoltatore non installato: il bot manda soltanto (livello 1)"; fi

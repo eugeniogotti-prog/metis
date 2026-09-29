@@ -26,7 +26,7 @@ import datetime, json, os, re, shutil, subprocess, sys, tempfile, time, urllib.p
 CFG_DIR = os.path.dirname(os.environ.get("METIS_CONFIG", os.path.expanduser("~/.config/metis/config")))
 API = os.environ.get("METIS_TELEGRAM_API", "https://api.telegram.org").rstrip("/")
 GROQ = os.environ.get("METIS_GROQ_API", "https://api.groq.com").rstrip("/")
-CLAUDE = os.environ.get("METIS_CLAUDE", "claude")
+CLAUDE = os.environ.get("METIS_CLAUDE", "")   # vuoto: dalla configurazione (METIS_CLAUDE), altrimenti «claude»
 ORE_CONVERSAZIONE = 6
 MAX_MSG = 3900
 
@@ -48,6 +48,9 @@ def config():
     c = {k: os.path.expanduser(v) for k, v in c.items()}
     vault = c.get("METIS_VAULT", "").rstrip("/")
     ruolo = lambda r, d: os.path.join(vault, c.get("METIS_RUOLO_" + r, d))
+    global CLAUDE
+    if not CLAUDE:
+        CLAUDE = c.get("METIS_CLAUDE") or "claude"
     return {
         "vault": vault,
         "inbox": ruolo("INBOX", "0 - Inbox"),
@@ -57,11 +60,24 @@ def config():
     }
 
 
-def segreti(nome):
-    p = os.path.join(CFG_DIR, nome)
+def protetto(p):
     if os.path.exists(p) and (os.stat(p).st_mode & 0o077):
         raise SystemExit(f"{p}: permessi troppo larghi, servono 600 (chmod 600 {p})")
-    return leggi_kv(p)
+    return p
+
+
+def segreti(nome):
+    """Segreti del bot e della voce. Di default in ~/.config/metis/<nome>; la configurazione può indicare file
+    esistenti da leggere a ogni uso, senza copiarli: METIS_TELEGRAM_TOKEN_FILE e METIS_TELEGRAM_CHAT_FILE (un valore
+    per file), METIS_GROQ_FILE (righe CHIAVE=valore: si usa la prima chiave che contiene «GROQ»)."""
+    c = {k: os.path.expanduser(v) for k, v in leggi_kv(os.environ.get("METIS_CONFIG", os.path.join(CFG_DIR, "config"))).items()}
+    if nome == "telegram" and c.get("METIS_TELEGRAM_TOKEN_FILE"):
+        leggi = lambda k: open(protetto(c[k]), encoding="utf-8").read().strip() if c.get(k) and os.path.exists(c[k]) else ""
+        return {"TOKEN": leggi("METIS_TELEGRAM_TOKEN_FILE"), "CHAT_ID": leggi("METIS_TELEGRAM_CHAT_FILE")}
+    if nome == "groq" and c.get("METIS_GROQ_FILE"):
+        kv = leggi_kv(protetto(c["METIS_GROQ_FILE"]))
+        return {"KEY": next((v for k, v in kv.items() if "GROQ" in k.upper()), "")}
+    return leggi_kv(protetto(os.path.join(CFG_DIR, nome)))
 
 
 def log(cfg, testo):
@@ -131,7 +147,9 @@ def trascrivi(cfg, percorso):
     corpo += (f"--{confine}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{os.path.basename(audio)}\"\r\n"
               f"Content-Type: application/octet-stream\r\n\r\n").encode() + open(audio, "rb").read() + f"\r\n--{confine}--\r\n".encode()
     req = urllib.request.Request(f"{GROQ}/openai/v1/audio/transcriptions", data=corpo,
-                                 headers={"Authorization": f"Bearer {chiave}", "Content-Type": f"multipart/form-data; boundary={confine}"})
+                                 headers={"Authorization": f"Bearer {chiave}", "Content-Type": f"multipart/form-data; boundary={confine}",
+                                          # con l'intestazione predefinita di urllib Groq risponde 403 (verificato il 29/9/2026)
+                                          "User-Agent": "metis/0.1"})
     with urllib.request.urlopen(req, timeout=120) as r:
         return r.read().decode("utf-8").strip()
 
@@ -240,6 +258,18 @@ def main(a):
         s = segreti("telegram")
         testo = " ".join(a[1:]) if len(a) > 1 else sys.stdin.read()
         invia(s["TOKEN"], s["CHAT_ID"], testo); return 0
+    if a[0] == "verifica":   # token valido e chat presente, senza mostrare nessuno dei due
+        s = segreti("telegram")
+        if not s.get("TOKEN"):
+            print("token assente"); return 1
+        try:
+            me = tg(s["TOKEN"], "getMe", timeout=20)
+        except Exception as e:
+            print(f"token non valido: {e}"); return 1
+        print(f"token valido (bot @{me.get('username')})")
+        if not s.get("CHAT_ID"):
+            print("chat del cliente non salvata"); return 2
+        print("chat del cliente salvata"); return 0
     if a[0] == "trova-chat":
         s = segreti("telegram")
         viste = {}

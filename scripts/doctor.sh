@@ -203,6 +203,7 @@ if [ -n "$MODULI_INST" ]; then
     case "$m" in
       voce)   # niente trascrizione ogni mattina: bastano ffmpeg e la chiave protetta
         CG="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/groq"
+        GF="$(bash "$METIS_ROOT/scripts/configura.sh" get METIS_GROQ_FILE 2>/dev/null)"; [ -n "$GF" ] && CG="${GF/#\~/$HOME}"
         if { command -v ffmpeg >/dev/null 2>&1 || [ -x /opt/homebrew/bin/ffmpeg ]; } && [ "$(stat -f %Lp "$CG" 2>/dev/null)" = 600 ]; then add ok "voce: ffmpeg e chiave di Groq presenti"
         else add warn "voce: manca ffmpeg o la chiave di Groq (voce.sh controlla)"; fi ;;
       markitdown|google|telegram|routine)

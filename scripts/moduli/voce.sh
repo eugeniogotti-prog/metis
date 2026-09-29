@@ -11,6 +11,8 @@ export METIS_ROOT
 source "$METIS_ROOT/scripts/lib/config.sh"
 metis_carica_config || { echo "voce: ${METIS_ERRORE}" >&2; exit 2; }
 SEG="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/groq"
+# Se la configurazione indica un file esistente con la chiave (METIS_GROQ_FILE), si controlla quello: nessuna copia.
+G_FILE="$(bash "$METIS_ROOT/scripts/configura.sh" get METIS_GROQ_FILE 2>/dev/null)"; [ -n "$G_FILE" ] && SEG="${G_FILE/#\~/$HOME}"
 
 case "${1:-}" in
   chiave)

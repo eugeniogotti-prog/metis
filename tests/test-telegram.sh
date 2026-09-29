@@ -118,6 +118,19 @@ check "controlla: trascrizione vera di un secondo di audio" '$V controlla | grep
 printf 'chiave-sbagliata\n' | $V chiave >/dev/null 2>&1
 check "chiave sbagliata: controllo fallito" '! $V controlla >/dev/null'
 
+echo "8. Segreti letti da file esistenti, senza copiarli"
+mkdir -p "$T/esterni"; ( umask 077; printf '123:finto\n' > "$T/esterni/tok"; printf '4242\n' > "$T/esterni/chat"; printf 'ALTRO=x\nGROQ_API_KEY=chiave-finta\n' > "$T/esterni/.env" )
+rm -f "$T/cfg/telegram" "$T/cfg/groq"
+printf 'METIS_TELEGRAM_TOKEN_FILE=%s\nMETIS_TELEGRAM_CHAT_FILE=%s\nMETIS_GROQ_FILE=%s\n' "$T/esterni/tok" "$T/esterni/chat" "$T/esterni/.env" >> "$METIS_CONFIG"
+: > "$T/finto/inviati.jsonl"
+check "verifica: token valido e chat salvata, senza mostrarli" '$TG verifica | grep -q "token valido" && ! $TG verifica | grep -q "123:finto"'
+check "invio con il token letto dal file" '$TG invia "via file" && grep -q "via file" "$T/finto/inviati.jsonl"'
+check "chiave Groq presa dalla variabile che contiene GROQ" 'bash "$ROOT/scripts/moduli/voce.sh" controlla 2>/dev/null | grep -q "trascrizione riuscita"'
+chmod 644 "$T/esterni/tok"
+check "file del token troppo aperto: rifiutato" '! $TG invia "x" 2>/dev/null'
+chmod 600 "$T/esterni/tok"
+check "nessuna copia dei segreti nella cartella di configurazione" '[ ! -e "$T/cfg/telegram" ] && [ ! -e "$T/cfg/groq" ]'
+
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]
