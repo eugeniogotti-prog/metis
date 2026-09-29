@@ -95,6 +95,13 @@ check "controlla senza credenziali: fallisce" '! $G controlla >/dev/null'
 : > "$T/claude-args.txt"; bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null
 check "giro con il server Google e i suoi strumenti" 'grep -q -- "--mcp-config $M" "$T/claude-args.txt" && grep -q -- "--allowedTools mcp__google" "$T/claude-args.txt"'
 
+echo "5. Il doctor controlla i moduli installati"
+bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
+check "google senza credenziali: avviso nel doctor" 'grep -q "⚠️ google: credenziali OAuth assenti" "$T/vault/_Claude/doctor.md"'
+check "routine con LaunchAgent non caricati: avviso nel doctor" 'grep -q "⚠️ routine:" "$T/vault/_Claude/doctor.md"'
+$G credenziali "$T/cred.json" >/dev/null; bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
+check "google con le credenziali: controllo superato" 'grep -q "✅ google: controllo superato" "$T/vault/_Claude/doctor.md"'
+
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]

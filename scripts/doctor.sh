@@ -195,6 +195,24 @@ else
   fi
 fi
 
+# --- Moduli installati: il controllo di ciascuno (il doctor fa anche da test di conformità) ---
+MODULI_INST="$(bash "$METIS_ROOT/scripts/configura.sh" get METIS_MODULI 2>/dev/null)"
+if [ -n "$MODULI_INST" ]; then
+  sec "Moduli"
+  for m in $MODULI_INST; do
+    case "$m" in
+      voce)   # niente trascrizione ogni mattina: bastano ffmpeg e la chiave protetta
+        CG="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/groq"
+        if { command -v ffmpeg >/dev/null 2>&1 || [ -x /opt/homebrew/bin/ffmpeg ]; } && [ "$(stat -f %Lp "$CG" 2>/dev/null)" = 600 ]; then add ok "voce: ffmpeg e chiave di Groq presenti"
+        else add warn "voce: manca ffmpeg o la chiave di Groq (voce.sh controlla)"; fi ;;
+      markitdown|google|telegram|routine)
+        R=$(bash "$METIS_ROOT/scripts/moduli/$m.sh" controlla 2>/dev/null); RC=$?
+        if [ "$RC" = 0 ]; then add ok "$m: controllo superato"
+        else add warn "$m: $(printf '%s\n' "$R" | grep '❌' | head -2 | sed 's/^❌ //' | paste -sd ';' - | cut -c1-240)"; fi ;;
+    esac
+  done
+fi
+
 # --- Manutenzione: log grandi ---
 sec "Manutenzione"
 GRANDI=0
