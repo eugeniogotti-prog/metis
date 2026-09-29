@@ -37,6 +37,11 @@ allow = [
     "Bash(pgrep *)", "Bash(textutil *)", "Bash(unzip -p *)", "Bash(mkdir *)",
     "Bash(obsidian move *)", "Bash(obsidian rename *)", "Bash(obsidian daily:append *)", "Bash(obsidian daily:read*)",
     f"Bash(bash {root}/scripts/doctor.sh)",
+    # giri automatici: spostare e togliere singoli file (le cancellazioni ricorsive le ferma la guardia),
+    # messaggio sul telefono alla sola chat del cliente, lettura delle pagine dei link salvati nell'Inbox
+    "Bash(mv *)", "Bash(cp *)", "Bash(rm *)", "Bash(find *)",
+    f"Bash(python3 {root}/scripts/telegram/metis_telegram.py invia *)",
+    "WebFetch",
 ]
 if fonti:
     allow += [f"Read({ass(fonti)}/**)", f"Edit({ass(fonti)}/**)"]

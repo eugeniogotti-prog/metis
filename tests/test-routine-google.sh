@@ -38,6 +38,7 @@ ESITO_FINTO=errore bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null 2
 check "errore dichiarato da Claude: codice 1 e riga ⚠️ metis-agent" '[ "$RC" = 1 ] && grep -q "⚠️ metis-agent .* daily-digest: fallito" "$D"'
 ESITO_FINTO=crash bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null 2>&1
 check "Claude che si ferma: riga ⚠️ metis-agent" '[ "$(grep -c "⚠️ metis-agent" "$D")" = 2 ]'
+rm -rf "$ROOT/skills/weekly-digest"   # nella copia: simula una skill non ancora installata
 bash "$ROOT/scripts/metis-agent.sh" weekly-digest >/dev/null 2>&1; RC=$?
 check "skill assente nel plugin: il giro non parte e lo dice" '[ "$RC" = 1 ] && grep -q "weekly-digest: non partito, la skill weekly-digest non è ancora nel plugin" "$D"'
 mkdir -p "$ROOT/skills/inbox-processor"; echo finta > "$ROOT/skills/inbox-processor/SKILL.md"

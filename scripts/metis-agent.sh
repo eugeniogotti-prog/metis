@@ -22,7 +22,7 @@ JOURNAL=$(metis_ruolo JOURNAL); DAILY="$JOURNAL/$OGGI.md"
 mkdir -p "$METIS_LOG_DIR" "$JOURNAL" "$METIS_CL/sessioni"
 
 # Regola in testa a ogni prompt: un giro non ha un dopo.
-REGOLA="[Giro automatico di $METIS_PRODOTTO, senza nessuno davanti allo schermo. Un giro non ha un dopo: niente attese, niente lavori in background, niente domande. Non mandare mail né messaggi a nessuno: prepara bozze. Chiudi con un resoconto di tre righe al massimo: che cosa hai fatto, dove l'hai scritto, che cosa resta.]"
+REGOLA="[Giro automatico di $METIS_PRODOTTO, senza nessuno davanti allo schermo. Cartella del plugin: $METIS_ROOT. Un giro non ha un dopo: niente attese, niente lavori in background, niente domande. Non mandare mail né messaggi a nessuno: prepara bozze. Chiudi con un resoconto di tre righe al massimo: che cosa hai fatto, dove l'hai scritto, che cosa resta.]"
 
 case "$LAVORO" in
   daily-digest)    SKILL=daily-digest;    COMPITO="Esegui la skill daily-digest in modalità mattino." ;;
