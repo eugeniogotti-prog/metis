@@ -51,5 +51,5 @@ L'installazione è un lavoro del cliente come gli altri: `stati/installazione.md
 ## Chiusura di ogni sessione d'installazione
 
 1. Aggiornare lo stato `installazione.md`: blocchi chiusi con la data e l'esito del controllo; impegni rimasti.
-2. Lanciare il doctor e riportare il semaforo.
+2. Lanciare il doctor e riportare il semaforo, se la cartella di Claude esiste già (dal blocco 2); prima del blocco 2 si dice che il controllo arriva con la memoria.
 3. Dire al cliente in due righe che cosa è fatto, che cosa resta e come riprendere («quando vuoi, scrivi: installa»).
