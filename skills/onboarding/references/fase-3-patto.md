@@ -1,6 +1,6 @@
 # Fase 3 — il patto di collaborazione e il gesto di correzione
 
-**Precondizioni:** fasi 1 e 2 fatte; automazioni scelte installate (blocco 7), altrimenti il doctor resta giallo e lo si dice.
+**Precondizioni:** fasi 1 e 2 fatte; automazioni scelte installate, altrimenti il doctor resta giallo e lo si dice.
 
 **Esito:** il cliente conosce il patto; un caso in `correzioni.md` fatto da lui con il gesto, registrato durante questa fase; l'onboarding è chiuso.
 
@@ -8,9 +8,9 @@
 
 Si dice in chat, con queste parole o con parole vicine, adattate al registro del cliente:
 
-> Da oggi tratta Claude come un collaboratore junior. Quando un suo lavoro non va, spiegagli che cosa non funziona e come deve cambiare il metodo, e lascia il file com'è. Una correzione fatta a mano resta in quel file; una correzione spiegata diventa una regola, e Claude non la ripete. Così in poco tempo il collaboratore junior diventa senior, e impara sia il merito del tuo lavoro sia il tuo metodo.
+> Da oggi tratta Claude come un collaboratore junior. Quando un suo lavoro non va, spiegagli che cosa non funziona e come deve cambiare il metodo, e lascia il file com'è. Una correzione fatta a mano resta in quel file; una correzione spiegata diventa una regola, e Claude non la ripete. Così il collaboratore junior diventa senior, e impara sia il merito del tuo lavoro sia il tuo metodo.
 
-Poi si spiega dove finiscono le correzioni, in tre righe: il caso in `correzioni.md`, subito; la regola nel profilo subito se è di stile, altrimenti a inizio mese in `regole-di-metodo.md`; il doctor che ogni mattina controlla che il ciclo giri.
+Poi si spiega dove finiscono le correzioni, in tre righe: il caso in `correzioni.md`, subito, per ogni correzione; la regola nel profilo subito se è di stile, in `dominio/` se è di merito, altrimenti a inizio mese in `regole-di-metodo.md`; il doctor che ogni mattina controlla che il ciclo giri.
 
 ## 2. Il gesto
 
@@ -45,5 +45,5 @@ Si dice al cliente, in breve:
 1. Routine di fine sessione (`routine-fine-sessione.md`, oppure «Chiusura sessione» di `CLAUDE.md`).
 2. Doctor: si lancia con il comando che l'installazione ha scritto in `_Claude.md` e si legge il semaforo con il cliente. Atteso verde, oppure giallo con motivi noti (per esempio un'automazione non ancora installata).
 3. In `_Claude.md`: la riga dell'onboarding in «Ultime sessioni» diventa «onboarding completato» con la data; contatori aggiornati.
-4. Lo stato `onboarding.md`: tappa 3 `fatto · YYYY-MM-DD`, poi si archivia in `stati/archivio/`.
+4. Lo stato `onboarding.md`: tappa 3 `fatto · YYYY-MM-DD · «## YYYY-MM-DD — titolo del caso fatto dal vivo»`, poi si archivia in `stati/archivio/`.
 5. Riga in `decisioni.md`: data, «onboarding completato», con le scelte rilevanti emerse (autonomia concessa, canali, lavoro pilota).

@@ -61,6 +61,16 @@ check "hook fuori dal vault: nessun output" '[ -z "$H2" ]'
 H3=$(cd "$V1/_Claude/stati" && echo '{}' | CLAUDE_PROJECT_DIR="$V1" bash "$ROOT/hooks/session-orient.sh")
 check "hook senza cwd nel JSON: usa CLAUDE_PROJECT_DIR" 'printf "%s" "$H3" | grep -q "Stato attuale"'
 
+echo "1b. Onboarding finito: tolti i marcatori COMPILARE, nessun avviso"
+cp -R "$V1" "$T/vault-finito"; VF="$T/vault-finito"
+perl -0pi -e 's/<!-- COMPILARE.*?-->//gs; s/\{\{COMPILARE:[^}]*\}\}/temi/g' "$VF/CLAUDE.md" "$VF/_Claude/profilo-nucleo.md" "$VF/_Claude/profilo-completo.md"
+config "$T/cf" "$VF" "$M1"
+METIS_CONFIG="$T/cf" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
+check "doctor: profilo compilato" 'grep -q "Profilo e CLAUDE.md compilati" "$VF/_Claude/doctor.md"'
+HF=$(echo "{\"cwd\":\"$VF\"}" | METIS_CONFIG="$T/cf" bash "$ROOT/hooks/session-orient.sh")
+check "hook: nessun invito all'onboarding" '! printf "%s" "$HF" | grep -q "Onboarding da completare"'
+export METIS_CONFIG="$T/c1"
+
 echo "2. Inizio mese: un caso del mese scorso ancora in correzioni.md"
 MP=$(date -v-1m +%Y-%m)
 printf '\n## %s-15 — caso di prova\n\nTesto.\n' "$MP" >> "$V1/_Claude/correzioni.md"

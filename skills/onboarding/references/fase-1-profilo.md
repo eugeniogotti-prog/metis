@@ -1,6 +1,6 @@
 # Fase 1 — il profilo
 
-**Precondizioni:** modelli e hook installati (blocchi 2 e 3); `profilo-nucleo.md` e `profilo-completo.md` presenti nella cartella di Claude.
+**Precondizioni:** modelli e hook installati; `profilo-nucleo.md` e `profilo-completo.md` presenti nella cartella di Claude.
 
 **Esito:** `profilo-nucleo.md` compilato, senza `COMPILARE` né `[da confermare]`, sotto il suo tetto; `profilo-completo.md` compilato tranne le sezioni 3 e 4, che completa la fase 2; il cliente conosce il gesto di correzione.
 
@@ -10,7 +10,7 @@ Claude spiega al cliente, con parole semplici:
 - legge alcuni documenti che il cliente considera ben fatti e ne ricava una bozza del suo modo di scrivere e di lavorare;
 - il cliente corregge la bozza; ciò che conferma entra nel profilo, che Claude rilegge all'inizio di ogni sessione;
 - i file restano dove sono, sul disco del cliente. Per leggerli, il loro testo passa dal servizio Claude con l'abbonamento del cliente, come ogni cosa che Claude legge. Per questo conviene scegliere documenti senza dati riservati di terzi, oppure già resi anonimi;
-- nel profilo entrano solo regole e forme, mai contenuti, nomi di terzi o cifre.
+- nel profilo entrano solo regole e forme. Contenuti, nomi di terzi e cifre restano fuori.
 
 Si chiede il consenso esplicito alla lettura e lo si registra nel log dello stato `onboarding.md` («consenso alla lettura dei documenti d'esempio: sì, YYYY-MM-DD»). Senza consenso si passa al percorso senza documenti (punto 4), e nel profilo restano le sole regole nate dalle risposte.
 
@@ -22,7 +22,12 @@ Se la cartella non è pronta: impegno nello stato `onboarding.md` («portare i d
 
 ## 3. La lettura
 
-I PDF si leggono direttamente. I documenti Word si convertono in testo con `textutil -convert txt -stdout <file>` (macOS), oppure con lo strumento di conversione del pacchetto se è già installato. Si legge un documento alla volta, per intero.
+I PDF si leggono direttamente. I documenti Word si convertono in testo con `textutil -convert txt -stdout <file>` (macOS), oppure con lo strumento di conversione del pacchetto se è già installato. Si legge un documento alla volta, per intero, e si controlla che il testo convertito non sia vuoto (`textutil` esce senza errore anche su un file che non trova).
+
+`textutil` toglie i commenti e le note a piè di pagina, e restituisce il testo con le revisioni già accettate. Prima di scrivere osservazioni su come il cliente usa le note o su che cosa corregge:
+- note: `unzip -p <file.docx> word/footnotes.xml | grep -c '<w:footnote '` (Word ne mette due di servizio: oltre due, il documento ha note);
+- revisioni: `unzip -p <file.docx> word/document.xml | grep -c '<w:del '` (più di zero: il documento ha revisioni).
+Se una coppia prima/dopo arriva come un solo file con revisioni, si chiedono al cliente i due file separati, perché la conversione perde il «prima».
 
 Dopo ogni documento si scrivono nel log dello stato `onboarding.md` le osservazioni, senza copiare passi del testo:
 
@@ -48,8 +53,9 @@ Ogni domanda con la sua proposta; dove ci sono due strade, due opzioni e una rac
 - **Chi è** (nucleo e sezione 1): mestiere, domini in cui ne sa più delle fonti, per chi lavora (per categoria, senza nomi), attività personali che Claude potrebbe incontrare nel vault. Proposta: tre righe ricavate dai documenti.
 - **Lingua**: parole che non vuole, come trattare le citazioni in lingua straniera. Proposta dai documenti.
 - **Tono verso di sé** (nucleo, «Tono»): come Claude deve parlargli, come esprimere un apprezzamento o un dissenso, che cosa fare quando il cliente critica un output. Proposta: «diretto, senza premesse; se critico un output, adeguati senza difenderlo».
+- **Avvisi**: come vuole essere avvisato di un problema. Proposta: «subito, in una riga, con la tua proposta».
 - **Come lavorare con lui** (nucleo e sezione 6, «Ritmo»): due opzioni. A: «procedi sulle operazioni tecniche e chiedimi solo quando una scelta è irreversibile o cambia il senso di un mio testo». B: «prima di ogni modifica ai miei file dimmi che cosa farai e aspetta il mio sì». Raccomandazione: A per chi vuole velocità, B nelle prime settimane per chi vuole prima fidarsi.
-- **In chat**: quanto vuole leggere mentre si produce un documento. Proposta: «in chat il principio in due frasi e la scelta da confermare; il testo va nel file».
+- **In chat**: quanto vuole leggere mentre si produce un documento, e che cosa fare quando dice «non ho capito». Proposta: «in chat il principio in due frasi e la scelta da confermare; il testo va nel file. Se non capisco, riformula da capo, più semplice, con un esempio».
 - **Decisioni**: come vuole le scelte. Proposta dai documenti, se il cliente le pone in un modo riconoscibile; altrimenti «una alla volta, al massimo due opzioni, con la tua raccomandazione».
 - **Sintesi per un esperto** (sezione 2): che cosa vuole da una sintesi di un documento del suo campo. Proposta: dati citabili con la fonte; come la fonte incornicia il tema; dove la fonte è attaccabile o conferma ciò che il cliente ha scritto.
 - **Documenti in revisione presso altri** (sezione 5): come lavorare su un testo che un interlocutore sta rivedendo. Proposta: commenti ancorati al testo, revisioni minime.
@@ -82,7 +88,7 @@ Ogni sezione dei due modelli ha una fonte. Prima di presentare la bozza si contr
 | nucleo: In chat, Come lavoro con te | punto 4 |
 | nucleo: Testi a mio nome | documenti |
 | nucleo: Registri specifici | un rimando per ogni sottosezione compilata della sezione 5 della pagina completa |
-| completa 1-2 (Chi sono, Come parlarmi, Sintesi per un esperto) | documenti + punto 4 |
+| completa 1-2 (Chi sono, Come parlarmi, Sintesi per un esperto) | documenti + punto 4; «Forme da evitare» dal punto 5 |
 | completa 3 (Come verificare nel mio campo) | documenti (come cita le fonti) + fase 2 |
 | completa 4 (errori, distinzioni del dominio) | distinzioni annotate al punto 3 + fase 2 |
 | completa 5 (registri) | documenti, una sottosezione per tipo di documento letto; «Documenti in revisione» dal punto 4 |
@@ -110,7 +116,7 @@ Ogni rilievo fatto con il gesto diventa un caso in `correzioni.md` e, se è di s
 
 ## 9. Controlli di fine fase
 
-- `grep -c 'COMPILARE\|da confermare'` su `profilo-nucleo.md`: zero. Su `profilo-completo.md`: solo nelle sezioni 3 e 4.
+- `grep -nE '<!-- COMPILARE|da confermare'` su `profilo-nucleo.md`: nessuna riga. Su `profilo-completo.md`: esattamente due righe, i commenti delle sezioni 3 e 4.
 - Dimensione del nucleo sotto il tetto di `_Claude.md`.
 - Nomi di terzi e cifre: si fa l'elenco dei nomi propri e delle cifre visti nei documenti d'esempio e lo si cerca nei due file del profilo: nessun risultato (il nome del cliente, in «Chi sono», è atteso).
 - Nessuna frase di più di dieci parole copiata da un documento.

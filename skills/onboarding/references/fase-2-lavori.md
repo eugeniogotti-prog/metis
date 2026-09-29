@@ -1,6 +1,6 @@
 # Fase 2 — lavori, domini, persone
 
-**Precondizioni:** fase 1 fatta; connettori di posta e calendario collegati, se il cliente li ha scelti (blocco 5).
+**Precondizioni:** fase 1 fatta; connettori di posta e calendario collegati, se il cliente li ha scelti.
 
 Esito: almeno uno stato in `stati/` con obiettivo e impegni a norma; una scheda in `dominio/`; le note delle persone del primo lavoro; i temi per i tag al posto del segnaposto `COMPILARE` in `CLAUDE.md`.
 
@@ -31,7 +31,7 @@ Il dominio è la conoscenza di merito che serve al lavoro pilota: la norma o il 
 
 Si chiede al cliente quali tre cose del suo campo un collaboratore nuovo sbaglia più spesso: diventano le prime asserzioni, verificate sulla fonte, oppure le prime «distinzioni da non confondere» della pagina completa del profilo (sezione 4), insieme a quelle annotate in fase 1.
 
-Nella stessa occasione si completano le sezioni 3 e 4 della pagina completa: come si citano e si verificano le fonti del suo campo, gli errori che cerca quando rivede, le distinzioni da non confondere. Si cancellano i loro commenti `COMPILARE`.
+Nella stessa occasione si completano le sezioni 3 e 4 della pagina completa: come si citano e si verificano le fonti del suo campo, come trattare riunioni e decisioni (proposta: le regole della sezione 3 di `regole-di-metodo.md`, più ciò che il cliente aggiunge), gli errori che cerca quando rivede, le distinzioni da non confondere. Si cancellano i loro commenti `COMPILARE`.
 
 ## 4. Le persone
 
@@ -44,7 +44,7 @@ In `CLAUDE.md` il segnaposto `{{COMPILARE: i temi del lavoro}}` si sostituisce c
 ## 6. Controlli di fine fase
 
 - Lo stato del lavoro pilota esiste, `grep -c '{{'` su di esso dà zero, e ha una sola sezione `## Impegni` con righe a norma (il doctor le controlla, se è installato: sezione «Lavori» del report).
-- `grep COMPILARE` su `CLAUDE.md` e su `profilo-completo.md`: nessun risultato.
+- `grep -E '<!-- COMPILARE|\{\{COMPILARE'` su `CLAUDE.md` e su `profilo-completo.md`: nessun risultato.
 - Ogni asserzione della scheda di dominio ha fonte, grado di verifica e data.
 - Autorevisione, livello 1.
 - Stato `onboarding.md`: tappa 2 `fatto · YYYY-MM-DD`; «Lavori attivi» e contatori di `_Claude.md` aggiornati.

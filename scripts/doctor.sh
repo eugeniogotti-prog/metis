@@ -118,7 +118,7 @@ sec "Lavori (stati)"
 STATI=$(find "$CL/stati" -maxdepth 1 -name "*.md" ! -name "_*" 2>/dev/null | sort)
 NSTATI=$(printf '%s\n' "$STATI" | conta)
 if [ "$NSTATI" -eq 0 ]; then
-  add info "Nessuno stato in $METIS_RUOLO_CLAUDE/stati/: il primo nasce dall'onboarding, fase 2"
+  add info "Nessuno stato in $METIS_RUOLO_CLAUDE/stati/: il primo nasce con l'onboarding"
 else
   add info "$NSTATI stati attivi"
   MULTI=""; MALFORMATE=0; SCADUTI=0; DECADUTE=0; DORMIENTI=""
