@@ -40,7 +40,6 @@ allow = [
     # giri automatici: spostare e togliere singoli file (le cancellazioni ricorsive le ferma la guardia),
     # messaggio sul telefono alla sola chat del cliente, lettura delle pagine dei link salvati nell'Inbox
     "Bash(mv *)", "Bash(cp *)", "Bash(rm *)", "Bash(find *)",
-    f"Bash(python3 {root}/scripts/telegram/metis_telegram.py invia *)",
     "WebFetch",
 ]
 if fonti:
@@ -48,6 +47,9 @@ if fonti:
 deny = ["Bash(sudo *)", "Bash(rm -rf /*)", "Bash(rm -rf ~*)"]
 if ris:
     deny += [f"Read({ass(vault)}/{ris}/**)", f"Edit({ass(vault)}/{ris}/**)"]
+# cartelle che Claude legge ma non modifica (METIS_SOLA_LETTURA, relative al vault, separate da «|»)
+for c in [x.strip() for x in env.get("METIS_SOLA_LETTURA", "").split("|") if x.strip()]:
+    deny += [f"Edit({ass(vault)}/{c}/**)", f"Write({ass(vault)}/{c}/**)"]
 metis = {"permissions": {"defaultMode": "acceptEdits", "allow": allow, "deny": deny,
                          "additionalDirectories": [fonti] if fonti else []}}
 

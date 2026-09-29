@@ -114,6 +114,7 @@ printf '123:finto\n' | $M token >/dev/null 2>&1
 check "token giusto: salvato con permessi 600" '[ "$(stat -f %Lp "$T/cfg/telegram")" = 600 ] && grep -q "^TOKEN=123:finto" "$T/cfg/telegram"'
 echo "[$(upd 20 4242 '"text":"ciao"')]" > "$T/finto/aggiornamenti.json"
 check "chat trovata dal primo messaggio" '$M chat >/dev/null && grep -q "^CHAT_ID=4242" "$T/cfg/telegram"'
+check "installa: regola d'invio aggiunta alle regole delle routine" '$M installa >/dev/null && grep -q "metis_telegram.py invia" "$T/cfg/permessi-routine.json"'
 check "installa: prova mandata e modulo registrato" '$M installa >/dev/null && grep -q "Messaggio di prova di" "$T/finto/inviati.jsonl" && bash "$ROOT/scripts/configura.sh" get METIS_MODULI | grep -qw telegram'
 check "ascoltatore: LaunchAgent generato e valido (non caricato)" '$M ascoltatore --senza-caricare >/dev/null && plutil -lint "$T/LaunchAgents/"*.telegram.plist >/dev/null'
 check "LaunchAgent sempre acceso, con PATH di Homebrew e configurazione" 'grep -q "<key>KeepAlive</key>" "$T/LaunchAgents/"*.telegram.plist && grep -q "/opt/homebrew/bin" "$T/LaunchAgents/"*.telegram.plist && grep -q "$METIS_CONFIG" "$T/LaunchAgents/"*.telegram.plist'

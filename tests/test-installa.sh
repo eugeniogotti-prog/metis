@@ -82,6 +82,20 @@ check "bozza di posta: passa" '[ -z "$(g mcp__claude_ai_Gmail__create_draft "$V"
 check "lettura normale: passa" '[ -z "$(g Read "$V" "{\"file_path\":\"$V/CLAUDE.md\"}")" ]'
 check "fuori dal vault: nessun intervento" '[ -z "$(g Bash "$T" "{\"command\":\"rm -rf x\"}")" ]'
 
+echo "5b. Guardia: ricerche nella shell e cartella riservata"
+r() { g Bash "$V" "$(python3 -c 'import json,sys; print(json.dumps({"command": sys.argv[1]}))' "$1")"; }
+check "grep -r su tutto il vault: bloccato" 'r "grep -r segreto ." | grep -q "\"deny\""'
+check "grep -rn senza percorso: bloccato" 'r "grep -rn segreto" | grep -q "\"deny\""'
+check "grep -r con il percorso assoluto del vault: bloccato" 'r "grep -r segreto \"$V\"" | grep -q "\"deny\""'
+check "find dalla radice: bloccato" 'r "find . -name *.md" | grep -q "\"deny\""'
+check "rg senza percorso: bloccato" 'r "rg segreto" | grep -q "\"deny\""'
+check "grep -r in una sottocartella: ammesso" '[ -z "$(r "grep -rn segreto \"1 - Progetti/\"")" ]'
+check "grep -r con --exclude-dir della cartella: ammesso" '[ -z "$(r "grep -r --exclude-dir=_Privato segreto .")" ]'
+check "find con -not -path della cartella: ammesso" '[ -z "$(r "find . -not -path *_Privato* -name x.md")" ]'
+check "rg con -g !cartella: ammesso" '[ -z "$(r "rg -g !_Privato segreto")" ]'
+check "grep non ricorsivo in una pipe: ammesso" '[ -z "$(r "cat CLAUDE.md | grep Metis")" ]'
+check "find su un'altra cartella del disco: ammesso" '[ -z "$(r "find /tmp -name x")" ]'
+
 echo "6. Validazione delle scritture"
 w() { printf '{"tool_name":"Write","tool_input":{"file_path":"%s"}}' "$1" | bash "$ROOT/hooks/valida-scrittura.sh" 2>"$T/w.err"; echo $?; }
 printf 'testo\n' > "$V/1 - Progetti/nuda.md"
@@ -92,6 +106,17 @@ check "tag senza prefisso: avviso" '[ "$(w "$V/1 - Progetti/tag.md")" = 2 ] && g
 check "nota a norma: nessun avviso" '[ "$(w "$V/1 - Progetti/buona.md")" = 0 ]'
 check "CLAUDE.md: ignorato" '[ "$(w "$V/CLAUDE.md")" = 0 ]'
 check "file nella cartella di Claude: ignorato" '[ "$(w "$V/_Claude/correzioni.md")" = 0 ]'
+
+echo "6b. Sola lettura, Inbox senza sottocartelle, tetto con CLAUDE.local.md"
+bash "$ROOT/scripts/configura.sh" set METIS_SOLA_LETTURA "Giurisprudenza|Studio/Modelli" >/dev/null
+bash "$ROOT/scripts/installa-permessi.sh" >/dev/null
+check "cartelle in sola lettura: scrittura negata" 'grep -q "Edit(/$V/Giurisprudenza/\*\*)" "$P" && grep -q "Write(/$V/Studio/Modelli/\*\*)" "$P"'
+check "regola d'invio Telegram assente senza il modulo" '! grep -q "metis_telegram.py invia" "$P"'
+printf 'METIS_VAULT=%s\nMETIS_INBOX_FONTI=\nMETIS_MEMORY_DIR=%s/m4\n' "$T/v4" "$T" > "$T/c4"; mkdir -p "$T/v4"
+METIS_CONFIG="$T/c4" bash "$ROOT/scripts/installa-struttura.sh" crea >/dev/null
+check "Inbox senza sottocartelle quando METIS_INBOX_FONTI è vuoto" '[ -d "$T/v4/0 - Inbox" ] && [ -z "$(ls "$T/v4/0 - Inbox")" ]'
+M3=$(METIS_CONFIG="$T/c3" bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; metis_misura "CLAUDE.md del vault"' "$ROOT")
+check "tetto di CLAUDE.md: misura anche CLAUDE.local.md" '[ "$M3" = "$(cat "$V3/CLAUDE.md" "$V3/CLAUDE.local.md" | wc -m | tr -d " ")" ]'
 
 echo "7. Compattazione"
 printf '{"cwd":"%s","trigger":"auto"}' "$V" | bash "$ROOT/hooks/pre-compact.sh"

@@ -66,7 +66,7 @@ metis_carica_config() {
   fi
   export METIS_MEMORY_DIR
   export METIS_FONTI="${METIS_FONTI:-$HOME/Documents/Fonti}"
-  export METIS_INBOX_FONTI="${METIS_INBOX_FONTI:-Clippings files voicenotes}"
+  export METIS_INBOX_FONTI="${METIS_INBOX_FONTI-Clippings files voicenotes}"   # vuoto = Inbox senza sottocartelle
   export METIS_FRONTMATTER_CHIAVI="${METIS_FRONTMATTER_CHIAVI:-created_at tags up}"
   export METIS_TAG_PREFISSI="${METIS_TAG_PREFISSI-tipo argomento contenuto status}"
   export METIS_LABEL="${METIS_LABEL:-com.metis.$(id -un)}"
@@ -122,7 +122,8 @@ metis_misura() {
     *regole-di-metodo-strumenti.md*) f="$METIS_CL/regole-di-metodo-strumenti.md" ;;
     *regole-di-metodo.md*) f="$METIS_CL/regole-di-metodo.md" ;;
     *MEMORY.md*) f="$METIS_MEMORY_DIR/MEMORY.md" ;;
-    *CLAUDE.md*) f="$METIS_VAULT/CLAUDE.md" ;;
+    *CLAUDE.md*)   # tutto ciò che Claude Code carica: CLAUDE.md più CLAUDE.local.md, se c'è
+      cat "$METIS_VAULT/CLAUDE.md" "$METIS_VAULT/CLAUDE.local.md" 2>/dev/null | wc -m | tr -d ' '; return ;;
   esac
   [ -n "$f" ] && [ -f "$f" ] && wc -m < "$f" | tr -d ' '
 }

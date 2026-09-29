@@ -50,6 +50,11 @@ bash "$ROOT/scripts/metis-agent.sh" inbox-processor >/dev/null
 check "Inbox con una nota: il giro parte" '[ "$(wc -l < "$T/claude-args.txt")" -gt "$N" ]'
 bash "$ROOT/scripts/metis-agent.sh" sconosciuto >/dev/null 2>&1; check "lavoro sconosciuto rifiutato" '[ $? = 2 ]'
 
+printf 'METIS_FRONTMATTER_CHIAVI=date tags\nMETIS_TAG_PREFISSI=\n' >> "$METIS_CONFIG"; mv "$D" "$D.bak"
+bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null
+check "nota del giorno con le convenzioni del cliente (date, tag senza prefisso)" 'grep -q "^date: $OGGI" "$D" && grep -q "^- daily$" "$D" && ! grep -q "created_at" "$D"'
+mv "$D.bak" "$D"; printf 'METIS_FRONTMATTER_CHIAVI=created_at tags up\nMETIS_TAG_PREFISSI=tipo argomento contenuto status\n' >> "$METIS_CONFIG"
+
 echo "2. Il doctor vede i giri falliti di ieri"
 IERI=$(date -v-1d +%F); cp "$D" "$T/vault/Journal/$IERI.md"
 mkdir -p "$T/vault/_Claude"; cp "$SRC/templates/memoria/_Claude/_Claude.md.txt" "$T/vault/_Claude/_Claude.md"

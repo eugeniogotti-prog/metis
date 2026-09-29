@@ -52,6 +52,11 @@ case "${1:-}" in
     token_valido || { echo "telegram: il token salvato non è valido → telegram.sh token"; exit 1; }
     chat_salvata || bash "$0" chat || exit 1
     bash "$0" prova || exit 1
+    # la regola che consente ai giri automatici di scrivere alla chat del cliente entra solo con il modulo
+    R="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/permessi-routine.json"
+    for F in "$METIS_VAULT/.claude/settings.json" "$R"; do
+      python3 "$METIS_ROOT/scripts/lib/impostazioni.py" lista "$F" permissions.allow "Bash(python3 $METIS_ROOT/scripts/telegram/metis_telegram.py invia *)" >/dev/null
+    done
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI telegram
     echo "telegram: uscita pronta. Per l'Inbox dal telefono e la conversazione: telegram.sh ascoltatore" ;;
   controlla)

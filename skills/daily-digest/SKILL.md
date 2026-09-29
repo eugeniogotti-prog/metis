@@ -47,7 +47,7 @@ Sotto `# Memo`, in coda a ciò che c'è già:
 **Posta da gestire** · Nome — richiesta (in una riga)
 **🎯 Fare adesso** · 🔴 **cosa** — [[stato]] | data
 **Lavori con scadenza vicina** · [[stato]] — scadenza
-**Inbox** · 3 note — le lavora il giro delle 9
+**Inbox** · 3 note — le lavora il prossimo giro dell'inbox (orari in `METIS_ORARI_INBOX_PROCESSOR`, default 9, 13, 17)
 **Domani** · 10:00 Incontro Z — mini-briefing: …
 Fonti non lette: nessuna.
 ```

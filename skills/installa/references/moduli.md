@@ -20,7 +20,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 ## Microsoft 365 (servizio, fuori dalla v1)
 
 Nessun modulo: per posta e calendario Microsoft 365 non c'è un server provato. Nell'installazione si fa solo questo:
-1. si consegnano al cliente le domande per il suo reparto IT (dal kit: `checklist-oauth-e-m365.md`): se consente la registrazione di un'app in Entra con le autorizzazioni di lettura di posta e calendario; se consente IMAP con una password per app; se il calendario si può pubblicare come ICS in sola lettura;
+1. si prepara per il cliente il testo per il suo reparto IT, da `procedura-m365.md`: registrazione di un'app in Entra in sola lettura, calendario pubblicato come ICS, regole sui dati dei clienti;
 2. nel frattempo il ripiego: le mail utili si salvano a mano nella cartella fonti, e l'inbox-processor le lavora da lì;
 3. si registra nello stato `installazione.md` un impegno `palla:loro` con la data di riesame e la decadenza, per la risposta dell'IT.
 L'integrazione vera è una giornata di consulenza.

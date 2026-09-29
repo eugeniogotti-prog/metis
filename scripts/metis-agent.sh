@@ -32,8 +32,22 @@ case "$LAVORO" in
   *) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac
 
+nuova_daily() {  # la nota del giorno con le chiavi di frontmatter del cliente (METIS_FRONTMATTER_CHIAVI)
+  {
+    echo "---"
+    for k in $METIS_FRONTMATTER_CHIAVI; do
+      case "$k" in
+        created_at|created|date|data) echo "$k: $OGGI" ;;
+        tags) echo "tags:"; case " $METIS_TAG_PREFISSI " in *" tipo "*) echo "- tipo/daily" ;; *) echo "- daily" ;; esac ;;
+        up) echo "up:"; echo "- '[[$(basename "$JOURNAL")]]'" ;;
+        *) echo "$k:" ;;
+      esac
+    done
+    printf -- '---\n\n# Memo\n'
+  } > "$DAILY"
+}
 memo() {  # memo <riga>: una riga sotto «# Memo» nella nota del giorno (creata se manca)
-  [ -f "$DAILY" ] || printf -- '---\ncreated_at: %s\ntags:\n- tipo/daily\nup:\n- %s\n---\n\n# Memo\n' "$OGGI" "'[[$(basename "$JOURNAL")]]'" > "$DAILY"
+  [ -f "$DAILY" ] || nuova_daily
   grep -q '^# Memo' "$DAILY" || printf '\n# Memo\n' >> "$DAILY"
   python3 - "$DAILY" "$1" <<'PY'
 import sys

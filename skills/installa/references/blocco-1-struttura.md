@@ -34,4 +34,4 @@ Se l'albero mostra un `CLAUDE.md` alla radice, è del cliente: al blocco 2 si co
 
 Se il cliente usa Obsidian: plugin consigliati Templater, Periodic Notes, Dataview; la CLI si registra in Obsidian → Impostazioni → Generali. Prima di ogni comando `obsidian` si controlla che l'app sia aperta (`pgrep -f "Obsidian.app/Contents/MacOS/[Oo]bsidian"`): ad app chiusa il comando la avvia e non ritorna.
 
-**Controllo:** `bash scripts/installa-struttura.sh controlla` esce con 0; con Obsidian aperto, `obsidian daily:read` risponde.
+**Controllo:** `bash scripts/installa-struttura.sh controlla` esce con 0; con Obsidian aperto **sul vault del cliente** (la CLI agisce sul vault aperto nell'app), `obsidian daily:read` risponde.

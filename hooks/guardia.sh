@@ -42,6 +42,52 @@ if [ -n "${METIS_RUOLO_RISERVATA:-}" ]; then
   esac
 fi
 
+# 1b. Ricerche ricorsive nella shell (grep -r, rg, ag, find) che partono da una cartella che contiene quella riservata
+# senza escluderla. Gli strumenti Grep e Glob di Claude la escludono già con le regole deny (verificato il 29/9/2026).
+if [ -n "${METIS_RUOLO_RISERVATA:-}" ] && [ "$TOOL" = "Bash" ] && [ -n "$CMD" ]; then
+  ESITO=$(python3 - "$CMD" "${CWD:-$PWD}" "$METIS_VAULT" "${METIS_RUOLO_RISERVATA%/}" <<'PY2'
+import os, shlex, sys
+cmd, cwd, vault, ris = sys.argv[1:]
+ris_abs = os.path.realpath(os.path.join(vault, ris))
+try:
+    parole = shlex.split(cmd, posix=True)
+except ValueError:
+    parole = cmd.split()
+# si spezza la riga in comandi semplici
+comandi, cur = [], []
+for p in parole:
+    if p in ("|", "||", "&&", ";", "&"):
+        comandi.append(cur); cur = []
+    else:
+        cur.append(p)
+comandi.append(cur)
+def contiene(percorso):
+    a = os.path.realpath(os.path.join(cwd, os.path.expanduser(percorso)))
+    return ris_abs == a or ris_abs.startswith(a.rstrip("/") + "/")
+for c in comandi:
+    if not c: continue
+    nome = os.path.basename(c[0])
+    if nome not in ("grep", "egrep", "rg", "ag", "find"): continue
+    if ris in " ".join(c[1:]):          # la cartella è nominata: è un'esclusione (o la regola 1 ha già deciso)
+        continue
+    if nome == "find":
+        percorsi = []
+        for a in c[1:]:
+            if a.startswith("-") or a in ("(", "!", ")"): break
+            percorsi.append(a)
+        percorsi = percorsi or ["."]
+    else:
+        ricorsivo = nome in ("rg", "ag") or any(a.startswith("-") and not a.startswith("--") and ("r" in a or "R" in a) for a in c[1:]) or "--recursive" in c
+        if not ricorsivo: continue
+        non_opz = [a for a in c[1:] if not a.startswith("-")]
+        percorsi = non_opz[1:] or ["."]      # il primo argomento non opzione è il pattern
+    if any(contiene(p) for p in percorsi):
+        print("nega"); sys.exit(0)
+PY2
+)
+  [ "$ESITO" = nega ] && decidi deny "Ricerca che attraversa la cartella riservata (${METIS_RUOLO_RISERVATA%/}). Escluderla (grep --exclude-dir=${METIS_RUOLO_RISERVATA%/}, find … -not -path '*${METIS_RUOLO_RISERVATA%/}*', rg -g '!${METIS_RUOLO_RISERVATA%/}'), cercare in una sottocartella, oppure usare lo strumento Grep, che la esclude già."
+fi
+
 # 2. Azioni irreversibili nei comandi di shell.
 if [ "$TOOL" = "Bash" ] && [ -n "$CMD" ]; then
   C=" $(printf '%s' "$CMD" | tr '\n' ' ') "

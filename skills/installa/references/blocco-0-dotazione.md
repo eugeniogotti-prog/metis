@@ -11,7 +11,7 @@ Una domanda alla volta, ciascuna con una proposta. Le risposte decidono i moduli
 4. Telefono: usa Telegram? Vuole ricevere il riepilogo del mattino sul telefono, mandare cose al vault dal telefono, parlare con Claude dal telefono?
 5. Voce: vuole dettare note vocali che diventano note nel vault?
 6. Il Mac resta acceso di giorno? (Le routine automatiche girano solo a Mac acceso.)
-7. Ha una cartella che Claude non deve mai leggere?
+7. Ha una cartella che Claude non deve mai leggere? E cartelle che Claude può leggere ma non deve modificare (per esempio schede scritte solo da lui)?
 
 Proposta dei moduli dalle risposte:
 
@@ -30,6 +30,8 @@ Proposta dei moduli dalle risposte:
 bash scripts/configura.sh set METIS_VAULT "<vault>"
 bash scripts/configura.sh set METIS_FONTI "<cartella fonti>"
 bash scripts/configura.sh set METIS_RUOLO_RISERVATA "<cartella riservata, relativa al vault, o vuoto>"
+bash scripts/configura.sh set METIS_SOLA_LETTURA "<cartelle in sola lettura, relative al vault, separate da |, o vuoto>"
+bash scripts/configura.sh set METIS_INBOX_FONTI "<sottocartelle dell'Inbox, separate da spazi; vuoto = nessuna>"
 bash scripts/configura.sh aggiungi METIS_MODULI <modulo>     # una volta per modulo scelto
 ```
 
