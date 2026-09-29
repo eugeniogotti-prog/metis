@@ -1,0 +1,41 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/appunti
+up:
+- '[[_Claude]]'
+updated_at: null
+---
+
+# Profilo di {{Nome}} — nucleo
+
+<!-- COMPILARE. Questo file viene caricato per intero all'avvio di ogni sessione: contiene le regole su chi sei e su come Claude deve scriverti e lavorare con te, che valgono in qualunque testo o risposta.
+Lo compila la skill `onboarding` (fase 1) con il metodo «bozza e reazione»: Claude propone, tu correggi. Poi cresce con le tue correzioni.
+Il tetto è nella tabella di `_Claude.md`. Il dettaglio (registri per tipo di testo, esempi, lenti di revisione) va nella pagina completa, `profilo-completo.md`; qui resta ciò che serve sempre.
+Quando una sezione è compilata, cancella il suo commento. Una sezione che non ti serve si cancella intera. -->
+
+Pagina completa: [[profilo-completo]]. Aprirla prima di ogni testo destinato ad altri.
+
+## Chi sono
+<!-- COMPILARE. Tre-cinque righe: nome, mestiere, i domini in cui ne sai più delle fonti che Claude legge, per chi lavori (per categoria, senza nomi). Esempio di forma: «Sono Anna Rossi, avvocata amministrativista. Seguo appalti pubblici e contenzioso degli enti locali; su questi temi ne so più della maggior parte delle fonti che leggi. Lavoro per comuni, società partecipate e imprese che partecipano alle gare.» -->
+
+## Lingua
+<!-- COMPILARE. Lingua di lavoro, parole da evitare con la loro alternativa, calchi e termini che ti danno fastidio, come trattare le citazioni in lingua straniera. -->
+
+## Forme da evitare, in ogni testo
+<!-- COMPILARE. Le forme di scrittura che correggi sempre, ciascuna con un esempio «prima → dopo». L'onboarding te ne propone alcune tipiche; tieni quelle in cui ti riconosci. Qui arrivano anche le forme che correggerai nei primi mesi. -->
+
+## Tono
+<!-- COMPILARE. Come vuoi che Claude ti parli e scriva per te: registro, quanto essere diretto, come esprimere un apprezzamento o un dissenso, che cosa fare quando critichi un suo output. -->
+
+## In chat
+<!-- COMPILARE. Lunghezza e forma delle risposte: che cosa vuoi vedere in chat e che cosa va nei file, come vuoi le decisioni (quante opzioni, con o senza raccomandazione), che cosa fare quando dici «non ho capito». -->
+
+## Come lavoro con te
+<!-- COMPILARE. Il ritmo: quanta autonomia dai a Claude, quando deve chiederti e quando procedere, su che cosa agisce da solo, come preferisci essere avvisato di un problema. -->
+
+## Testi a mio nome
+<!-- COMPILARE. Persona grammaticale nei documenti che firmi, i gesti con cui asciughi un testo prima di mandarlo, le regole fisse sulle fonti dentro la frase. -->
+
+## Registri specifici: apri la pagina completa
+<!-- COMPILARE. Un rimando per ogni tipo di testo che ha un registro suo, con la sezione della pagina completa che lo descrive. Esempio di forma: «Pareri per il cliente → pagina completa, sezione 5, Documenti per i clienti». -->

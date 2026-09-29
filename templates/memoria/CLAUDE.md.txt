@@ -1,0 +1,131 @@
+<!-- Installato da {{PRODOTTO}}. L'installazione sostituisce i segnaposto fra doppie graffe, tranne quelli che iniziano con COMPILARE: quelli li chiude l'onboarding. -->
+
+# CLAUDE.md — vault di {{Nome}}
+
+Istruzioni operative per Claude Code quando lavora su questo vault Obsidian.
+
+## Panoramica
+
+- **Radice del vault:** `{{VAULT}}/`. Tutti i percorsi di questo file sono relativi a questa cartella.
+- **Dove stanno le cartelle.** Ogni cartella ha un ruolo; skill e script cercano per ruolo. La mappatura l'ha fissata l'installazione: in un vault nuovo è la struttura PARA, in un vault esistente sono le cartelle di {{Nome}}, che non si spostano.
+
+| Ruolo | Cartella |
+|---|---|
+| ingresso (Inbox), da svuotare | `{{RUOLO_INBOX}}/` |
+| progetti, lavori con una fine | `{{RUOLO_PROGETTI}}/` |
+| aree, responsabilità continuative | `{{RUOLO_AREE}}/` |
+| risorse, conoscenza per argomento | `{{RUOLO_RISORSE}}/` |
+| persone, una nota per interlocutore | `{{RUOLO_PERSONE}}/` |
+| archivio | `{{RUOLO_ARCHIVIO}}/` |
+| note giornaliere e settimanali | `{{RUOLO_JOURNAL}}/` |
+| modelli di nota | `{{RUOLO_TEMPLATE}}/` |
+| memoria operativa di Claude | `{{RUOLO_CLAUDE}}/` |
+
+Una nota nuova va nella cartella del suo ruolo. Se il ruolo non basta a decidere, si guarda dove stanno le note simili.
+- **Binari su disco, note nel vault.** PDF, documenti Word e fogli di calcolo stanno in `{{FONTI}}/`; nel vault va la nota che li descrive, con il percorso.
+
+## Dove stanno le cose
+
+La memoria di Claude ha tre livelli. Il primo si carica a ogni avvio e ha un tetto; il secondo si apre quando serve; il terzo si interroga soltanto.
+
+| Livello | Che cosa | Dove |
+|---|---|---|
+| **Nucleo**, a ogni avvio | chi è {{Nome}} e come scrivere a {{Nome}} | `{{RUOLO_CLAUDE}}/profilo-nucleo.md` |
+| | lo stato attuale: contatori, lavori attivi, ultime sessioni | `{{RUOLO_CLAUDE}}/_Claude.md`, sezione «Stato attuale» |
+| | le regole del vault | questo file |
+| | l'indice delle memorie | `MEMORY.md` della memoria di Claude Code |
+| **Su richiesta** | il profilo per esteso, con i registri | `{{RUOLO_CLAUDE}}/profilo-completo.md` |
+| | le regole di metodo | `{{RUOLO_CLAUDE}}/regole-di-metodo.md` |
+| | le regole per script e automazioni | `{{RUOLO_CLAUDE}}/regole-di-metodo-strumenti.md` |
+| | la conoscenza di merito | `{{RUOLO_CLAUDE}}/dominio/` |
+| | lo stato di ogni lavoro | `{{RUOLO_CLAUDE}}/stati/` |
+| | le istruzioni di ogni compito | le skill in `.claude/skills/` |
+| **Archivio** | casi dei mesi chiusi, sessioni compattate, versioni precedenti | `{{RUOLO_CLAUDE}}/archivio/` |
+
+- **Una regola nuova va in un solo posto:** ciò che serve sempre nel nucleo, ciò che serve a un compito nella sua skill, il merito in `dominio/`.
+- I tetti di ogni file del nucleo sono in `{{RUOLO_CLAUDE}}/_Claude.md`, «Tetti del contesto».
+
+## Regole sempre valide
+
+- **Fatto e inferenza.** Mai presentare un'inferenza come un fatto. Se un'informazione non è scritta nella fonte, dirlo: «non è scritto, ma suppongo che…», oppure «non ho questa informazione, verifica direttamente». Niente date, numeri, riunioni o citazioni ricostruiti per riempire un vuoto.
+- **Verificare per smentire.** Prima di affermare che qualcosa è assente, rotto, già fatto o mai successo, eseguire la ricerca che lo smentirebbe e dire dove si è guardato. Se la verifica non è stata fatta, scrivere «non ho verificato». Le regole di dettaglio sono in `{{RUOLO_CLAUDE}}/regole-di-metodo.md`, sezione 1.
+- **Scrivere prima di rispondere.** Se in conversazione emerge qualcosa che chiude, sospende o cambia un impegno di un lavoro, la scrittura nel suo stato in `{{RUOLO_CLAUDE}}/stati/` precede la risposta. La conversazione si perde; il file resta.
+- **Bozze verso l'esterno.** Mail, messaggi e documenti per altri sono bozze che {{Nome}} rilegge. Si invia solo con un suo via esplicito, valido per quel messaggio e quel destinatario. Le prove dei canali in uscita si fanno solo verso {{Nome}}.
+- **Decisioni.** Prima di proporre alternative a una scelta già fatta, leggere `{{RUOLO_CLAUDE}}/decisioni.md` e non riproporre le alternative scartate. Ogni decisione nuova: una riga con data, decisione, perché, alternative scartate.
+- **Propagare.** Un materiale nuovo (riunione, mail, documento, decisione) si registra su tutti i punti da cui qualcuno lo cercherà: stato del lavoro, note delle persone coinvolte, `dominio/`, log della sessione. Il test: se questa conversazione domani non esistesse, il vault saprebbe la cosa? Elenco dei punti: `{{RUOLO_CLAUDE}}/protocollo-propagazione.md`.
+- **Solo in coda:** `{{RUOLO_CLAUDE}}/sessioni/*.md`, `{{RUOLO_CLAUDE}}/decisioni.md` e `{{RUOLO_CLAUDE}}/correzioni.md` si scrivono solo aggiungendo in fondo. Negli stati si aggiorna il singolo campo, lasciando intatto il resto.
+
+## Il ciclo delle correzioni
+
+È il meccanismo con cui Claude impara. {{Nome}} tratta Claude come un collaboratore junior: quando un output non va, spiega che cosa non funziona e come migliorare il metodo («questo non va perché…, d'ora in poi…»), invece di correggere il file a mano.
+
+1. **Il caso.** Claude registra la correzione in `{{RUOLO_CLAUDE}}/correzioni.md` nello stesso turno, prima di rifare il lavoro, qualunque sia il tipo di correzione. La regola di merito va in `dominio/`, quella che riguarda un solo lavoro nel suo stato. Se la regola riguarda lo stile o il rapporto con {{Nome}}, è univoca e {{Nome}} la conferma, entra subito anche nel profilo.
+2. **La regola.** A inizio mese i casi del mese chiuso diventano regole in `{{RUOLO_CLAUDE}}/regole-di-metodo.md` (lavoro e verifica) o nel profilo (stile e rapporto), fondendo prima di aggiungere. Una regola che serve a un solo compito va nella sua skill.
+3. **Il controllo.** Il doctor misura i tetti e segnala se la distillazione del mese non è stata fatta.
+
+## Inizio sessione
+
+- Se l'hook segnala note con frontmatter incompleto, sistemarle per prime.
+- Se nei file del nucleo restano commenti o segnaposto da compilare, proporre di riprendere l'onboarding con la skill `onboarding`.
+
+## Durante il lavoro
+
+- **Prima di un lavoro sostanziale nuovo:** fissare in cima allo stato del lavoro la sezione `## Obiettivo e perché`, proponendo una bozza a {{Nome}} e lasciando che reagisca.
+- **Prima di processare contenuti e di ogni lavoro sostanziale:** leggere `{{RUOLO_CLAUDE}}/regole-di-metodo.md`.
+- **Prima di un testo per altri:** aprire `{{RUOLO_CLAUDE}}/profilo-completo.md` alla sezione del registro giusto.
+- **Prima di consegnare un output sostanziale:** skill `autorevisione`. Livello 1 sempre; livello 2, un revisore separato che riapre le fonti, per i lavori ad alta posta o su richiesta.
+- **Impegni e attese:** si scrivono nella sezione `## Impegni` dello stato del lavoro, con le regole della skill `impegni`.
+
+## Chiusura sessione
+
+In ordine, secondo `{{RUOLO_CLAUDE}}/routine-fine-sessione.md`:
+1. log in `{{RUOLO_CLAUDE}}/sessioni/YYYY-MM-DD.md`, con una sezione «Decisioni e ragionamento»;
+2. stato e impegni di ogni lavoro toccato;
+3. note delle persone con cui si è interagito direttamente;
+4. `dominio/`, con il grado di verifica (`[verificato|inferito|da verificare]`), la fonte e la data;
+5. `{{RUOLO_CLAUDE}}/_Claude.md`, sezione «Stato attuale», e `updated_at`.
+
+## Prima sessione del mese
+
+- Distillare i casi del mese chiuso in `regole-di-metodo.md` o nel profilo, poi spostarli in `{{RUOLO_CLAUDE}}/archivio/correzioni-YYYY-MM.md`. Il caso si archivia, la regola resta.
+- Compattare i log di sessione del mese chiuso in `{{RUOLO_CLAUDE}}/sessioni/archivio/YYYY-MM.md`.
+- Rientrare nei tetti che il doctor segnala.
+
+## Convenzioni
+
+### Frontmatter
+
+```yaml
+---
+created_at: YYYY-MM-DD
+tags:
+- tipo/{tipo}
+- argomento/{argomento}
+up:
+- '[[Nota padre]]'
+updated_at: YYYY-MM-DD    # oppure null se mai aggiornata
+---
+```
+
+- `up:` punta alla nota o cartella genitore. Date in formato `YYYY-MM-DD`. Wikilink nel frontmatter tra apici singoli.
+- Quando {{Nome}} dice di aver mandato una nota a qualcuno, si aggiungono `destinatario:` e `inviata: YYYY-MM-DD` e si aggiorna lo stato del lavoro.
+- **Tag sempre con un prefisso:** `tipo/` (daily, weekly, appunti, articolo, indice, verbale), `argomento/` ({{COMPILARE: i temi del lavoro}}), `contenuto/` (clipping), `status/`. Acronimi in maiuscolo, il resto in minuscolo. Prima di creare un tag nuovo, cercare un equivalente già in uso.
+
+### Nomi dei file
+
+- **Note operative** (riunioni, call, briefing, analisi, sintesi): `YYYY-MM-DD Prefisso Parole chiave — Persona.md`, con almeno quattro parole significative oltre a data e prefisso. Esempio: `2026-10-07 Riunione rinnovo contratto fornitura — Bianchi.md`.
+- Note giornaliere `YYYY-MM-DD.md`; settimanali `YYYY-Www.md`; clipping con il titolo originale; persone `Nome Cognome.md`.
+- Le note esistenti non si rinominano.
+
+### Spostare e rinominare
+
+Per spostare o rinominare una nota si usa la CLI di Obsidian, che aggiorna i wikilink: `obsidian move file="Nome nota" to="cartella/"`, `obsidian rename file="Nome nota" name="Nuovo nome"`. Precondizione: l'app Obsidian deve essere aperta, perché ad app chiusa il comando la avvia e non ritorna. Verificarlo prima con `pgrep -f "Obsidian.app/Contents/MacOS/[Oo]bsidian"`. Se l'app è chiusa, scrivere sui file e dichiarare che i wikilink non sono stati aggiornati. `obsidian delete` non ha opzioni: qualunque argomento è una nota da cestinare. I file che non sono note si spostano con `mv`.
+
+### Persone
+
+`{{RUOLO_PERSONE}}/` è il registro degli interlocutori. Quando una persona entra in un lavoro, si crea la sua nota se manca, o si aggiorna la tabella «Interazioni chiave». Niente note per persone citate di sfuggita né per autori di libri e articoli.
+
+## Cartella riservata
+
+<!-- L'installazione toglie questa sezione se la configurazione non ha una cartella riservata. -->
+Non leggere, cercare né elencare `{{RUOLO_RISERVATA}}/` e le sue sottocartelle. Se {{Nome}} lo chiede esplicitamente, chiedere conferma prima di procedere.

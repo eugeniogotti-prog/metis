@@ -30,6 +30,14 @@ OGGI=$(date '+%Y-%m-%d')
 echo "=== ${METIS_PRODOTTO}: orientamento della sessione ($OGGI) ==="
 echo ""
 
+# 0. Dopo una compattazione: la traccia salvata dall'hook pre-compact.
+SOURCE=$(printf '%s' "$INPUT" | sed -n 's/.*"source"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+if [ "$SOURCE" = "compact" ] && [ -f "$CL/cache/pre-compact.md" ]; then
+  echo "--- RIPRESA DOPO LA COMPATTAZIONE ---"
+  cat "$CL/cache/pre-compact.md"
+  echo ""
+fi
+
 # 1. Salute del sistema: la riga del semaforo e i punti da guardare, dal report del doctor.
 if [ -f "$CL/doctor.md" ]; then
   echo "--- SALUTE DEL SISTEMA (doctor) ---"

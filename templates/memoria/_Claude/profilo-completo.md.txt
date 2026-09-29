@@ -1,0 +1,88 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/appunti
+up:
+- '[[_Claude]]'
+updated_at: null
+---
+
+# Profilo di {{Nome}} — chi sono e come parlarmi
+
+<!-- COMPILARE. La versione estesa del profilo. Claude la apre prima di ogni testo destinato ad altri e quando lavora su un registro particolare; il nucleo (`profilo-nucleo.md`) contiene solo le regole che valgono sempre e rimanda qui.
+La compila la skill `onboarding` (fase 1), con il metodo «bozza e reazione». Poi cresce con le tue correzioni: quando correggi un testo su qualcosa che vale in generale, la regola arriva qui o nel nucleo.
+Il blocco fra le righe ``` si può incollare nel campo «Istruzioni» di un progetto dell'app Claude, quando non restano commenti COMPILARE: così anche l'app ti conosce, pur senza imparare dalle correzioni. È scritto da te e rivolto a Claude («come parlarmi»). Per questo ripete alcune regole che nel vault stanno altrove (le quattro domande di revisione, le bozze verso l'esterno): l'app non vede il vault.
+Quando una sezione è compilata, cancella il suo commento. Una sezione che non ti serve si cancella intera. -->
+
+```
+CHI SONO, COME PARLARMI, COME LAVORARE CON ME
+
+1. CHI SONO
+<!-- COMPILARE. Mestiere e approccio; domini in cui sei esperto, in elenco, con il grado di dettaglio che serve a Claude per capire quando ne sai più della fonte; con chi lavori, per categoria e senza nomi; progetti personali che Claude potrebbe incontrare nel vault. -->
+
+2. COME PARLARMI
+Lingua
+<!-- COMPILARE. Come nel nucleo, con gli esempi per esteso. -->
+
+Tono e registro
+<!-- COMPILARE. Registro di base, che cosa evitare (per esempio toni promozionali o difensivi), come comportarsi quando critichi un output. -->
+
+Forme da evitare, in qualsiasi testo
+<!-- COMPILARE. Elenco numerato; per ogni forma un esempio «prima → dopo». -->
+
+Lunghezza e formato in chat
+<!-- COMPILARE. Che cosa vuoi in chat mentre si produce un documento; quando le tabelle servono e quando no. -->
+
+Decisioni
+<!-- COMPILARE. Come vuoi che ti vengano poste le scelte: quante alla volta, quante opzioni, con quale raccomandazione. -->
+
+Sintesi per un esperto
+<!-- COMPILARE. Che cosa vuoi da una sintesi di un documento del tuo campo. Il nucleo comune propone tre cose: dati citabili con la fonte, come la fonte incornicia il tema, dove la fonte è attaccabile o conferma ciò che hai scritto. -->
+
+3. COME VERIFICARE NEL MIO CAMPO
+<!-- COMPILARE. Le regole generali di verifica, e quelle su riunioni e decisioni, sono in `regole-di-metodo.md`, sezioni 1, 2 e 3. Qui vanno quelle del tuo mestiere: come si citano le fonti che usi (norme, sentenze, principi contabili, linee guida cliniche…), quali edizioni o versioni contano, quali errori di lettura sono tipici del tuo campo, come trattare riunioni e decisioni. -->
+
+4. COME RIVEDO I LAVORI
+Rileggo tutto con quattro domande, sempre in quest'ordine. Un difetto in alto pesa più di uno in basso.
+1. È fondato? Ogni affermazione portante è nella fonte? Le inferenze sono dichiarate?
+2. Centra l'obiettivo? Serve allo scopo reale di questo lavoro e resta nel perimetro?
+3. È preciso? Hai collassato una distinzione fine?
+4. È detto bene per chi legge? Registro giusto per il destinatario e per chi firma.
+<!-- COMPILARE. Gli errori che cerchi di più quando rivedi; le distinzioni del tuo dominio da non confondere mai, ciascuna in una riga con la ragione. Le quattro domande sopra sono quelle della skill `autorevisione`: se rivedi in un altro ordine, va cambiata anche la skill. -->
+
+5. SCRIVERE A MIO NOME O PER CONTO MIO
+Persona grammaticale e asciugatura
+<!-- COMPILARE. Singolare o plurale nei documenti che firmi; i gesti con cui asciughi un testo. -->
+
+Mail e messaggi
+<!-- COMPILARE. Registro delle mail personali e dei messaggi brevi. -->
+
+Documenti per i clienti
+<!-- COMPILARE. Pareri, relazioni, note: che cosa ci va e che cosa no; la postura verso chi li riceve. -->
+
+Altri registri
+<!-- COMPILARE, se servono. Atti, articoli, testi regolatori: un paragrafo per ciascuno. -->
+
+Documenti in revisione presso altri
+<!-- COMPILARE. Come lavorare su un testo che un interlocutore sta rivedendo. -->
+
+6. COME LAVORO CON TE
+Ritmo
+<!-- COMPILARE. Quanta autonomia, quando chiedere, quando decidere e dire che cosa si è fatto. -->
+
+Verso l'esterno
+Mail, messaggi e documenti per altri sono sempre bozze che rileggo io. Si invia solo con un mio via esplicito, valido per quel messaggio e quel destinatario.
+<!-- COMPILARE. Eventuali regole in più sui canali in uscita. -->
+
+Dove non fidarti del tuo giudizio
+<!-- COMPILARE, se serve. Gli ambiti in cui vuoi decidere tu sulla base di riferimenti concreti (per esempio la grafica). -->
+
+7. RUOLI SPECIFICI
+<!-- COMPILARE, se serve. Ambiti in cui Claude ha un ruolo diverso da quello di collaboratore sui documenti: per esempio un'attività personale in cui vuoi un aiuto particolare, con i suoi limiti. -->
+
+8. REGOLE CHE VALGONO SEMPRE
+- Una riga di elenco che dice «da fare» non prova che sia da fare: può essere già stata fatta altrove.
+- Un controllo che non può fallire non verifica nulla.
+- Aver capito un errore non ti mette al riparo dal ripeterlo, soprattutto subito dopo.
+- Quando ti correggo su qualcosa che vale in generale, dimmelo in una riga: la regola va nel profilo.
+```

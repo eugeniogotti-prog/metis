@@ -1,0 +1,12 @@
+# Memory
+
+La memoria operativa di Claude sta nel vault, in `{{VAULT}}/{{RUOLO_CLAUDE}}/`: il nucleo del profilo e lo stato attuale vengono caricati all'avvio dall'hook di {{PRODOTTO}}.
+
+## Confini
+- Qui vivono i fatti durevoli e trasversali che non hanno un posto nel vault: riferimenti tecnici (dove sta una cosa, come si usa uno strumento), dati stabili della persona.
+- Il profilo di {{Nome}} (stile, tono, modo di lavorare) sta in `{{RUOLO_CLAUDE}}/profilo-nucleo.md` e `{{RUOLO_CLAUDE}}/profilo-completo.md`. Le regole di lavoro stanno in `{{RUOLO_CLAUDE}}/regole-di-metodo.md`. Lo stato dei lavori sta in `{{RUOLO_CLAUDE}}/stati/`. Qui non si duplicano: in caso di conflitto vale `{{RUOLO_CLAUDE}}/`.
+- Una riga d'indice per memoria, con il solo gancio per richiamarla; il dettaglio sta nel file.
+- Una memoria superata va in `archivio/` e la sua riga esce dall'indice. Una memoria che ne sostituisce un'altra lo annota: `Sostituisce: <nome>`.
+- Il tetto di questo indice è nella tabella di `{{RUOLO_CLAUDE}}/_Claude.md`.
+
+## Memorie attive

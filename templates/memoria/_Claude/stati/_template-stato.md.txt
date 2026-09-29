@@ -1,0 +1,61 @@
+---
+thread: '{{slug-del-filo}}'
+name: '{{Nome leggibile del filo}}'
+status: attivo          # caldo | attivo | attesa | dormiente
+ultima-mossa: '{{YYYY-MM-DD}}'
+prossima-azione: '{{una riga}}'
+scadenza: nessuna       # oppure YYYY-MM-DD
+persone: []             # lista di wikilink alle note Persone coinvolte: ['[[Nome Cognome]]']
+created_at: '{{YYYY-MM-DD}}'
+updated_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/appunti
+- argomento/{{argomento}}
+up:
+- '[[_Claude]]'
+---
+<!-- derivato dalla struttura degli stati in PARA/_Claude/stati/ del vault di riferimento, spersonalizzato il 2026-09-18.
+     Le sezioni sono in ordine fisso. «## Impegni» è UNA SOLA per file, dopo «Dove siamo»: le voci datate raccontano, non contengono impegni. -->
+
+# Stato — {{Nome leggibile del filo}}
+
+## Obiettivo e perché
+<!-- Stabile. Si scrive una volta con l'utente (metodo: bozza + reazione), si ritocca di rado. È il metro con cui l'autorevisione misura «centra l'obiettivo?». -->
+**Obiettivo (finale):** {{cosa deve essere vero alla fine}}
+
+**Perché conta:** {{l'orizzonte: a cosa serve che sia vero}}
+
+**Successo osservabile:** {{come ci si accorge che è fatto — 1-3 punti verificabili}}
+
+**Cosa NON è:** {{il confine: cosa resta fuori anche se sembra vicino}}
+
+## Dove siamo
+<!-- 3-8 righe, riscritte a ogni turno che tocca il filo. Non è un log: è la fotografia di adesso. -->
+- {{situazione attuale in una riga}}
+- {{prossimo passo}}
+
+## Impegni
+<!-- UNA SOLA sezione per file. Aperti in cima, chiusi in coda sotto **Fatti:**. Formato della riga (ogni scostamento la rende invisibile agli strumenti):
+     - [ ] **Testo** — contesto | YYYY-MM-DD | palla:me|claude|loro [| decade:YYYY-MM-DD]
+     palla:me + data = scadenza · palla:loro + data = riesame, con decade: obbligatorio (default +21 giorni) -->
+- [ ] **{{cosa}}** — {{contesto}} | {{YYYY-MM-DD}} | palla:me
+
+**Fatti:**
+- [x] {{cosa}} ✅ {{YYYY-MM-DD}} — {{prova: dove sta l'evidenza}}
+
+## Se arriva
+<!-- Riconoscimenti, non attese: «se arriva X, so cosa farne». Niente data, palla, decadenza. Quando X arriva: ◇ → ◆ e una riga nel log. -->
+- ◇ {{X}} → {{cosa farne}}
+
+## Attori
+- **{{Nome Cognome}}** — {{ruolo}} → [[{{Nome Cognome}}]]
+
+## Documenti prodotti
+- [[{{nota}}]] — {{cosa è, data}}
+
+## Log
+<!-- Voci datate, append-only, dalla più recente. Raccontano; non contengono impegni. -->
+### {{YYYY-MM-DD}} — {{titolo della voce}}
+{{cosa è successo, cosa si è deciso, perché}}
+
+<!-- aggiornato da {{istanza}} {{YYYY-MM-DD}} -->

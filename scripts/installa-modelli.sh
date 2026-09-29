@@ -14,6 +14,7 @@ METIS_ROOT="${METIS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export METIS_ROOT
 source "$METIS_ROOT/scripts/lib/config.sh"
 MOD="${1:?uso: installa-modelli.sh <cartella dei modelli> \"<Nome del cliente>\"}"
+case "$MOD" in /*) ;; *) [ -d "$MOD" ] || MOD="$METIS_ROOT/$MOD" ;; esac   # percorso relativo: prima la cartella corrente, poi il plugin
 NOME="${2:?manca il nome del cliente}"
 metis_carica_config || { echo "installa-modelli: ${METIS_ERRORE}" >&2; exit 2; }
 [ -f "$MOD/CLAUDE.md.txt" ] || { echo "installa-modelli: modelli non trovati in $MOD" >&2; exit 2; }
@@ -30,7 +31,18 @@ copia() {  # copia <sorgente> <destinazione>
   cp "$1" "$2" && COPIATI+=("$2")
 }
 for f in "$MOD"/_Claude/*.md.txt; do copia "$f" "$CL/$(basename "$f" .txt)"; done
-copia "$MOD/CLAUDE.md.txt" "$METIS_VAULT/CLAUDE.md"
+# Modelli di stato: si copiano come sono, perché i loro segnaposto servono ogni volta che nasce uno stato.
+for f in "$MOD"/_Claude/stati/*.md.txt; do
+  [ -f "$f" ] || continue; d="$CL/stati/$(basename "$f" .txt)"
+  if [ -e "$d" ]; then echo "già presente, lasciato com'è: $d"; else cp "$f" "$d"; fi
+done
+# Un CLAUDE.md del cliente resta com'è: il nucleo di Metis va in CLAUDE.local.md, che Claude Code carica insieme (verificato con 2.1.284).
+if [ -f "$METIS_VAULT/CLAUDE.md" ] && ! grep -q "Installato da" "$METIS_VAULT/CLAUDE.md"; then
+  echo "CLAUDE.md del cliente presente: il nucleo di $METIS_PRODOTTO va in CLAUDE.local.md"
+  copia "$MOD/CLAUDE.md.txt" "$METIS_VAULT/CLAUDE.local.md"
+else
+  copia "$MOD/CLAUDE.md.txt" "$METIS_VAULT/CLAUDE.md"
+fi
 copia "$MOD/memory/MEMORY.md.txt" "$METIS_MEMORY_DIR/MEMORY.md"
 
 if [ "${#COPIATI[@]}" -eq 0 ]; then echo "installa-modelli: nessun file nuovo, vault già installato"; exit 0; fi
@@ -48,9 +60,11 @@ for f in "${COPIATI[@]}"; do
 done
 
 # Cartella riservata assente: si toglie la sezione dal CLAUDE.md appena copiato.
-if [ -z "$METIS_RUOLO_RISERVATA" ] && printf '%s\n' "${COPIATI[@]}" | grep -qx "$METIS_VAULT/CLAUDE.md"; then
-  perl -0pi -e 's/\n## Cartella riservata\n.*\z/\n/s' "$METIS_VAULT/CLAUDE.md"
-fi
+for c in "$METIS_VAULT/CLAUDE.md" "$METIS_VAULT/CLAUDE.local.md"; do
+  if [ -z "$METIS_RUOLO_RISERVATA" ] && printf '%s\n' "${COPIATI[@]}" | grep -qxF "$c"; then
+    perl -0pi -e 's/\n## Cartella riservata\n.*\z/\n/s' "$c"
+  fi
+done
 
 RESTANO=$(grep -rhoE '\{\{[^}]*\}\}' "${COPIATI[@]}" 2>/dev/null | grep -v '^{{COMPILARE' | sort -u)
 if [ -n "$RESTANO" ]; then echo "installa-modelli: segnaposto non sostituiti: $RESTANO" >&2; exit 1; fi

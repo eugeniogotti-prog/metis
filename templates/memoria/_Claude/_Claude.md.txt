@@ -1,0 +1,72 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/indice
+up:
+- '[[Home]]'
+updated_at: '{{YYYY-MM-DD}}'
+---
+
+# Memoria operativa di Claude
+
+<!-- Questo file ha due parti. La prima, fino a «Tetti del contesto» compresa, descrive la cartella `_Claude/` e si legge su richiesta. La seconda, «Stato attuale», viene caricata all'avvio di ogni sessione: va tenuta corta e sotto il suo tetto. -->
+
+## Identità
+Sono l'assistente di {{Nome}} su questo vault. Il vault è la memoria: io la tengo in ordine, la interrogo e la faccio crescere con le sue correzioni. Le decisioni di merito e gli invii restano a {{Nome}}.
+
+## Che cosa c'è in `_Claude/`
+
+| File o cartella | Che cosa contiene | Quando si legge |
+|---|---|---|
+| `profilo-nucleo.md` | chi è {{Nome}} e come scrivere a {{Nome}}: le regole sempre valide | all'avvio, per intero |
+| `profilo-completo.md` | il profilo per esteso: registri, esempi, lenti di revisione | prima di ogni testo per altri |
+| `_Claude.md` | questo file; la sezione «Stato attuale» | all'avvio |
+| `regole-di-metodo.md` | le regole di lavoro: il nucleo comune più quelle nate dalle correzioni | prima di processare contenuti e di ogni lavoro sostanziale |
+| `regole-di-metodo-strumenti.md` | le regole per script, automazioni e collaudi | prima di un lavoro tecnico |
+| `correzioni.md` | i casi di correzione del mese corrente | quando si registra o si cerca un caso |
+| `decisioni.md` | le decisioni prese, con il perché e le alternative scartate | prima di proporre alternative a una scelta fatta |
+| `stati/` | un file per ogni lavoro in corso: obiettivo, impegni, log | quando si lavora su quel lavoro |
+| `dominio/` | la conoscenza di merito, con la fonte e il grado di verifica | quando si lavora su quella materia |
+| `sessioni/` | il log di ogni sessione, un file al giorno | per riprendere un lavoro |
+| `archivio/` | casi dei mesi chiusi, sessioni compattate, vecchie versioni | solo se interrogato |
+
+## Parole
+
+- **Skill**: un insieme di istruzioni per un compito (per esempio `autorevisione`, `impegni`, `onboarding`), che Claude carica quando il compito si presenta.
+- **Hook di avvio**: lo script che all'apertura di ogni sessione fa leggere a Claude il nucleo del profilo e lo stato attuale.
+- **Doctor**: il controllo giornaliero che misura i tetti e segnala ciò che si è fermato. Si lancia a mano con `{{COMANDO_DOCTOR}}`.
+- **Frontmatter**: le righe fra `---` in cima a una nota (data, tag, nota padre).
+- **Distillare**: trasformare i casi di correzione in regole, fondendo quelle che prescrivono la stessa azione.
+
+## Tetti del contesto
+
+Ciò che si carica all'avvio ha un tetto: oltre, Claude lavora peggio e costa di più. Il doctor misura ogni giorno i file qui sotto e segnala i superamenti. Un superamento si risolve distillando, fondendo o spostando nel livello «su richiesta» (pagina completa, `dominio/`, una skill).
+
+| Che cosa | Tetto (caratteri) |
+|---|---|
+| `profilo-nucleo.md` | 10000 |
+| `_Claude.md`, sezione «Stato attuale» | 9000 |
+| `regole-di-metodo.md` | 20000 |
+| `MEMORY.md`, indice delle memorie | 9000 |
+| `CLAUDE.md` del vault | 18000 |
+| testo iniettato dall'hook di avvio | 40000 |
+
+<!-- I tetti si possono cambiare qui: il doctor li legge da questa tabella. Alzare un tetto è una decisione da registrare in `decisioni.md`. -->
+
+## Stato attuale
+
+<!-- Ricalcolato a ogni chiusura di sessione dalle fonti (stati/, sessioni/). Solo numeri, una riga per lavoro, al massimo sette sessioni: il dettaglio sta nei file linkati. -->
+
+### Contatori
+- Lavori attivi: **0** ({{YYYY-MM-DD}})
+- Schede di dominio: **0**
+- Casi di correzione del mese: **0**
+- Regole di metodo nate dalle correzioni: **0**
+
+### Lavori attivi
+
+| Lavoro | Stato | Prossima azione |
+|---|---|---|
+
+### Ultime sessioni
+- **{{YYYY-MM-DD}}** — installazione di {{PRODOTTO}}; onboarding da fare.

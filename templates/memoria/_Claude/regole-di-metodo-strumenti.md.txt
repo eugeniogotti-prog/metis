@@ -1,0 +1,40 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/appunti
+up:
+- '[[regole-di-metodo]]'
+updated_at: null
+---
+
+# Regole di metodo — strumenti, script e automazioni
+
+Regole per il lavoro tecnico di Claude: comandi, script, automazioni, collaudi. Claude le legge prima di scrivere o lanciare uno script, un'automazione o un comando che modifica file. Le regole generali stanno in `regole-di-metodo.md`; questo file segue le stesse regole di crescita.
+
+## Prima di lanciare
+
+- Prima di scrivere uno script o una skill, elencare il contenuto della cartella. Percorsi, credenziali e comandi già documentati si cercano nella memoria.
+- Prima di lanciare uno strumento che modifica stato, code o cursori, leggerne le istruzioni d'uso, anche se l'ha scritto Claude. Se la memoria segnala trappole note, aprirla prima.
+- Prima di rilanciare uno strumento modificato, leggere che cosa fa di nuovo, in particolare verso risorse esterne condivise (quote, limiti di chiamate).
+- Prima di rimuovere una chiave di configurazione, cercare chi altro la legge.
+- Mai una ricerca di file sull'intera cartella home.
+- Un comando che può non terminare si lancia con un limite di tempo o in background. Un'attesa su un agente in background ha un limite di tempo.
+
+## Mentre gira
+
+- Un comando che riporta la misura del problema che risolve (arretrato, coda) si collauda su quella misura: se non cala, il comando ha fatto altro.
+- L'output di uno strumento con effetti collaterali (cursori, code) non si tronca: la parte tagliata non torna rieseguendo il comando.
+- Nel codice di controllo, ogni comando, pattern, variabile e quoting si esegue sulla macchina reale prima di lasciarlo nel file.
+- Registri e interfacce di programmazione registrano spesso gli orari in UTC. Ogni orario scritto viene dall'orologio di sistema nello stesso comando; prima di un'operazione legata a una finestra oraria si legge l'ora. I messaggi si confrontano per identificativo.
+
+## Collaudi
+
+- Una procedura distruttiva si collauda su una copia o in modalità di prova, con l'originale reso irraggiungibile.
+- Nessun test apre i dati veri, nemmeno in lettura, e il recinto del test si collauda. Un backup vale solo se se ne conosce lo schema.
+- Un test che non può fallire non verifica nulla. Diffidare dei test che costruiscono uno stato che l'uso reale non produce.
+- Un ramo di codice eseguito solo in certe condizioni (risultato pieno, errore) si collauda forzando quelle condizioni.
+- Un processo già avviato (server, servizio in background) si riavvia prima di verificare una modifica attraverso di lui. Uno zero esatto è sospetto. Se una scrittura manca, controllare che il canale di prova abbia il permesso di scrivere.
+- Un fallimento che sembra una risposta si registra come fallimento. Uno strumento che dichiara successo misura il proprio prodotto.
+- Chi aggiunge una cache dice come si invalida. Contro le esecuzioni concorrenti: file temporanei unici per processo e permessi fissati alla creazione. Niente ritentativi sugli errori definitivi.
+- Chi accende spegne: a fine prova si chiudono app, finestre e processi avviati, e si contano i residui.
+- Un processo altrui si termina con il numero di processo ricavato dalla porta su cui ascolta; l'applicazione in uso reale resta accesa durante i collaudi.

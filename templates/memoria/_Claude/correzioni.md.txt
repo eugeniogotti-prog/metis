@@ -1,0 +1,29 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/appunti
+up:
+- '[[_Claude]]'
+updated_at: null
+---
+
+# Correzioni
+
+Registro dei casi di correzione del mese corrente: che cosa è successo, perché, le parole di {{Nome}}. Si scrive solo aggiungendo in coda. Le regole che ne nascono stanno in [[regole-di-metodo]] (lavoro e verifica) e in [[profilo-nucleo]] (stile e rapporto con {{Nome}}).
+
+**Il gesto di correzione.** Quando un output non va, {{Nome}} lo dice a Claude: «questo non va perché…, d'ora in poi…». Claude registra il caso qui nello stesso turno, prima di rifare il lavoro. Il ciclo completo, dal caso alla regola, è in `CLAUDE.md`, «Il ciclo delle correzioni».
+
+**Dove va una correzione.** Il caso si scrive sempre qui. La regola che ne nasce va:
+- nel profilo, se riguarda la scrittura o il rapporto con {{Nome}};
+- in `regole-di-metodo.md`, se riguarda il metodo di lavoro (a inizio mese);
+- in `dominio/`, con la fonte e il grado di verifica, se è un fatto di merito (una norma, una scadenza, come funziona un sistema);
+- nello stato del lavoro, se riguarda un solo lavoro o una sola relazione.
+
+**Come si aggiunge un caso.** In coda, con l'intestazione `## YYYY-MM-DD — titolo che nomina l'errore` (`## YYYY-MM-DD (2) — …` per il secondo dello stesso giorno), poi tre parti:
+- **Che cosa è successo**, con le parole di {{Nome}} quando sono decisive;
+- **Perché**: la causa, oltre al sintomo;
+- **Regola**: una riga, scritta in modo che valga anche per un caso diverso.
+
+**Inizio mese.** I casi del mese chiuso diventano regole e si spostano in `archivio/correzioni-YYYY-MM.md`: il caso si archivia, la regola resta.
+
+---
