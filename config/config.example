@@ -1,0 +1,38 @@
+# Configurazione di Metis: una riga CHIAVE=valore. Il file si legge e non si esegue.
+# Posizione: ~/.config/metis/config (oppure il percorso in METIS_CONFIG).
+
+# Nome del prodotto nei messaggi (una sola variabile, da cambiare qui se il nome cambia).
+METIS_PRODOTTO=Metis
+
+# Radice del vault.
+METIS_VAULT=~/Documents/Vault
+
+# Mappatura ruolo → cartella, relativa alla radice del vault. Vault nuovo: i valori sotto (PARA).
+# Vault esistente: la skill di installazione propone la mappatura sulle cartelle del cliente, senza spostare note.
+METIS_RUOLO_INBOX=0 - Inbox
+METIS_RUOLO_PROGETTI=1 - Progetti
+METIS_RUOLO_AREE=2 - Aree
+METIS_RUOLO_RISORSE=3 - Risorse
+METIS_RUOLO_ARCHIVIO=4 - Archivio
+METIS_RUOLO_PERSONE=3 - Risorse/Persone
+METIS_RUOLO_JOURNAL=Journal
+METIS_RUOLO_TEMPLATE=_Extras/_Templates
+METIS_RUOLO_CLAUDE=_Claude
+# Cartella riservata: vuota se non c'è.
+METIS_RUOLO_RISERVATA=
+
+# Sottocartelle dell'Inbox attive, una per fonte.
+METIS_INBOX_FONTI=Clippings files voicenotes
+
+# Chiavi del frontmatter che ogni nota deve avere, e prefissi dei tag controllati dal doctor
+# (vuoto = controllo dei tag spento, se il cliente non adotta i tag con prefisso).
+METIS_FRONTMATTER_CHIAVI=created_at tags up
+METIS_TAG_PREFISSI=tipo argomento contenuto status
+
+# LaunchAgent: prefisso delle etichette e job installati.
+METIS_LABEL=com.metis.utente
+METIS_JOBS=daily-digest inbox-processor
+METIS_LOG_DIR=~/Library/Logs/metis
+
+# Memoria di Claude Code del vault: si ricava dal percorso del vault; fissarla qui solo se il ricavo non torna.
+# METIS_MEMORY_DIR=~/.claude/projects/-Users-utente-Documents-Vault/memory
