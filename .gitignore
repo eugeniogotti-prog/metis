@@ -3,3 +3,4 @@ prove/**
 !prove/*/
 !prove/*/resoconto.md
 !prove/*/claude-prova.sh
+.DS_Store
