@@ -26,7 +26,7 @@ installa() {
     "s/\{\{PRODOTTO\}\}/Metis/g; s/\{\{Nome\}\}/Anna Rossi/g; s#\{\{VAULT\}\}#$V#g; s#\{\{FONTI\}\}#$T/fonti#g; s/\{\{YYYY-MM-DD\}\}/$(date +%F)/g;
      s#\{\{RUOLO_CLAUDE\}\}#$RC#g; s#\{\{RUOLO_INBOX\}\}#$RI#g; s#\{\{RUOLO_PROGETTI\}\}#1 - Progetti#g; s#\{\{RUOLO_AREE\}\}#2 - Aree#g;
      s#\{\{RUOLO_RISORSE\}\}#3 - Risorse#g; s#\{\{RUOLO_PERSONE\}\}#3 - Risorse/Persone#g; s#\{\{RUOLO_ARCHIVIO\}\}#4 - Archivio#g;
-     s#\{\{RUOLO_JOURNAL\}\}#Journal#g; s#\{\{RUOLO_TEMPLATE\}\}#_Extras/_Templates#g; s#\{\{RUOLO_RISERVATA\}\}#_Privato#g" {} +
+     s#\{\{RUOLO_JOURNAL\}\}#Journal#g; s#\{\{RUOLO_TEMPLATE\}\}#_Extras/_Templates#g; s#\{\{RUOLO_RISERVATA\}\}#_Privato#g; s#\{\{COMANDO_DOCTOR\}\}#bash $ROOT/scripts/doctor.sh#g" {} +
   # nessun segnaposto d'installazione deve restare: solo quelli COMPILARE, che chiude l'onboarding
   ! grep -rhoE "\{\{[^}]*\}\}" "$V" "$M" | grep -qv "COMPILARE"
 }
