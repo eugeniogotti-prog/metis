@@ -101,6 +101,13 @@ check "ripresa: traccia rimessa nel contesto" 'printf "%s" "$H" | grep -q "RIPRE
 H=$(printf '{"cwd":"%s","source":"startup"}' "$V" | bash "$ROOT/hooks/session-orient.sh")
 check "avvio normale: nessuna traccia" '! printf "%s" "$H" | grep -q "RIPRESA DOPO"'
 
+echo "7b. Modulo markitdown"
+echo '{"mcpServers":{"mio":{"command":"x"}}}' > "$V/.mcp.json"
+bash "$ROOT/scripts/moduli/markitdown.sh" installa >/dev/null; bash "$ROOT/scripts/moduli/markitdown.sh" installa >/dev/null
+check "server dichiarato e server del cliente conservato" 'python3 -c "import json,sys;d=json.load(open(\"$V/.mcp.json\"))[\"mcpServers\"];sys.exit(0 if set(d)=={\"mio\",\"markitdown\"} else 1)"'
+check "strumento consentito una volta sola" '[ "$(grep -c convert_to_markdown "$V/.claude/settings.json")" = 1 ]'
+check "modulo registrato nella configurazione" 'bash "$ROOT/scripts/configura.sh" get METIS_MODULI | grep -qw markitdown'
+
 echo "8. Dotazione"
 check "verifica-dotazione: sintassi e modulo sconosciuto segnalato" '! bash "$ROOT/scripts/verifica-dotazione.sh" inesistente >/dev/null'
 
