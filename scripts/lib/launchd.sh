@@ -52,11 +52,14 @@ PY
     plutil -lint "$PLIST" >/dev/null || { echo "launchd: plist non valido" >&2; exit 1; } ;;
   carica)
     [ -f "$PLIST" ] || { echo "launchd: manca $PLIST (prima: genera)" >&2; exit 1; }
+    # Prove: con METIS_SENZA_CARICARE=1 non si carica niente nella sessione dell'utente.
+    [ "${METIS_SENZA_CARICARE:-}" = 1 ] && { echo "launchd: $ETICHETTA non caricato (prova: METIS_SENZA_CARICARE=1)"; exit 0; }
     launchctl bootout "gui/$(id -u)/$ETICHETTA" 2>/dev/null
     launchctl bootstrap "gui/$(id -u)" "$PLIST" && echo "launchd: $ETICHETTA caricato" ;;
   scarica)
     launchctl bootout "gui/$(id -u)/$ETICHETTA" 2>/dev/null && echo "launchd: $ETICHETTA fermato" || echo "launchd: $ETICHETTA non era caricato" ;;
   stato)
+    [ "${METIS_SENZA_CARICARE:-}" = 1 ] && { echo "non caricato (prova)"; exit 1; }
     if launchctl print "gui/$(id -u)/$ETICHETTA" >/dev/null 2>&1; then echo "caricato"; else echo "non caricato"; exit 1; fi ;;
   *) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

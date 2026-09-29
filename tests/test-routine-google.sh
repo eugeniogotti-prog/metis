@@ -67,6 +67,7 @@ check "doctor alle 06:45" '[ "$(/usr/libexec/PlistBuddy -c "Print :StartCalendar
 check "orari dell'inbox dalla configurazione (08:30 e 18:00)" '[ "$(/usr/libexec/PlistBuddy -c "Print :StartCalendarInterval:1:Hour" "$T/LA/com.metis.prova.inbox-processor.plist")" = 18 ]'
 check "weekly solo il lunedì" '[ "$(/usr/libexec/PlistBuddy -c "Print :StartCalendarInterval:0:Weekday" "$T/LA/com.metis.prova.weekly-digest.plist")" = 1 ]'
 check "giro di Claude lanciato da metis-agent" '/usr/libexec/PlistBuddy -c "Print :ProgramArguments" "$T/LA/com.metis.prova.daily-digest.plist" | grep -q "metis-agent.sh"'
+check "con METIS_SENZA_CARICARE=1 il caricamento è simulato" 'METIS_SENZA_CARICARE=1 bash "$ROOT/scripts/lib/launchd.sh" carica doctor | grep -q "non caricato (prova"'
 check "controlla: segnala i LaunchAgent non caricati" '! bash "$ROOT/scripts/moduli/routine.sh" controlla >/dev/null'
 
 echo "4. Modulo google"
