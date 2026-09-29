@@ -23,7 +23,12 @@ installa() {
   for f in "$MOD"/_Claude/*.md.txt; do b=$(basename "$f" .txt); cp "$f" "$V/$RC/$b"; done
   cp "$MOD/CLAUDE.md.txt" "$V/CLAUDE.md"; cp "$MOD/memory/MEMORY.md.txt" "$M/MEMORY.md"
   find "$V" "$M" -type f -name "*.md" -exec perl -pi -e \
-    "s/\{\{PRODOTTO\}\}/Metis/g; s/\{\{Nome\}\}/Anna Rossi/g; s#\{\{VAULT\}\}#$V#g; s#\{\{FONTI\}\}#$T/fonti#g; s/\{\{YYYY-MM-DD\}\}/$(date +%F)/g" {} +
+    "s/\{\{PRODOTTO\}\}/Metis/g; s/\{\{Nome\}\}/Anna Rossi/g; s#\{\{VAULT\}\}#$V#g; s#\{\{FONTI\}\}#$T/fonti#g; s/\{\{YYYY-MM-DD\}\}/$(date +%F)/g;
+     s#\{\{RUOLO_CLAUDE\}\}#$RC#g; s#\{\{RUOLO_INBOX\}\}#$RI#g; s#\{\{RUOLO_PROGETTI\}\}#1 - Progetti#g; s#\{\{RUOLO_AREE\}\}#2 - Aree#g;
+     s#\{\{RUOLO_RISORSE\}\}#3 - Risorse#g; s#\{\{RUOLO_PERSONE\}\}#3 - Risorse/Persone#g; s#\{\{RUOLO_ARCHIVIO\}\}#4 - Archivio#g;
+     s#\{\{RUOLO_JOURNAL\}\}#Journal#g; s#\{\{RUOLO_TEMPLATE\}\}#_Extras/_Templates#g; s#\{\{RUOLO_RISERVATA\}\}#_Privato#g" {} +
+  # nessun segnaposto d'installazione deve restare: solo quelli COMPILARE, che chiude l'onboarding
+  ! grep -rhoE "\{\{[^}]*\}\}" "$V" "$M" | grep -qv "COMPILARE"
 }
 
 config() {  # config <file> <vault> <memoria> [righe in più]
@@ -31,7 +36,8 @@ config() {  # config <file> <vault> <memoria> [righe in più]
 }
 
 echo "1. Vault nuovo con struttura PARA"
-V1="$T/vault uno"; M1="$T/mem1"; installa "$V1" "$M1" "_Claude" "0 - Inbox"
+V1="$T/vault uno"; M1="$T/mem1"
+check "installazione: nessun segnaposto rimasto oltre a COMPILARE" 'installa "$V1" "$M1" "_Claude" "0 - Inbox"'
 cp "$MOD/../../03-cartella-claude/_Claude/stati/_template-stato.md" "$V1/_Claude/stati/" 2>/dev/null || touch "$V1/_Claude/stati/_template-stato.md"
 config "$T/c1" "$V1" "$M1"
 export METIS_CONFIG="$T/c1"
@@ -73,7 +79,9 @@ bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
 check "doctor segnala profilo-nucleo oltre il tetto" 'grep -q "profilo-nucleo.md.*oltre il tetto di 10000" "$V1/_Claude/doctor.md"'
 
 echo "4. Vault esistente con un'altra struttura (mappatura dei ruoli)"
-V2="$T/vault-due"; M2="$T/mem2"; installa "$V2" "$M2" "Sistema/Claude" "00 Ingresso"
+V2="$T/vault-due"; M2="$T/mem2"
+check "installazione con ruoli mappati: nessun segnaposto rimasto" 'installa "$V2" "$M2" "Sistema/Claude" "00 Ingresso"'
+check "CLAUDE.md punta alla cartella di Claude mappata" 'grep -q "Sistema/Claude/regole-di-metodo.md" "$V2/CLAUDE.md"'
 mkdir -p "$V2/Clienti/Rossi"; printf -- '---\ncreated_at: 2026-09-29\ntags:\n- appunti\nup:\n- x\n---\nTesto\n' > "$V2/Clienti/Rossi/nota.md"
 printf 'Senza frontmatter\n' > "$V2/Clienti/Rossi/nuda.md"
 config "$T/c2" "$V2" "$M2" "METIS_RUOLO_CLAUDE=Sistema/Claude" "METIS_RUOLO_INBOX=00 Ingresso" "METIS_RUOLO_JOURNAL=Diario"
