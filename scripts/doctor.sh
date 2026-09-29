@@ -53,6 +53,7 @@ note_recenti() {
     salta=0
     for e in "${esclusi[@]}"; do [ -n "$e" ] && case "$f" in "$e"/*) salta=1 ;; esac; done
     case "$f" in */.obsidian/*|*/.trash/*) salta=1 ;; esac
+    case "$f" in "$METIS_VAULT"/CLAUDE.md|"$METIS_VAULT"/CLAUDE.local.md) salta=1 ;; esac   # istruzioni, non note
     [ "$salta" -eq 0 ] && printf '%s\n' "$f"
   done
 }

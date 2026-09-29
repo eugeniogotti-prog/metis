@@ -7,6 +7,9 @@ METIS_PRODOTTO=Metis
 # Radice del vault.
 METIS_VAULT=~/Documents/Vault
 
+# Cartella dei documenti su disco (PDF, Word, fogli): accanto al vault, fuori da esso.
+METIS_FONTI=~/Documents/Fonti
+
 # Mappatura ruolo → cartella, relativa alla radice del vault. Vault nuovo: i valori sotto (PARA).
 # Vault esistente: la skill di installazione propone la mappatura sulle cartelle del cliente, senza spostare note.
 METIS_RUOLO_INBOX=0 - Inbox

@@ -93,6 +93,8 @@ while IFS= read -r f; do
   for e in "${ESCLUSI[@]}"; do [ -n "$e" ] && case "$f" in "$e"/*) salta=1 ;; esac; done
   [ "$salta" -eq 1 ] && continue
   case "$f" in */.obsidian/*|*/.trash/*) continue ;; esac
+  # File di istruzioni alla radice del vault: non sono note e non hanno frontmatter.
+  case "$f" in "$METIS_VAULT"/CLAUDE.md|"$METIS_VAULT"/CLAUDE.local.md) continue ;; esac
   if [ "$(head -1 "$f" 2>/dev/null)" != "---" ]; then INCOMPLETE="$INCOMPLETE; $(basename "$f" .md) (senza frontmatter)"; continue; fi
   FM=$(awk 'NR==1{next} $0=="---"{exit} {print}' "$f" 2>/dev/null)
   MANCA=""

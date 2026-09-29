@@ -56,6 +56,8 @@ check "hook: frontmatter del profilo tolto" '! printf "%s" "$H" | grep -q "^crea
 check "hook: onboarding proposto" 'printf "%s" "$H" | grep -q "Onboarding da completare"'
 check "hook: sunto del doctor" 'printf "%s" "$H" | grep -q "SALUTE DEL SISTEMA"'
 check "hook: stderr vuoto" '[ ! -s "$T/h1.err" ]'
+check "hook: CLAUDE.md non segnalato come nota senza frontmatter" '! printf "%s" "$H" | grep -q "CLAUDE (senza frontmatter)"'
+check "doctor: CLAUDE.md non segnalato" '! grep -q "CLAUDE (senza frontmatter)" "$V1/_Claude/doctor.md"'
 H2=$(echo "{\"cwd\":\"$T\",\"source\":\"startup\"}" | bash "$ROOT/hooks/session-orient.sh")
 check "hook fuori dal vault: nessun output" '[ -z "$H2" ]'
 H3=$(cd "$V1/_Claude/stati" && echo '{}' | CLAUDE_PROJECT_DIR="$V1" bash "$ROOT/hooks/session-orient.sh")
@@ -106,6 +108,16 @@ check "stderr del doctor vuoto" '[ ! -s "$T/d2.err" ]'
 config "$T/c2b" "$V2" "$M2" "METIS_RUOLO_CLAUDE=Sistema/Claude" "METIS_RUOLO_INBOX=00 Ingresso" "METIS_TAG_PREFISSI="
 METIS_CONFIG="$T/c2b" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
 check "controllo dei tag spento se METIS_TAG_PREFISSI è vuoto" 'grep -q "Controllo dei tag spento" "$V2/Sistema/Claude/doctor.md"'
+
+echo "4b. Memoria di Claude Code: vault dentro un repository git"
+mkdir -p "$T/repo/sotto/vault"; git -C "$T/repo" init -q
+printf 'METIS_VAULT=%s\n' "$T/repo/sotto/vault" > "$T/cg"
+MG=$(METIS_CONFIG="$T/cg" bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; echo "$METIS_MEMORY_DIR"' "$ROOT")
+ATTESA="$HOME/.claude/projects/$(cd "$T/repo" && pwd -P | sed 's/[^A-Za-z0-9]/-/g')/memory"
+check "memoria ricavata dalla radice del repository" '[ "$MG" = "$ATTESA" ]'
+printf 'METIS_VAULT=%s\n' "$V2" > "$T/cg2"
+MG2=$(METIS_CONFIG="$T/cg2" bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; echo "$METIS_MEMORY_DIR"' "$ROOT")
+check "memoria ricavata dal vault quando non c'è repository" '[ "$MG2" = "$HOME/.claude/projects/$(printf "%s" "$V2" | sed "s/[^A-Za-z0-9]/-/g")/memory" ]'
 
 echo "5. Configurazione: si legge, non si esegue"
 config "$T/c3" "$V1" "$M1" 'METIS_PRODOTTO=$(touch '"$T"'/eseguito)' 'rm -rf /tmp/non-esiste' 'PATH=/nulla'

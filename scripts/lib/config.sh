@@ -57,9 +57,15 @@ metis_carica_config() {
   export METIS_PRODOTTO="${METIS_PRODOTTO:-Metis}"
   export METIS_CL="$METIS_VAULT/$METIS_RUOLO_CLAUDE"
   # Memoria di Claude Code del vault: ~/.claude/projects/<percorso con ogni carattere non alfanumerico sostituito da «-»>/memory.
-  # La regola di conversione è ricavata da un'installazione reale e va riverificata a ogni versione di Claude Code:
-  # se non torna, la si fissa con METIS_MEMORY_DIR nella configurazione.
-  export METIS_MEMORY_DIR="${METIS_MEMORY_DIR:-$HOME/.claude/projects/$(printf '%s' "$METIS_VAULT" | sed 's/[^A-Za-z0-9]/-/g')/memory}"
+  # Il percorso è la radice del repository git che contiene il vault, se c'è; altrimenti il vault stesso
+  # (verificato con Claude Code 2.1.284 il 29/9/2026: con il vault dentro un repository la memoria segue la radice del repository).
+  # Regola ricavata dal comportamento osservato, da riverificare a ogni versione; se non torna, si fissa METIS_MEMORY_DIR.
+  if [ -z "${METIS_MEMORY_DIR:-}" ]; then
+    local base; base=$(git -C "$METIS_VAULT" rev-parse --show-toplevel 2>/dev/null) || base="$METIS_VAULT"
+    METIS_MEMORY_DIR="$HOME/.claude/projects/$(printf '%s' "$base" | sed 's/[^A-Za-z0-9]/-/g')/memory"
+  fi
+  export METIS_MEMORY_DIR
+  export METIS_FONTI="${METIS_FONTI:-$HOME/Documents/Fonti}"
   export METIS_INBOX_FONTI="${METIS_INBOX_FONTI:-Clippings files voicenotes}"
   export METIS_FRONTMATTER_CHIAVI="${METIS_FRONTMATTER_CHIAVI:-created_at tags up}"
   export METIS_TAG_PREFISSI="${METIS_TAG_PREFISSI-tipo argomento contenuto status}"

@@ -1,1 +1,5 @@
-prove/
+# Prove: vault, persone e documenti di prova restano fuori dal repository; entra solo il resoconto.
+prove/**
+!prove/*/
+!prove/*/resoconto.md
+!prove/*/claude-prova.sh
