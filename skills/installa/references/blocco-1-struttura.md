@@ -24,7 +24,7 @@ Poi `bash scripts/installa-struttura.sh crea`.
 
 1. `bash scripts/installa-struttura.sh albero "<vault>"`: l'albero fino a tre livelli con il numero di note. Non scrive niente.
 2. Claude propone la mappatura ruolo → cartella che esiste, con il metodo bozza e reazione: una tabella come quella sopra, con le cartelle del cliente. Esempi: una cartella «Clienti» fa da PROGETTI; una cartella di appunti in arrivo fa da INBOX; se non c'è un journal, si propone di crearlo.
-3. Il cliente corregge. I ruoli che non trovano una cartella si creano nuovi, con il nome che il cliente sceglie.
+3. Il cliente corregge. I ruoli che non trovano una cartella si creano nuovi, con il nome che il cliente sceglie, alla radice del vault o dove dice lui: **mai dentro la cartella di Claude**, che è la memoria operativa e resta fuori dai controlli sulle note (emerso dalla prova del 29/9, dove risorse e persone erano finite in `_Claude/`).
 4. Si scrive la mappatura: `bash scripts/configura.sh set METIS_RUOLO_<RUOLO> "<cartella relativa al vault>"`, una riga per ruolo.
 5. `bash scripts/installa-struttura.sh crea`: crea solo ciò che manca (cartella di Claude, sottocartelle dell'Inbox, cartella fonti).
 
