@@ -1,0 +1,7 @@
+{
+  "name": "metis-locale",
+  "owner": { "name": "Metis" },
+  "plugins": [
+    { "name": "metis", "source": "./", "description": "Memoria a tre livelli, onboarding e ciclo correzioni → regole per un vault Obsidian con Claude Code." }
+  ]
+}
