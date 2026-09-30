@@ -20,7 +20,7 @@ cat > "$T/claude-finto" <<'EOF'
 cat > /dev/null; echo "$*" >> "$(dirname "$0")/claude-args.txt"
 case "$*" in *stream-json*)   # evento di avvio con i connettori, come Claude Code 2.1.284
   S="${STATO_CONNETTORI:-connected}"
-  printf '{"type":"system","subtype":"init","mcp_servers":[{"name":"claude.ai Gmail","status":"%s"},{"name":"claude.ai Google Calendar","status":"%s"},{"name":"claude.ai Google Drive","status":"connected"}]}\n' "$S" "$S"
+  printf '{"type":"system","subtype":"init","mcp_servers":[{"name":"claude.ai Gmail","status":"%s"},{"name":"claude.ai Google Calendar","status":"%s"},{"name":"claude.ai Google Drive","status":"connected"},{"name":"claude.ai Microsoft 365","status":"%s"}],"tools":["Read","mcp__claude_ai_Microsoft_365__outlook_email_search","mcp__claude_ai_Microsoft_365__read_resource","mcp__claude_ai_Microsoft_365__outlook_calendar_search","mcp__claude_ai_Microsoft_365__send_email","mcp__claude_ai_Microsoft_365__create_event","mcp__claude_ai_Gmail__search_threads"]}\n' "$S" "$S" "${STATO_M365:-connected}"
   exit 0 ;; esac
 case "${ESITO_FINTO:-ok}" in
   ok) printf '{"result":"Digest scritto nella nota del giorno.\\nTre scadenze questa settimana.","is_error":false}' ;;
@@ -108,6 +108,16 @@ check "server dichiarato senza credenziali: controllo fallito" '! $G controlla >
 $G credenziali "$T/cred.json" >/dev/null
 check "server con credenziali e connettori: controllo superato" '$G controlla >/dev/null'
 rm "$T/home/.google-mcp/credentials.json"
+
+echo "4b. Modulo microsoft"
+MS="bash $ROOT/scripts/moduli/microsoft.sh"
+check "connettore Microsoft 365 collegato: controllo superato" '$MS controlla | grep -q "✅ connettore Microsoft 365"'
+check "connettore da autorizzare: controllo fallito" '! STATO_M365=needs-auth $MS controlla >/dev/null'
+$MS installa > "$T/ms.out"
+check "strumenti di lettura ammessi per nome" 'bash "$ROOT/scripts/configura.sh" get METIS_ROUTINE_STRUMENTI | grep -q "mcp__claude_ai_Microsoft_365__outlook_email_search"'
+check "invio ed eventi negati nelle routine" 'grep -q "mcp__claude_ai_Microsoft_365__send_email" "$T/cfg/permessi-routine.json" && grep -q "mcp__claude_ai_Microsoft_365__create_event" "$T/cfg/permessi-routine.json"'
+check "strumenti di altri connettori non toccati" '! grep -q "Gmail__search_threads" "$T/ms.out"'
+check "elenco da rileggere con il cliente stampato" 'grep -q "scrittura: mcp__claude_ai_Microsoft_365__send_email" "$T/ms.out"'
 
 echo "5. Il doctor controlla i moduli installati"
 bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1

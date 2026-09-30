@@ -8,6 +8,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 | `telegram` | riepiloghi sul telefono; ciò che il cliente manda al bot finisce nell'Inbox; conversazione con Claude dal telefono | `modulo-telegram.md` |
 | `voce` | un vocale mandato al bot diventa una nota trascritta | `modulo-telegram.md`, «Voce» |
 | `google` | posta, calendario e Drive con i connettori di claude.ai, anche nelle routine in sola lettura; server locale facoltativo | `modulo-google.md` |
+| `microsoft` | posta e calendario Outlook, OneDrive, SharePoint, Teams con il connettore Microsoft 365 di claude.ai, in sola lettura nelle routine | `procedura-m365.md` |
 | `routine` | doctor, digest del mattino e inbox-processor ad orari fissi | `modulo-routine.md` |
 
 ## MarkItDown
@@ -17,12 +18,8 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 
 **Controllo:** `bash scripts/moduli/markitdown.sh controlla` converte un documento Word creato al momento; poi, nella sessione nuova, si chiede a Claude di convertire un PDF della cartella fonti con lo strumento `convert_to_markdown`.
 
-## Microsoft 365 (servizio, fuori dalla v1)
+## Microsoft 365
 
-Nessun modulo: per posta e calendario Microsoft 365 non c'è un server provato. Nell'installazione si fa solo questo:
-1. si prepara per il cliente il testo per il suo reparto IT, da `procedura-m365.md`: registrazione di un'app in Entra in sola lettura, calendario pubblicato come ICS, regole sui dati dei clienti;
-2. nel frattempo il ripiego: le mail utili si salvano a mano nella cartella fonti, e l'inbox-processor le lavora da lì;
-3. si registra nello stato `installazione.md` un impegno `palla:loro` con la data di riesame e la decadenza, per la risposta dell'IT.
-L'integrazione vera è una giornata di consulenza.
+Modulo `microsoft`, sul modello di Google: il connettore Microsoft 365 di claude.ai (Outlook posta e calendario, OneDrive, SharePoint, Teams), disponibile su tutti i piani Claude con un account Microsoft 365 aziendale. Serve l'IT una volta, per il consenso: testo e passi in `procedura-m365.md`.
 
 WhatsApp è fuori dalla v1.

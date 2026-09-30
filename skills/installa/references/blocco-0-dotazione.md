@@ -19,7 +19,7 @@ Proposta dei moduli dalle risposte:
 |---|---|
 | documenti PDF o Word | `markitdown` |
 | Google | `google` |
-| Microsoft 365 | nessun modulo: procedura per l'IT (`references/moduli.md`, «Microsoft 365») |
+| Microsoft 365 aziendale | `microsoft` (connettore di claude.ai, con il consenso una tantum dell'IT: `procedura-m365.md`) |
 | Telegram | `telegram` (uscita; con i messaggi al bot in Inbox e la conversazione se li vuole) |
 | note vocali | `voce` (richiede `telegram`) |
 | Mac acceso di giorno | `routine` (doctor, digest del mattino, inbox) |

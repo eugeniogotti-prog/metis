@@ -1,7 +1,7 @@
 #!/bin/bash
 # verifica-dotazione.sh — blocco 0 dell'installazione: che cosa c'è sul Mac e che cosa manca per ciascun modulo.
 # Uso: verifica-dotazione.sh [modulo ...]     (senza argomenti: le fondamenta e tutti i moduli)
-# Moduli: fondamenta markitdown google telegram voce routine
+# Moduli: fondamenta markitdown google microsoft telegram voce routine
 # Uscita: una riga per requisito (✅ presente, ❌ manca, ⚠️ da guardare) e, in fondo, i moduli installabili.
 # Codice: 0 se tutti i requisiti dei moduli chiesti ci sono, 1 altrimenti. Non installa niente.
 
@@ -37,9 +37,11 @@ for m in $MODULI; do
       cmd "Homebrew" brew "https://brew.sh" ;;
     markitdown)
       cmd "uv" uv "brew install uv" ;;
+    microsoft)
+      riga "ℹ️" "connettore Microsoft 365" "si attiva da claude.ai → Impostazioni → Connettori; serve il consenso di un amministratore Entra e un account Microsoft 365 aziendale" ;;
     google)
-      cmd "node (npx)" npx "brew install node"
-      riga "ℹ️" "connettori claude.ai" "si attivano da claude.ai → Impostazioni → Connettori; non si verificano da qui" ;;
+      riga "ℹ️" "connettori claude.ai" "si attivano da claude.ai → Impostazioni → Connettori; il controllo è google.sh connettori"
+      command -v npx >/dev/null 2>&1 && riga "✅" "node (npx)" "per il server locale facoltativo" || riga "ℹ️" "node (npx)" "serve solo al server locale facoltativo: brew install node" ;;
     telegram)
       cmd "curl" curl "preinstallato su macOS"
       cmd "python3" python3 "xcode-select --install" ;;
