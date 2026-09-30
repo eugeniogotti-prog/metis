@@ -133,6 +133,28 @@ check "server dichiarato e server del cliente conservato" 'python3 -c "import js
 check "strumento consentito una volta sola" '[ "$(grep -c convert_to_markdown "$V/.claude/settings.json")" = 1 ]'
 check "modulo registrato nella configurazione" 'bash "$ROOT/scripts/configura.sh" get METIS_MODULI | grep -qw markitdown'
 
+echo "7b. Sessioni chiuse senza «chiudi sessione»"
+PR="$T/progetti"; export METIS_CLAUDE_PROJECTS="$PR"
+PD="$PR/$(cd "$V" && pwd -P | sed 's/[^A-Za-z0-9]/-/g')"; mkdir -p "$PD"
+IERI=$(date -v-1d +%F); VECCHIO=$(date -v-10d +%F)
+printf '%s\n' '{"type":"user","timestamp":"'"$IERI"'T09:00:00Z","message":{"content":"prepara la nota sul bando"}}' '{"type":"assistant","timestamp":"'"$IERI"'T09:00:05Z","message":{"content":[{"type":"text","text":"Nota scritta in Progetti."},{"type":"tool_use","name":"Write"}]}}' '{"type":"user","timestamp":"'"$IERI"'T09:01:00Z","message":{"content":"<system-reminder>interno</system-reminder>"}}' > "$PD/aaa-ieri.jsonl"
+touch -t "$(date -v-1d +%Y%m%d)1200" "$PD/aaa-ieri.jsonl"
+cp "$PD/aaa-ieri.jsonl" "$PD/bbb-vecchia.jsonl"; touch -t "$(date -v-10d +%Y%m%d)1200" "$PD/bbb-vecchia.jsonl"
+cp "$PD/aaa-ieri.jsonl" "$PD/ccc-corrente.jsonl"; touch -t "$(date -v-1d +%Y%m%d)1300" "$PD/ccc-corrente.jsonl"
+H=$(printf '{"cwd":"%s","source":"startup","session_id":"ccc-corrente"}' "$V" | bash "$ROOT/hooks/session-orient.sh")
+check "sessione di ieri senza log: segnalata con il comando per ricostruirla" 'printf "%s" "$H" | grep -q "Sessione del $IERI chiusa senza «chiudi sessione»" && printf "%s" "$H" | grep -q "aaa-ieri.jsonl"'
+check "sessione corrente esclusa" '! printf "%s" "$H" | grep -q "ccc-corrente.jsonl"'
+check "sessione più vecchia di sette giorni ignorata" '! printf "%s" "$H" | grep -q "bbb-vecchia"'
+echo "log" > "$V/_Claude/sessioni/$IERI.md"
+H=$(printf '{"cwd":"%s","source":"startup","session_id":"ccc-corrente"}' "$V" | bash "$ROOT/hooks/session-orient.sh")
+check "con il log del giorno: nessuna segnalazione" '! printf "%s" "$H" | grep -q "chiusa senza"'
+rm "$V/_Claude/sessioni/$IERI.md"
+TR=$(python3 "$ROOT/scripts/trascrizione.py" "$PD/aaa-ieri.jsonl" --giorno "$IERI")
+check "trascrizione leggibile: utente, Claude e strumenti, senza avvisi di sistema" 'printf "%s" "$TR" | grep -q "Utente: prepara la nota sul bando" && printf "%s" "$TR" | grep -q "Claude: Nota scritta" && printf "%s" "$TR" | grep -q "strumento: Write" && ! printf "%s" "$TR" | grep -q "interno"'
+check "trascrizione filtrata per giorno" '[ -z "$(python3 "$ROOT/scripts/trascrizione.py" "$PD/aaa-ieri.jsonl" --giorno "$VECCHIO")" ]'
+check "permesso per lo script di ricostruzione" 'grep -q "trascrizione.py" "$P"'
+unset METIS_CLAUDE_PROJECTS
+
 echo "8. Dotazione"
 check "verifica-dotazione: sintassi e modulo sconosciuto segnalato" '! bash "$ROOT/scripts/verifica-dotazione.sh" inesistente >/dev/null'
 

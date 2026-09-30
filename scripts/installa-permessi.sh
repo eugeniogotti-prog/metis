@@ -41,6 +41,8 @@ allow = [
     # messaggio sul telefono alla sola chat del cliente, lettura delle pagine dei link salvati nell'Inbox
     "Bash(mv *)", "Bash(cp *)", "Bash(rm *)", "Bash(find *)",
     "WebFetch",
+    # ricostruzione del log di una sessione non chiusa, dalla trascrizione che Claude Code tiene fuori dal vault
+    f"Bash(python3 {root}/scripts/trascrizione.py *)",
 ]
 if fonti:
     allow += [f"Read({ass(fonti)}/**)", f"Edit({ass(fonti)}/**)"]

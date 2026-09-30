@@ -83,6 +83,27 @@ if ls "$CL/sessioni/$MESEPREC"-*.md >/dev/null 2>&1; then
   SEGNALI=1
 fi
 
+# 5b. Sessioni chiuse senza «chiudi sessione»: trascrizioni di Claude Code degli ultimi 7 giorni (fuori dal vault,
+# in ~/.claude/projects/) il cui giorno non ha un log in sessioni/. La trascrizione non si copia: la si legge a richiesta.
+SESSIONE=$(printf '%s' "$INPUT" | sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+BASE="${METIS_CLAUDE_PROJECTS:-$HOME/.claude/projects}"
+NONCHIUSE=$(for d in "$DOVE" "$METIS_VAULT"; do
+    p=$(cd "$d" 2>/dev/null && pwd -P) || continue
+    printf '%s\n' "$BASE/$(printf '%s' "$p" | sed 's/[^A-Za-z0-9]/-/g')"
+  done | sort -u | while IFS= read -r dir; do
+    find "$dir" -maxdepth 1 -name '*.jsonl' -mtime -7 2>/dev/null
+  done | while IFS= read -r f; do
+    [ -n "$SESSIONE" ] && [ "$(basename "$f" .jsonl)" = "$SESSIONE" ] && continue
+    g=$(date -r "$(stat -f %m "$f")" '+%Y-%m-%d' 2>/dev/null)
+    [ -n "$g" ] && [ "$g" != "$OGGI" ] && [ ! -f "$CL/sessioni/$g.md" ] && printf '%s\t%s\n' "$g" "$f"
+  done | sort -r | head -3)
+if [ -n "$NONCHIUSE" ]; then
+  printf '%s\n' "$NONCHIUSE" | while IFS=$'\t' read -r g f; do
+    echo "- Sessione del $g chiusa senza «chiudi sessione» (manca sessioni/$g.md). Proporre di ricostruire il log: python3 \"$METIS_ROOT/scripts/trascrizione.py\" \"$f\" --giorno $g"
+  done
+  SEGNALI=1
+fi
+
 # 6. Impegni palla:me scaduti.
 if [ -d "$CL/stati" ]; then
   SCAD=$(grep -h -E '^- \[ \].*\| *[0-9]{4}-[0-9]{2}-[0-9]{2} *\| *palla:me' "$CL/stati/"*.md 2>/dev/null \

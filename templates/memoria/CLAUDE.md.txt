@@ -66,6 +66,7 @@ La memoria di Claude ha tre livelli. Il primo si carica a ogni avvio e ha un tet
 ## Inizio sessione
 
 - Se l'hook segnala note con frontmatter incompleto, sistemarle per prime.
+- Se l'orientamento segnala una sessione chiusa senza «chiudi sessione», proporre a {{Nome}} di ricostruirne il log: leggere la trascrizione con il comando indicato, scrivere `{{RUOLO_CLAUDE}}/sessioni/YYYY-MM-DD.md` con quello che si ricava (dichiarando che è una ricostruzione) e aggiornare gli stati dei lavori toccati. La trascrizione non si copia nel vault.
 - Se nei file del nucleo restano commenti o segnaposto da compilare, proporre di riprendere l'onboarding con la skill `onboarding`.
 
 ## Durante il lavoro
