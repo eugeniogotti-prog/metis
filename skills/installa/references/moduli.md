@@ -7,7 +7,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 | `markitdown` | Claude legge PDF, Word, Excel e PowerPoint della cartella fonti | qui sotto |
 | `telegram` | riepiloghi sul telefono; ciò che il cliente manda al bot finisce nell'Inbox; conversazione con Claude dal telefono | `modulo-telegram.md` |
 | `voce` | un vocale mandato al bot diventa una nota trascritta | `modulo-telegram.md`, «Voce» |
-| `google` | posta, calendario e Drive; server locale per le routine automatiche | `modulo-google.md` |
+| `google` | posta, calendario e Drive con i connettori di claude.ai, anche nelle routine in sola lettura; server locale facoltativo | `modulo-google.md` |
 | `routine` | doctor, digest del mattino e inbox-processor ad orari fissi | `modulo-routine.md` |
 
 ## MarkItDown

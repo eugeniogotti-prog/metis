@@ -1,17 +1,20 @@
 #!/bin/bash
 # google.sh — modulo Google: posta, calendario e Drive.
-# Due strade, che si completano:
-#   - connettori di claude.ai (Gmail, Google Calendar, Google Drive) per le sessioni con il cliente: nessuna
-#     installazione sul Mac, il cliente li attiva su claude.ai → Impostazioni → Connettori;
-#   - server locale google-workspace-mcp per le routine automatiche, in sola lettura: non dipende dal login di
-#     claude.ai e non può mandare niente. Richiede un progetto Google Cloud del cliente (credenziali OAuth).
+# Strada principale (decisione del 30/9/2026): i connettori di claude.ai (Gmail, Google Calendar, Google Drive), per
+# le sessioni con il cliente e per le routine. Nessuna installazione sul Mac: il cliente li attiva su claude.ai →
+# Impostazioni → Connettori. Nelle routine si ammettono per nome solo gli strumenti di lettura e si negano quelli che
+# scrivono (invii, risposte, cestino, eventi, condivisioni, bozze): un giro automatico legge e basta.
+# Rischio noto: i connettori nelle routine funzionano finché il login di Claude Code con l'abbonamento resta valido;
+# il controllo, eseguito ogni mattina dal doctor, se ne accorge.
+# Strada facoltativa, da provare con l'account vero del cliente prima di usarla: il server locale google-workspace-mcp,
+# in sola lettura, con un progetto Google Cloud del cliente (sottocomandi credenziali, account, server).
 # Uso:
-#   google.sh connettori          controlla quali connettori claude.ai vede una sessione di Claude Code nel vault
-#   google.sh credenziali <file>  copia il file delle credenziali OAuth scaricato da Google Cloud (600)
-#   google.sh account             avvia l'autorizzazione dell'account nel browser (la fa il cliente)
-#   google.sh routine             dichiara il server locale, in sola lettura, nella configurazione MCP delle routine
-#   google.sh controlla           credenziali, account autorizzato, server pronto, configurazione delle routine
-# Versione del server fissata: gli aggiornamenti del pacchetto si provano prima di cambiarla.
+#   google.sh installa            regole delle routine per i connettori; modulo registrato
+#   google.sh connettori          quali connettori vede una sessione di Claude Code nel vault
+#   google.sh controlla           connettori collegati (e server locale, se dichiarato)
+#   google.sh credenziali <file>  [server locale] copia le credenziali OAuth scaricate da Google Cloud (600)
+#   google.sh account             [server locale] autorizzazione dell'account nel browser (la fa il cliente)
+#   google.sh server              [server locale] dichiara il server, in sola lettura, per le routine
 
 set -uo pipefail
 METIS_ROOT="${METIS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -26,7 +29,18 @@ CLAUDE="${METIS_CLAUDE:-claude}"
 MCP_ROUTINE="$CFG_DIR/mcp-routine.json"
 IMP="$METIS_ROOT/scripts/lib/impostazioni.py"
 
+# Strumenti dei connettori di claude.ai (nomi letti il 30/9/2026 dall'elenco degli strumenti di Claude Code).
+LEGGE="mcp__claude_ai_Gmail__search_threads mcp__claude_ai_Gmail__get_thread mcp__claude_ai_Gmail__get_message mcp__claude_ai_Gmail__list_labels mcp__claude_ai_Google_Calendar__list_calendars mcp__claude_ai_Google_Calendar__list_events mcp__claude_ai_Google_Calendar__get_event mcp__claude_ai_Google_Calendar__search_events mcp__claude_ai_Google_Drive__search_files mcp__claude_ai_Google_Drive__read_file_content mcp__claude_ai_Google_Drive__get_file_metadata mcp__claude_ai_Google_Drive__list_recent_files mcp__claude_ai_Google_Drive__download_file_content"
+SCRIVE="mcp__claude_ai_Gmail__send_message mcp__claude_ai_Gmail__reply mcp__claude_ai_Gmail__forward mcp__claude_ai_Gmail__create_draft mcp__claude_ai_Gmail__update_draft mcp__claude_ai_Gmail__delete_draft mcp__claude_ai_Gmail__trash_message mcp__claude_ai_Gmail__trash_thread mcp__claude_ai_Gmail__mark_message_spam mcp__claude_ai_Gmail__mark_thread_spam mcp__claude_ai_Google_Calendar__create_event mcp__claude_ai_Google_Calendar__update_event mcp__claude_ai_Google_Calendar__delete_event mcp__claude_ai_Google_Calendar__respond_to_event mcp__claude_ai_Google_Drive__create_file mcp__claude_ai_Google_Drive__update_file mcp__claude_ai_Google_Drive__copy_file mcp__claude_ai_Google_Drive__trash_file mcp__claude_ai_Google_Drive__share_file"
+R="$CFG_DIR/permessi-routine.json"
+
 case "${1:-}" in
+  installa)
+    for t in $SCRIVE; do python3 "$IMP" lista "$R" permissions.deny "$t" >/dev/null; done
+    for t in $LEGGE; do bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_ROUTINE_STRUMENTI "$t" >/dev/null; done
+    bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI google
+    echo "google: routine con i connettori di claude.ai in sola lettura ($(echo $LEGGE | wc -w | tr -d ' ') strumenti ammessi, $(echo $SCRIVE | wc -w | tr -d ' ') negati)"
+    echo "google: controllo → google.sh connettori (i connettori si attivano su claude.ai → Impostazioni → Connettori)" ;;
   connettori)
     # Una sessione minima nel vault; l'evento di avvio (stream-json) elenca i server MCP e il loro stato.
     OUT=$(cd "$METIS_VAULT" && printf 'Rispondi solo: ok' | "$CLAUDE" -p --output-format stream-json --verbose 2>/dev/null | head -5)
@@ -64,25 +78,22 @@ PY
     [ -f "$GDIR/credentials.json" ] || { echo "google: prima le credenziali (google.sh credenziali <file>)" >&2; exit 1; }
     echo "google: si apre il browser; accedi con il tuo account Google e consenti l'accesso." >&2
     "$NPX" -y "$PACCHETTO" accounts add principale ;;
-  routine)
+  server)
     [ -n "$NPX" ] || { echo "google: manca node (brew install node)" >&2; exit 1; }
     python3 "$IMP" mcp "$MCP_ROUTINE" google "{\"type\":\"stdio\",\"command\":\"$NPX\",\"args\":[\"-y\",\"$PACCHETTO\",\"serve\",\"--read-only\"],\"env\":{}}"
     chmod 600 "$MCP_ROUTINE"
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_ROUTINE_STRUMENTI "mcp__google"
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI google
-    echo "google: server locale in sola lettura dichiarato per le routine ($MCP_ROUTINE)" ;;
+    echo "google: server locale in sola lettura dichiarato per le routine ($MCP_ROUTINE); da provare con l'account del cliente" ;;
   controlla)
     ERR=0
-    [ "$(stat -f %Lp "$GDIR/credentials.json" 2>/dev/null)" = 600 ] && echo "✅ credenziali OAuth presenti e protette" || { echo "❌ credenziali OAuth assenti o leggibili da altri ($GDIR/credentials.json)"; ERR=1; }
-    if [ "$ERR" = 0 ]; then
-      # «status» esce con 0 anche quando trova problemi (versione 2.3.6): si legge il testo.
-      S=$("$NPX" -y "$PACCHETTO" status 2>&1)
-      if printf '%s' "$S" | grep -qE 'issue\(s\) found|NOT found|No accounts'; then
-        echo "❌ server locale non pronto: $(printf '%s' "$S" | grep -E '❌|⚠️' | tr '\n' ' ')"; ERR=1
+    bash "$0" connettori || ERR=1
+    if grep -q '"google"' "$MCP_ROUTINE" 2>/dev/null; then   # server locale facoltativo: si controlla solo se dichiarato
+      [ "$(stat -f %Lp "$GDIR/credentials.json" 2>/dev/null)" = 600 ] && echo "✅ server locale: credenziali OAuth presenti e protette" || { echo "❌ server locale: credenziali OAuth assenti o leggibili da altri ($GDIR/credentials.json)"; ERR=1; }
+      S=$("$NPX" -y "$PACCHETTO" status 2>&1)   # «status» esce con 0 anche quando trova problemi: si legge il testo
+      if printf '%s' "$S" | grep -qE 'issue\(s\) found|NOT found|No accounts'; then echo "❌ server locale non pronto: $(printf '%s' "$S" | grep -E '❌|⚠️' | tr '\n' ' ')"; ERR=1
       else echo "✅ server locale pronto"; fi
-      "$NPX" -y "$PACCHETTO" accounts test-permissions >/dev/null 2>&1 && echo "✅ account autorizzato: permessi verificati" || { echo "❌ account non autorizzato o permessi mancanti (google.sh account)"; ERR=1; }
     fi
-    grep -q '"google"' "$MCP_ROUTINE" 2>/dev/null && grep -q -- '--read-only' "$MCP_ROUTINE" && echo "✅ routine: server in sola lettura dichiarato" || { echo "❌ routine: server non dichiarato (google.sh routine)"; ERR=1; }
     exit "$ERR" ;;
   *) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac
