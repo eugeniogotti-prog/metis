@@ -78,7 +78,7 @@ La memoria di Claude ha tre livelli. Il primo si carica a ogni avvio e ha un tet
 
 ## Chiusura sessione
 
-In ordine, secondo `{{RUOLO_CLAUDE}}/routine-fine-sessione.md`:
+Quando {{Nome}} scrive **«chiudi sessione»** (prima di uscire da Claude Code con `/exit`), e alla fine di ogni lavoro sostanziale, si esegue la chiusura. Uscire senza chiudere lascia fuori dal vault ciò che non è già scritto nei file. In ordine, secondo `{{RUOLO_CLAUDE}}/routine-fine-sessione.md` (se manca, i passi qui sotto):
 1. log in `{{RUOLO_CLAUDE}}/sessioni/YYYY-MM-DD.md`, con una sezione «Decisioni e ragionamento»;
 2. stato e impegni di ogni lavoro toccato;
 3. note delle persone con cui si è interagito direttamente;

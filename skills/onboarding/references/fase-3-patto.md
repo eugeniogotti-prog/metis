@@ -29,6 +29,10 @@ Quando riceve il gesto, Claude:
 3. rifà il lavoro applicando la regola;
 4. dice in una riga dove l'ha scritta.
 
+## 2b. Il gesto di chiusura
+
+Il secondo gesto da insegnare, in una riga: **prima di uscire da Claude Code con `/exit`, scrivere «chiudi sessione»**. Claude scrive il log della sessione, aggiorna gli stati dei lavori toccati, le persone e lo stato attuale. Chi esce senza chiudere perde ciò che non è già nei file: il mattino dopo il doctor lo segnala («ieri sono state toccate N note ma manca il log di sessione»).
+
 ## 3. La prima correzione, dal vivo
 
 Si chiede al cliente di scegliere un output della giornata (la prova della fase 1, lo stato della fase 2, un testo nuovo) e di correggerlo con il gesto. Claude esegue i quattro passi sopra. Se il cliente corregge a mano, glielo si fa notare con garbo e si ripete il gesto sulla stessa correzione.
