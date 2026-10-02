@@ -65,13 +65,21 @@ check "hook senza cwd nel JSON: usa CLAUDE_PROJECT_DIR" 'printf "%s" "$H3" | gre
 
 echo "1b. Onboarding finito: tolti i marcatori COMPILARE, nessun avviso"
 cp -R "$V1" "$T/vault-finito"; VF="$T/vault-finito"
-perl -0pi -e 's/<!-- COMPILARE.*?-->//gs; s/\{\{COMPILARE:[^}]*\}\}/temi/g' "$VF/CLAUDE.md" "$VF/_Claude/profilo-nucleo.md" "$VF/_Claude/profilo-completo.md"
+perl -0pi -e 's/<!-- COMPILARE.*?-->//gs; s/\{\{COMPILARE:[^}]*\}\}/temi/g; s/ ?\[da confermare\]//g' "$VF/CLAUDE.md" "$VF/_Claude/profilo-nucleo.md" "$VF/_Claude/profilo-completo.md"
 config "$T/cf" "$VF" "$M1"
 METIS_CONFIG="$T/cf" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
 check "doctor: profilo compilato" 'grep -q "Profilo e CLAUDE.md compilati" "$VF/_Claude/doctor.md"'
 HF=$(echo "{\"cwd\":\"$VF\"}" | METIS_CONFIG="$T/cf" bash "$ROOT/hooks/session-orient.sh")
 check "hook: nessun invito all'onboarding" '! printf "%s" "$HF" | grep -q "Onboarding da completare"'
 export METIS_CONFIG="$T/c1"
+
+echo "1c. Profilo di partenza: COMPILARE tolti ma regole ancora [da confermare]"
+cp -R "$V1" "$T/vault-partenza"; VP="$T/vault-partenza"
+perl -0pi -e 's/<!-- COMPILARE.*?-->//gs; s/\{\{COMPILARE:[^}]*\}\}/temi/g' "$VP/CLAUDE.md" "$VP/_Claude/profilo-nucleo.md" "$VP/_Claude/profilo-completo.md"
+config "$T/cp" "$VP" "$M1"
+METIS_CONFIG="$T/cp" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
+check "doctor: regole da confermare segnalate" 'grep -q "regole \[da confermare\]" "$VP/_Claude/doctor.md"'
+check "nucleo installato: sezione Onestà epistemica attiva" 'grep -q "^## Onestà epistemica" "$VP/_Claude/profilo-nucleo.md" && ! sed -n "/^## Onestà epistemica/,/^## /p" "$VP/_Claude/profilo-nucleo.md" | grep -q "da confermare"'
 
 echo "2. Inizio mese: un caso del mese scorso ancora in correzioni.md"
 MP=$(date -v-1m +%Y-%m)

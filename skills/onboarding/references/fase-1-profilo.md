@@ -49,6 +49,8 @@ Una regola entra nella bozza se si vede in almeno due documenti, o in una coppia
 
 ## 4. Le domande che i documenti non risolvono
 
+**Il profilo di partenza.** Il nucleo installato contiene già, marcate «[da confermare]», le proposte per Forme da evitare, Tono, In chat, Come lavoro con te, Sintesi per un esperto, Testi a mio nome e «Verso chi riceve il lavoro»: vengono dal profilo di un professionista che lavora con Claude da mesi (decisione del 2/10/2026). La sezione «Onestà epistemica» è del pacchetto e non si tocca: il cliente può aggiungere regole, non toglierle. Per le domande qui sotto la proposta è quella già scritta nel nucleo; Claude la confronta con i documenti letti e dice se la confermano, se la contraddicono (e propone la variante) o se non dicono nulla. Il rischio da evitare è il «sì» a blocco: la regola ereditata si presenta una per volta, con l'esempio, e se il cliente esita si toglie.
+
 Ogni domanda con la sua proposta; dove ci sono due strade, due opzioni e una raccomandazione.
 - **Chi è** (nucleo e sezione 1): mestiere, domini in cui ne sa più delle fonti, per chi lavora (per categoria, senza nomi), attività personali che Claude potrebbe incontrare nel vault. Proposta: tre righe ricavate dai documenti.
 - **Lingua**: parole che non vuole, come trattare le citazioni in lingua straniera. Proposta dai documenti.
@@ -64,7 +66,7 @@ Ogni domanda con la sua proposta; dove ci sono due strade, due opzioni e una rac
 
 ## 5. Le forme tipiche da proporre
 
-Queste forme ricorrono nelle correzioni da cui nasce il pacchetto. Si propongono una per una, con l'esempio, e si tengono solo quelle in cui il cliente si riconosce. Se i documenti mostrano già la forma, o mostrano che il cliente la usa, lo si dice.
+Queste forme ricorrono nelle correzioni da cui nasce il pacchetto. Le prime sei sono già nel nucleo come «[da confermare]»; la settima, se il cliente la tiene, va in «Lingua». Si propongono una per una, con l'esempio, e si tengono solo quelle in cui il cliente si riconosce. Se i documenti mostrano già la forma, o mostrano che il cliente la usa, lo si dice.
 
 1. **Negazione seguita dall'affermazione**: «Non è una richiesta: è un atto dovuto» → «È un atto dovuto». Anche con la negazione in coda: «previsto come opzione, non come requisito» → «previsto come opzione».
 2. **Avverbi e aggettivi di rinforzo**: «risultati davvero notevoli» → «risultati notevoli».
@@ -84,9 +86,11 @@ Ogni sezione dei due modelli ha una fonte. Prima di presentare la bozza si contr
 |---|---|
 | nucleo: Chi sono, Lingua | documenti + punto 4 |
 | nucleo: Forme da evitare | documenti (coppie) + punto 5 |
-| nucleo: Tono | punto 4, «Tono verso di sé» |
-| nucleo: In chat, Come lavoro con te | punto 4 |
-| nucleo: Testi a mio nome | documenti |
+| nucleo: Onestà epistemica | già scritta nel modello (regole del pacchetto); si aggiunge ciò che emerge |
+| nucleo: Tono | profilo di partenza + punto 4, «Tono verso di sé» |
+| nucleo: In chat, Come lavoro con te, Sintesi per un esperto | profilo di partenza + punto 4 |
+| nucleo: Testi a mio nome | documenti (persona grammaticale) + profilo di partenza |
+| nucleo: Verso chi riceve il lavoro | profilo di partenza; si chiede se il cliente lavora per committenti, enti o superiori, altrimenti si cancella |
 | nucleo: Registri specifici | un rimando per ogni sottosezione compilata della sezione 5 della pagina completa |
 | completa 1-2 (Chi sono, Come parlarmi, Sintesi per un esperto) | documenti + punto 4; «Forme da evitare» dal punto 5 |
 | completa 3 (Come verificare nel mio campo) | documenti (come cita le fonti) + fase 2 |
@@ -99,10 +103,10 @@ Una sezione che non serve si cancella intera, e il log dello stato dice quale e 
 
 ## 7. La bozza e la reazione
 
-1. Si scrive la bozza completa del nucleo e della pagina completa. Le regole ricavate dai documenti sono affermazioni; le proposte del punto 4 sono marcate «[da confermare]».
+1. Si scrive la bozza completa del nucleo e della pagina completa, partendo dal nucleo installato. Le regole ricavate dai documenti sono affermazioni; le proposte del profilo di partenza e del punto 4 restano marcate «[da confermare]». Una regola di partenza che i documenti contraddicono si riscrive nella forma del cliente, sempre marcata.
 2. Si presentano al cliente prima le regole ricavate dai documenti, a blocchi, poi le domande singole, non più di dodici per sessione. In chat va il blocco, breve; il file intero è a disposizione se lo vuole leggere.
 3. Si recepisce ogni correzione nella forma in cui il cliente la dà. Se il cliente dice che una regola non gli appartiene, la regola si toglie senza difenderla.
-4. A sezione confermata: si scrive nel file, si cancella il suo commento `COMPILARE` e ogni «[da confermare]», si passa alla successiva.
+4. A sezione confermata: si scrive nel file, si cancella il suo commento `COMPILARE` e ogni «[da confermare]», si passa alla successiva. Una regola di partenza che il cliente non riconosce si cancella, senza difenderla; la sezione può restare vuota, e allora si cancella intera.
 
 **Che cosa va nel nucleo e che cosa nella pagina completa.** Nel nucleo le regole che valgono in ogni testo e in ogni risposta. Nella pagina completa gli esempi estesi, i registri per tipo di documento, le distinzioni del dominio, gli errori che il cliente cerca quando rivede.
 

@@ -75,7 +75,7 @@ fi
 # --- Onboarding ---
 sec "Onboarding"
 NCOMP=$(metis_compilare_residui)
-if [ "${NCOMP:-0}" -gt 0 ]; then add warn "Onboarding non finito: $NCOMP punti COMPILARE nel profilo o in CLAUDE.md (skill onboarding)"
+if [ "${NCOMP:-0}" -gt 0 ]; then add warn "Onboarding non finito: $NCOMP punti da compilare o regole [da confermare] nel profilo o in CLAUDE.md (skill onboarding)"
 else add ok "Profilo e CLAUDE.md compilati"; fi
 
 # --- Operazioni di inizio mese (dal giorno 4) ---

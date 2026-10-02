@@ -67,7 +67,7 @@ SEGNALI=0
 # 4. Onboarding non finito.
 NCOMP=$(metis_compilare_residui)
 if [ "${NCOMP:-0}" -gt 0 ]; then
-  echo "- Onboarding da completare: $NCOMP punti COMPILARE nel profilo o in CLAUDE.md. Proporre di riprenderlo con la skill onboarding."
+  echo "- Onboarding da completare: $NCOMP punti da compilare o regole [da confermare] nel profilo o in CLAUDE.md. Proporre di riprenderlo con la skill onboarding."
   SEGNALI=1
 fi
 

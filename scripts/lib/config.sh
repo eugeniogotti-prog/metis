@@ -128,10 +128,11 @@ metis_misura() {
   [ -n "$f" ] && [ -f "$f" ] && wc -m < "$f" | tr -d ' '
 }
 
-# Segnaposto COMPILARE rimasti nei file che l'onboarding deve riempire.
+# Segnaposto COMPILARE e regole da confermare rimasti nei file che l'onboarding deve riempire.
 # Contano solo i due marcatori («<!-- COMPILARE» e «{{COMPILARE»): la parola nuda compare anche nella prosa dei modelli.
+# Contano anche le regole del profilo di partenza ancora «[da confermare]» (decisione del 2/10/2026).
 metis_compilare_residui() {
-  cat "$METIS_VAULT/CLAUDE.md" "$METIS_CL/profilo-nucleo.md" "$METIS_CL/profilo-completo.md" 2>/dev/null | grep -oE '<!-- COMPILARE|\{\{COMPILARE' | wc -l | tr -d ' '
+  cat "$METIS_VAULT/CLAUDE.md" "$METIS_CL/profilo-nucleo.md" "$METIS_CL/profilo-completo.md" 2>/dev/null | grep -oE '<!-- COMPILARE|\{\{COMPILARE|\[da confermare\]' | wc -l | tr -d ' '
 }
 
 # Guardia su Obsidian: il binario `obsidian` è l'app, e ad app chiusa la invocazione la avvia e non ritorna.
