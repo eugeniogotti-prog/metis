@@ -46,6 +46,11 @@ bash "$ROOT/scripts/installa-modelli.sh" "$MOD" "Anna Rossi" >/dev/null 2>"$T/im
 check "modelli installati senza errori" '[ ! -s "$T/im.err" ] && [ -f "$V/_Claude/profilo-nucleo.md" ]'
 check "cartella riservata presente in CLAUDE.md" 'grep -q "_Privato/" "$V/CLAUDE.md"'
 check "modello di stato copiato" '[ -f "$V/_Claude/stati/_template-stato.md" ]'
+mkdir -p "$T/schede"; printf -- '---\ncreated_at: 2026-10-02\n---\n# Prova {{non toccare}}\n' > "$T/schede/materia-prova.md.txt"
+bash "$ROOT/scripts/installa-modelli.sh" "$MOD" "Anna Rossi" "$T/schede" >"$T/sc.out" 2>&1
+check "schede di partenza copiate in dominio/, senza sostituzioni" 'grep -q "{{non toccare}}" "$V/_Claude/dominio/materia-prova.md" && grep -q "1 schede" "$T/sc.out"'
+bash "$ROOT/scripts/installa-modelli.sh" "$MOD" "Anna Rossi" "$T/schede" >"$T/sc2.out" 2>&1
+check "schede di partenza: rilancio senza sovrascrivere" 'grep -q "0 schede" "$T/sc2.out"'
 V3="$T/vault-con-claude"; mkdir -p "$V3"; echo "# Le mie regole" > "$V3/CLAUDE.md"
 printf 'METIS_VAULT=%s\nMETIS_MEMORY_DIR=%s/mem3\n' "$V3" "$T" > "$T/c3"
 METIS_CONFIG="$T/c3" bash "$ROOT/scripts/installa-modelli.sh" "$MOD" "Anna Rossi" >/dev/null 2>&1

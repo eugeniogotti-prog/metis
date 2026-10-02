@@ -2,7 +2,9 @@
 # installa-modelli.sh — copia i modelli della memoria in un vault e sostituisce i segnaposto d'installazione.
 # È il cuore del blocco «memoria e regole» dell'installazione; la skill di installazione lo chiamerà.
 #
-# Uso: METIS_CONFIG=<config> bash installa-modelli.sh <cartella dei modelli> "<Nome del cliente>"
+# Uso: METIS_CONFIG=<config> bash installa-modelli.sh <cartella dei modelli> "<Nome del cliente>" [<cartella delle schede di partenza>]
+#   <cartella delle schede di partenza>: facoltativa, file <materia>.md.txt preparati dal consulente per questo cliente;
+#   si copiano in dominio/ così come sono (decisione del 2/10/2026).
 #   <cartella dei modelli> contiene CLAUDE.md.txt, _Claude/*.md.txt, memory/MEMORY.md.txt
 #   (fino alla migrazione nel repository i modelli stanno nel kit).
 #
@@ -16,6 +18,7 @@ source "$METIS_ROOT/scripts/lib/config.sh"
 MOD="${1:?uso: installa-modelli.sh <cartella dei modelli> \"<Nome del cliente>\"}"
 case "$MOD" in /*) ;; *) [ -d "$MOD" ] || MOD="$METIS_ROOT/$MOD" ;; esac   # percorso relativo: prima la cartella corrente, poi il plugin
 NOME="${2:?manca il nome del cliente}"
+SCHEDE="${3:-}"
 metis_carica_config || { echo "installa-modelli: ${METIS_ERRORE}" >&2; exit 2; }
 [ -f "$MOD/CLAUDE.md.txt" ] || { echo "installa-modelli: modelli non trovati in $MOD" >&2; exit 2; }
 
@@ -44,6 +47,17 @@ else
   copia "$MOD/CLAUDE.md.txt" "$METIS_VAULT/CLAUDE.md"
 fi
 copia "$MOD/memory/MEMORY.md.txt" "$METIS_MEMORY_DIR/MEMORY.md"
+
+# Schede di dominio di partenza: si copiano senza sostituzioni, non contano fra i file del modello.
+if [ -n "$SCHEDE" ]; then
+  [ -d "$SCHEDE" ] || { echo "installa-modelli: cartella delle schede non trovata: $SCHEDE" >&2; exit 2; }
+  NS=0
+  for f in "$SCHEDE"/*.md.txt; do
+    [ -f "$f" ] || continue; d="$CL/dominio/$(basename "$f" .txt)"
+    if [ -e "$d" ]; then echo "già presente, lasciato com'è: $d"; else cp "$f" "$d" && NS=$((NS+1)); fi
+  done
+  echo "installa-modelli: $NS schede di dominio di partenza copiate in $CL/dominio"
+fi
 
 if [ "${#COPIATI[@]}" -eq 0 ]; then echo "installa-modelli: nessun file nuovo, vault già installato"; exit 0; fi
 
