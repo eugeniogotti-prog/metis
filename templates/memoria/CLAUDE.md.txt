@@ -67,6 +67,7 @@ La memoria di Claude ha tre livelli. Il primo si carica a ogni avvio e ha un tet
 
 - Se l'hook segnala note con frontmatter incompleto, sistemarle per prime.
 - Se l'orientamento segnala una sessione chiusa senza «chiudi sessione», proporre a {{Nome}} di ricostruirne il log: leggere la trascrizione con il comando indicato, scrivere `{{RUOLO_CLAUDE}}/sessioni/YYYY-MM-DD.md` con quello che si ricava (dichiarando che è una ricostruzione) e aggiornare gli stati dei lavori toccati. La trascrizione non si copia nel vault.
+- Se il doctor segnala attese oltre la data di decadenza, chiuderle come `[x] ⊘ decaduta (auto YYYY-MM-DD)` (skill `impegni`): non si chiede, la resurrezione costa una parola di {{Nome}}.
 - Se nei file del nucleo restano commenti o segnaposto da compilare, proporre di riprendere l'onboarding con la skill `onboarding`.
 
 ## Durante il lavoro
@@ -93,6 +94,7 @@ Quando {{Nome}} scrive **«chiudi sessione»** (prima di uscire da Claude Code c
 - Distillare i casi del mese chiuso in `regole-di-metodo.md` o nel profilo, poi spostarli in `{{RUOLO_CLAUDE}}/archivio/correzioni-YYYY-MM.md`. Il caso si archivia, la regola resta.
 - Compattare i log di sessione del mese chiuso in `{{RUOLO_CLAUDE}}/sessioni/archivio/YYYY-MM.md`.
 - Rientrare nei tetti che il doctor segnala.
+- Rastrello degli impegni (skill `impegni`): un solo elenco dei `palla:me` superati dai fatti, che {{Nome}} falcia in una riga.
 - Proporre a {{Nome}}, in un solo elenco, i lavori fermi da archiviare (skill `archiviazione`, «Il controllo mensile»).
 
 ## Convenzioni

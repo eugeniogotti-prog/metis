@@ -39,6 +39,7 @@ bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; shift; python3 
 ### 1. Distillare (il passo che non si salta)
 Rispondere a: *che cosa sa il vault, grazie a questo lavoro, che domani servirà altrove?*
 - conoscenza di merito (norme, dati, prassi di un ente o di un cliente) → la scheda di `dominio/` pertinente, con il grado di verifica, la fonte e la data;
+- il perché e le lezioni di metodo che valgono per tutti i lavori → `carta-del-perche.md` nella cartella di Claude (si crea al primo distillato; vedi la skill `definizione-obiettivi`);
 - una regola di metodo nata da una correzione → verificare che sia già in `regole-di-metodo.md` o nel profilo; non duplicarla;
 - documenti definitivi utili oltre il caso → segnalarli al cliente, che decide dove tenerli.
 

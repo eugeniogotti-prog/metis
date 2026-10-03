@@ -46,6 +46,8 @@ bash "$ROOT/scripts/installa-modelli.sh" "$MOD" "Anna Rossi" >/dev/null 2>"$T/im
 check "modelli installati senza errori" '[ ! -s "$T/im.err" ] && [ -f "$V/_Claude/profilo-nucleo.md" ]'
 check "cartella riservata presente in CLAUDE.md" 'grep -q "_Privato/" "$V/CLAUDE.md"'
 check "modello di stato copiato" '[ -f "$V/_Claude/stati/_template-stato.md" ]'
+check "modelli nuovi: decisioni, routine di fine sessione, protocollo" '[ -f "$V/_Claude/decisioni.md" ] && [ -f "$V/_Claude/routine-fine-sessione.md" ] && grep -q "Persone\|Contatti\|Risorse" "$V/_Claude/protocollo-propagazione.md" && ! grep -q "{{" "$V/_Claude/protocollo-propagazione.md"'
+check "modelli delle note nella cartella dei template, Templater intatto" 'T_="$V/_Extras/_Templates"; [ -f "$T_/daily-template.md" ] && grep -q "<% tp.file.title %>" "$T_/daily-template.md" && grep -q "\[\[Journal\]\]" "$T_/weekly-template.md"'
 mkdir -p "$T/schede"; printf -- '---\ncreated_at: 2026-10-02\n---\n# Prova {{non toccare}}\n' > "$T/schede/materia-prova.md.txt"
 bash "$ROOT/scripts/installa-modelli.sh" "$MOD" "Anna Rossi" "$T/schede" >"$T/sc.out" 2>&1
 check "schede di partenza copiate in dominio/, senza sostituzioni" 'grep -q "{{non toccare}}" "$V/_Claude/dominio/materia-prova.md" && grep -q "1 schede" "$T/sc.out"'

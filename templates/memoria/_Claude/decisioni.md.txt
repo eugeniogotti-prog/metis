@@ -1,0 +1,24 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+updated_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/indice
+up:
+- '[[_Claude]]'
+---
+
+# Decisioni
+
+Le decisioni sul vault, sul metodo e sui lavori, con il loro perché. Claude legge questo file per **non riproporre alternative già scartate** e per capire perché le cose sono come sono. **Solo in coda:** una decisione che cambia si registra come riga nuova che rimanda alla vecchia; le righe esistenti non si riscrivono.
+
+Le prime righe sono le scelte d'impianto che {{PRODOTTO}} porta con sé, datate all'installazione: si possono cambiare, con una riga nuova.
+
+| Data | Decisione | Perché | Alternative scartate |
+|------|-----------|--------|---------------------|
+| {{YYYY-MM-DD}} | Tag sempre con un prefisso (`tipo/`, `argomento/`, `contenuto/`, `status/`) | Evita collisioni e ambiguità; permette di navigare per famiglie | Tag piatti senza prefisso (si confondono e non scalano) |
+| {{YYYY-MM-DD}} | Una sola sezione `## Impegni` per stato, dopo «Dove siamo» | Un impegno vive se sta in un posto solo, dove qualcuno lo rilegge | Impegni sparsi nelle voci datate (producono doppioni e chiusure mancate) |
+| {{YYYY-MM-DD}} | Le attese (`palla:loro`) si aprono solo quando {{Nome}} aspetta una risposta, e nascono con `decade:` (+21 giorni) | «Inviato» è un fatto; un'attesa senza data di morte diventa una voce fantasma | Un'attesa a ogni invio (si accumulano voci che nessuno chiude) |
+| {{YYYY-MM-DD}} | Le correzioni hanno tre cassetti: generale (`correzioni.md`), di merito (`dominio/`), di un lavoro (`stati/`) | Un registro unico si riempie di casi che non servono agli altri lavori | Un solo registro per tutto |
+| {{YYYY-MM-DD}} | Verso l'esterno Claude prepara e {{Nome}} invia o autorizza, messaggio per messaggio | Un invio sbagliato non si ritira; una bozza sì | Invio automatico su istruzione sintetica |
+| {{YYYY-MM-DD}} | «Chiudi sessione» prima di uscire da Claude Code: log, stati, persone, dominio | La conversazione si perde; ciò che non è nei file non esiste il giorno dopo | Affidarsi alla memoria della conversazione |
+| {{YYYY-MM-DD}} | I lavori chiusi si archiviano (skill `archiviazione`), non si cancellano; le cartelle su disco restano dove sono | Tutto resta ritrovabile in `mappa-archivio.md`, e i lavori nuovi ne cercano i precedenti | Cancellare i lavori chiusi; spostare le cartelle su disco (rompe i riferimenti) |

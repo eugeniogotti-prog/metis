@@ -1,0 +1,20 @@
+---
+created_at: <% tp.file.title %>
+tags:
+- tipo/daily
+up:
+- '[[{{RUOLO_JOURNAL}}]]'
+updated_at: null
+---
+# Focus della giornata
+
+
+# Diario
+
+## Giornata
+<!-- Come è andata, che cosa ho fatto, che cosa ho deciso -->
+
+
+# Memo
+<!-- Qui scrivono i giri automatici (digest del mattino e della sera, inbox): una riga [HH:MM] 🤖 nome: riepilogo -->
+

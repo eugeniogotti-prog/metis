@@ -5,7 +5,7 @@
 # Uso: METIS_CONFIG=<config> bash installa-modelli.sh <cartella dei modelli> "<Nome del cliente>" [<cartella delle schede di partenza>]
 #   <cartella delle schede di partenza>: facoltativa, file <materia>.md.txt preparati dal consulente per questo cliente;
 #   si copiano in dominio/ così come sono (decisione del 2/10/2026).
-#   <cartella dei modelli> contiene CLAUDE.md.txt, _Claude/*.md.txt, memory/MEMORY.md.txt
+#   <cartella dei modelli> contiene CLAUDE.md.txt, _Claude/*.md.txt, memory/MEMORY.md.txt, note/*.md.txt (modelli delle note)
 #   (fino alla migrazione nel repository i modelli stanno nel kit).
 #
 # Idempotente sui file del cliente: un file che esiste già nel vault non si sovrascrive, e lo si dice.
@@ -47,6 +47,18 @@ else
   copia "$MOD/CLAUDE.md.txt" "$METIS_VAULT/CLAUDE.md"
 fi
 copia "$MOD/memory/MEMORY.md.txt" "$METIS_MEMORY_DIR/MEMORY.md"
+
+# Modelli delle note (giornaliera, settimanale) nella cartella dei template: sintassi di Templater, quindi nessuna
+# sostituzione oltre al nome della cartella delle note giornaliere. Si copiano con Obsidian chiuso (blocco 2).
+DT="$(metis_ruolo TEMPLATE)"
+if [ -n "$DT" ] && [ -d "$MOD/note" ]; then
+  mkdir -p "$DT"
+  for f in "$MOD"/note/*.md.txt; do
+    [ -f "$f" ] || continue; d="$DT/$(basename "$f" .txt)"
+    if [ -e "$d" ]; then echo "già presente, lasciato com'è: $d"
+    else cp "$f" "$d" && J="$METIS_RUOLO_JOURNAL" perl -pi -e 's/\{\{RUOLO_JOURNAL\}\}/$ENV{J}/g' "$d"; fi
+  done
+fi
 
 # Schede di dominio di partenza: si copiano senza sostituzioni, non contano fra i file del modello.
 if [ -n "$SCHEDE" ]; then

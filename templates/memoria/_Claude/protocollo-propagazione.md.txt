@@ -1,0 +1,51 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+updated_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/indice
+up:
+- '[[_Claude]]'
+---
+
+# Protocollo di propagazione
+
+Il difetto che corregge: **Claude aggiorna l'oggetto più vicino a ciò che ha appena toccato e si ferma lì.** Chiude un episodio nello stato e non tocca la nota della persona; sistema uno stato e non scrive il log; lavora tre ore su una cosa e la nota del giorno non lo sa. Ogni aggiornamento preso da solo è corretto: manca la cascata.
+
+## La domanda che fa scattare il protocollo
+
+Dopo ogni materiale nuovo (riunione, messaggio di {{Nome}}, mail, nota vocale, documento, decisione presa in conversazione):
+
+> **Se questa conversazione domani non esistesse, il vault saprebbe questa cosa? E la saprebbe da tutti i punti da cui qualcuno la cercherà?**
+
+Si sbaglia di solito la seconda metà: un fatto scritto in un posto solo lo ritrova solo chi sa già dove guardare.
+
+## I bersagli, in ordine di cascata
+
+| # | Bersaglio | Quando si tocca | Che cosa ci va |
+|---|---|---|---|
+| 1 | `{{RUOLO_CLAUDE}}/stati/<lavoro>.md` | il materiale riguarda un lavoro aperto | il fatto, l'effetto su `## Impegni`, il marcatore `<!-- aggiornato da … -->` |
+| 2 | `{{RUOLO_PERSONE}}/<Nome>.md` | c'è stata interazione diretta con qualcuno | riga in «Interazioni chiave» (data, tipo, argomento, parole decisive tra «»); «Posizioni e interessi» se emerge qualcosa |
+| 3 | `{{RUOLO_CLAUDE}}/dominio/<materia>.md` | emerge un fatto di merito riusabile oltre il caso | il fatto con il grado di verifica, la fonte e la data |
+| 4 | nota del giorno in `{{RUOLO_JOURNAL}}/` | il fatto è del giorno | una riga nel punto giusto; se contraddice il digest già scritto, si corregge quella riga |
+| 5 | nota del lavoro nella cartella dei lavori | il lavoro ne ha una | il dettaglio lungo, che nello stato non ci sta |
+| 6 | `{{RUOLO_CLAUDE}}/decisioni.md` | è una decisione sul metodo, sul vault o su un lavoro | data, decisione, perché, alternative scartate (in coda) |
+| 7 | `{{RUOLO_CLAUDE}}/correzioni.md` | {{Nome}} ha corretto un output | il caso e la regola che ne discende (in coda) |
+| 8 | `{{RUOLO_CLAUDE}}/sessioni/YYYY-MM-DD.md` | sempre, alla fine di un turno sostanziale | che cosa è stato fatto e «Decisioni e ragionamento» (in coda) |
+| 9 | memoria di Claude Code | il fatto è durevole e vale per tutti i lavori | una memoria per fatto e una riga in `MEMORY.md` |
+
+Non tutti scattano ogni volta. Conta che nessuno sia saltato per distrazione: per ciascuno saltato c'è una ragione.
+
+## Le due regole di tempo
+
+1. **Ciò che chiude, sospende o cambia un impegno si scrive prima di rispondere.** La conversazione si perde e la compattazione del contesto arriva senza preavviso.
+2. **Il resto entro il turno.** La fine della sessione potrebbe non arrivare come previsto.
+
+## Le tre nature di una riga di stato
+
+- **`palla:me` + data**: scadenza; se passa, il doctor la segnala.
+- **`palla:loro` + data + `decade:`**: attesa vera. Si apre solo se {{Nome}} dice di aspettare una risposta, se serve un'approvazione per procedere, o se c'è una scadenza esterna.
+- **`◇` nella sezione `## Se arriva`**: riconoscimento, «se arriva X, so che cosa farne». Senza data, palla né decadenza. Lo chiudono i giri sulla posta e sull'Inbox quando il fatto arriva: diventa una riga di log con data e provenienza, e il `◇` diventa `◆`. Ogni invio con dentro una richiesta genera un `◇`, mai un'attesa. Se il mancato arrivo di X blocca il lavoro, l'impegno è «Y entro il …, con o senza X», `palla:me`.
+
+## Il test di completezza
+
+Prima di chiudere un turno sostanziale si ripercorre la colonna «Quando si tocca» e, per ogni bersaglio saltato, si dice perché. «Non c'entrava» va bene; «non ci ho pensato» vuol dire che il turno non è chiuso.

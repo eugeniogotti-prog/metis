@@ -1,0 +1,82 @@
+---
+created_at: '{{YYYY-MM-DD}}'
+updated_at: '{{YYYY-MM-DD}}'
+tags:
+- tipo/indice
+up:
+- '[[_Claude]]'
+---
+
+# Routine di fine sessione
+
+In ordine. La esegue Claude quando {{Nome}} scrive **«chiudi sessione»** e alla fine di ogni lavoro sostanziale. Il `CLAUDE.md` la riassume in cinque punti; qui c'è il dettaglio.
+
+## 1. Log della sessione
+
+In `{{RUOLO_CLAUDE}}/sessioni/YYYY-MM-DD.md`, solo in coda:
+- «Cosa ho fatto»;
+- **«Decisioni e ragionamento»**: il perché delle scelte, oltre al cosa.
+
+Il log è la fonte di che cosa è successo: ciò che è riassunto in `_Claude.md` deriva da qui.
+
+## 2. Stati
+
+### Prima di scrivere: gli impegni si aggiornano, non si riscrivono
+
+Le regole complete sono nella skill `impegni`. Qui il minimo per la chiusura.
+
+**Una sola sezione `## Impegni` per stato**, dopo «Dove siamo». Le voci datate raccontano e non contengono impegni.
+
+Prima di aggiungere una voce datata a uno stato:
+1. rileggere la sezione `## Impegni` di quel file;
+2. chiudere con `[x]` e l'esito ciò che il lavoro appena fatto ha completato;
+3. aggiornare le righe esistenti invece di riformularle altrove;
+4. solo allora aggiungere gli impegni nuovi, nella stessa sezione.
+
+**Prima di scrivere un impegno**, la domanda: c'è un'azione che deve compiere {{Nome}} o Claude? Se il passo dipende da altri, è al massimo un `◇` in «Se arriva»; se non dipende da nessuno (una scadenza altrui, un evento atteso), non si scrive.
+
+**Prima di lasciare un «da verificare»**: se la verifica è a una ricerca di distanza (una mail nella posta inviata, un file su disco), si fa adesso. Un «da verificare» che si scioglie in dieci secondi sposta su {{Nome}} un controllo che tocca a Claude.
+
+### Per ogni lavoro toccato: `{{RUOLO_CLAUDE}}/stati/<lavoro>.md`
+
+**Frontmatter**: `status` (caldo, attivo, attesa, dormiente), `ultima-mossa` (oggi), `prossima-azione` (una riga), `scadenza` (data o `nessuna`), `persone` (wikilink alle persone coinvolte direttamente), `fonte-primaria` (cartella su disco, se è cambiata).
+
+**Corpo**: riscrivere «Dove siamo»; aggiornare «Documenti prodotti»; aggiungere la voce datata nel log.
+
+**Marcatore** in fondo: `<!-- aggiornato da {istanza} YYYY-MM-DD -->`.
+
+Quando un lavoro si chiude: skill `archiviazione`.
+
+## 3. Persone
+
+Per ogni persona in `persone:` degli stati toccati, nella sua nota in `{{RUOLO_PERSONE}}/`:
+- frontmatter: il lavoro nel campo `thread:` se manca; `ultima-interazione:` di oggi;
+- corpo: una riga in «Interazioni chiave» (data, tipo, argomento, note).
+
+La nota della persona non scrive mai sugli stati: `thread:` è uno specchio di `persone:` dello stato.
+
+Un ruolo nuovo emerso per una persona si scrive `ruolo: <descrizione>` con `ruolo-status: inferito`; la conferma tocca a {{Nome}}.
+
+## 4. Dominio
+
+Se la sessione ha prodotto un'asserzione di merito riusabile fra lavori (una norma, una scadenza, come funziona un sistema), va in `{{RUOLO_CLAUDE}}/dominio/<materia>.md`, con il grado di verifica:
+- **[verificato]**: letta sulla fonte primaria insieme a {{Nome}}, oppure da un revisore che ha riaperto la fonte e ne ha controllato il testo (la riga lo dice: `verificato da revisore il YYYY-MM-DD su <fonte>`). Fuori da questi casi Claude non assegna [verificato] da solo;
+- **[inferito]**: prodotto di ragionamento o di una lettura non controllata;
+- **[da verificare]**: ipotesi di cui manca la lettura della fonte.
+
+Formato:
+```markdown
+## Tema
+- Asserzione.
+  fonte: riferimento primario — [verificato|inferito|da verificare] (YYYY-MM-DD)
+```
+
+Il grado si promuove modificando il flag dell'asserzione esistente, con una riga di traccia (`promosso: [da verificare] → [verificato] il YYYY-MM-DD su <fonte>`). È l'unica eccezione alla regola di scrivere solo in coda. Mai promuovere per inerzia o perché «suona giusto».
+
+## 5. `_Claude.md`
+
+Nella sezione «Stato attuale»: contatori, lavori attivi (una riga per lavoro, il contenuto sta nello stato), ultime sessioni (al massimo sette voci, si taglia la più vecchia). Si aggiorna `updated_at`. Niente riassunti lunghi delle sessioni: stanno nel log.
+
+## Prima sessione del mese
+
+Le operazioni sono nel `CLAUDE.md`, sezione «Prima sessione del mese»: distillare e archiviare le correzioni del mese chiuso, compattare i log di sessione, rastrello degli impegni (skill `impegni`), proposta dei lavori fermi da archiviare (skill `archiviazione`), rientro nei tetti segnalati dal doctor.

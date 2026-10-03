@@ -33,7 +33,7 @@ Una fonte che non risponde si dichiara. Niente riunioni, mail o eventi dedotti p
 ## Mattino: impegni e lavori (la sezione che vale di più)
 
 1. `palla:me` con data passata o entro 7 giorni → «🎯 Fare adesso», per data. Se non c'è niente: «nessun impegno in scadenza».
-2. `palla:loro` con `decade:` superata → «attese decadute da chiudere» (le chiude il cliente, o la skill `impegni`).
+2. `palla:loro` con `decade:` superata → «attese decadute da chiudere» (le chiude Claude alla prima sessione, skill `impegni`).
 3. Per ogni evento di domani: cercare lo stato del lavoro collegato; se c'è materiale, un mini-briefing di 3-5 punti con i wikilink.
 Urgenza: 🔴 oggi o domani · 🟡 entro 5 giorni · 🟢 il resto.
 

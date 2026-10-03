@@ -1,0 +1,22 @@
+---
+created_at: <% tp.date.now("YYYY-MM-DD") %>
+tags:
+- tipo/weekly
+up:
+- '[[{{RUOLO_JOURNAL}}]]'
+updated_at: null
+---
+# Settimana <% tp.file.title %>
+
+## Che cosa ho fatto
+
+## Comunicazioni importanti
+
+## Prossima settimana
+- **Impegni in agenda**:
+- **Scadenze**:
+
+## Osservazioni
+
+# Digest
+<!-- Lo scrive il weekly digest del lunedì: lavori, impegni, attese decadute, decisioni, persone, operazioni di inizio mese -->
