@@ -6,6 +6,8 @@ ultima-mossa: '{{YYYY-MM-DD}}'
 prossima-azione: '{{una riga}}'
 scadenza: nessuna       # oppure YYYY-MM-DD
 persone: []             # lista di wikilink alle note Persone coinvolte: ['[[Nome Cognome]]']
+fonte-primaria: ''      # cartella su disco del lavoro (relativa alla cartella fonti, o assoluta); vuota se non c'è
+precedenti: []          # lavori archiviati affini, trovati in mappa-archivio.md all'avvio: ['[[stato-archiviato]]']
 created_at: '{{YYYY-MM-DD}}'
 updated_at: '{{YYYY-MM-DD}}'
 tags:

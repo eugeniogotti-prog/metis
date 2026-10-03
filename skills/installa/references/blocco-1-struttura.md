@@ -30,6 +30,16 @@ Poi `bash scripts/installa-struttura.sh crea`.
 
 Se l'albero mostra un `CLAUDE.md` alla radice, è del cliente: al blocco 2 si conserva e il nucleo di Metis si aggiunge (vedi il blocco 2). Se il vault sta dentro un repository git, la memoria di Claude Code segue la radice del repository: la libreria lo gestisce da sola.
 
+## Mappa delle cartelle e archivio
+
+Servono alla mappa giornaliera (`scripts/mappa.py`, lanciata dal doctor) e alla skill `archiviazione`. Si chiedono qui, con una proposta già scritta, una domanda alla volta:
+1. **Radici da tenere d'occhio.** Proposta: la cartella dei lavori, quella dell'archivio e la cartella fonti su disco. Se i documenti del cliente stanno anche altrove (per esempio una cartella per anno in Drive), si aggiungono: `configura.sh set METIS_MAPPA_RADICI "<lavori>|<archivio>|<percorso>"`. Se va bene il default, non si scrive niente.
+2. **Contenitori.** Se nella cartella fonti c'è una cartella i cui figli sono lavori distinti («Gare», «Clienti 2026»), la si dichiara: `configura.sh set METIS_MAPPA_CONTENITORI "Gare"`. Quelle con almeno dieci sottocartelle sono riconosciute da sole.
+3. **Archivio per anno o piatto.** Proposta: una cartella per anno dentro l'archivio (`METIS_ARCHIVIO_PER_ANNO=sì`, default). Se il cliente archivia già in modo piatto: `configura.sh set METIS_ARCHIVIO_PER_ANNO no`.
+4. **Cartelle su disco a fine lavoro.** Proposta: restano dove sono, e lo stato archiviato le ricorda (default, niente da scrivere). Se il cliente le sposta abitualmente in una cartella d'archivio: `configura.sh set METIS_FONTI_ARCHIVIO "<percorso>"`; la skill proporrà lo spostamento, lavoro per lavoro.
+
+**Controllo:** dopo il doctor esistono `<cartella di Claude>/mappa-inventario.md` e `mappa-archivio.md`, e la sezione «Mappa delle cartelle» del doctor dice «prima fotografia delle cartelle». Il confronto parte dal giorno dopo, e solo nei giorni in cui il doctor gira: ogni mattina con il modulo `routine` e il Mac acceso, altrimenti quando lo si lancia a mano.
+
 ## Obsidian
 
 Se il cliente usa Obsidian: plugin consigliati Templater, Periodic Notes, Dataview; la CLI si registra in Obsidian → Impostazioni → Generali. Prima di ogni comando `obsidian` si controlla che l'app sia aperta (`pgrep -f "Obsidian.app/Contents/MacOS/[Oo]bsidian"`): ad app chiusa il comando la avvia e non ritorna.

@@ -71,7 +71,9 @@ La memoria di Claude ha tre livelli. Il primo si carica a ogni avvio e ha un tet
 
 ## Durante il lavoro
 
-- **Prima di un lavoro sostanziale nuovo:** fissare in cima allo stato del lavoro la sezione `## Obiettivo e perché`, proponendo una bozza a {{Nome}} e lasciando che reagisca.
+- **Prima di un lavoro sostanziale nuovo:** cercare i precedenti in `{{RUOLO_CLAUDE}}/mappa-archivio.md` (stesso cliente, stesso tema, stesse persone) e scriverli nello stato del lavoro nuovo in `precedenti:`; se non ce ne sono, dirlo. Poi fissare in cima allo stato la sezione `## Obiettivo e perché`, proponendo una bozza a {{Nome}} e lasciando che reagisca, e indicare in `fonte-primaria:` la cartella su disco del lavoro, se c'è.
+- **Dove sono le cose in corso:** `{{RUOLO_CLAUDE}}/mappa-inventario.md`, rigenerata dal doctor (ogni mattina, se le routine sono attive), con gli spostamenti di cartelle dal giorno prima.
+- **Archiviare un lavoro chiuso:** skill `archiviazione`, solo su decisione di {{Nome}}.
 - **Prima di processare contenuti e di ogni lavoro sostanziale:** leggere `{{RUOLO_CLAUDE}}/regole-di-metodo.md`.
 - **Prima di un testo per altri:** aprire `{{RUOLO_CLAUDE}}/profilo-completo.md` alla sezione del registro giusto.
 - **Prima di consegnare un output sostanziale:** skill `autorevisione`. Livello 1 sempre; livello 2, un revisore separato che riapre le fonti, per i lavori ad alta posta o su richiesta.
@@ -91,6 +93,7 @@ Quando {{Nome}} scrive **«chiudi sessione»** (prima di uscire da Claude Code c
 - Distillare i casi del mese chiuso in `regole-di-metodo.md` o nel profilo, poi spostarli in `{{RUOLO_CLAUDE}}/archivio/correzioni-YYYY-MM.md`. Il caso si archivia, la regola resta.
 - Compattare i log di sessione del mese chiuso in `{{RUOLO_CLAUDE}}/sessioni/archivio/YYYY-MM.md`.
 - Rientrare nei tetti che il doctor segnala.
+- Proporre a {{Nome}}, in un solo elenco, i lavori fermi da archiviare (skill `archiviazione`, «Il controllo mensile»).
 
 ## Convenzioni
 

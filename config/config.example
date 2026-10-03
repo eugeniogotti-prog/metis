@@ -32,6 +32,18 @@ METIS_INBOX_FONTI=Clippings files voicenotes
 METIS_FRONTMATTER_CHIAVI=created_at tags up
 METIS_TAG_PREFISSI=tipo argomento contenuto status
 
+# Mappa delle cartelle e archivio (scripts/mappa.py, skill archiviazione). Tutte facoltative.
+# Radici da fotografare ogni giorno, separate da «|», relative al vault o assolute (default: lavori, archivio, fonti).
+# METIS_MAPPA_RADICI=Clienti|Chiusi|~/Documents/Fonti
+# Cartelle di primo livello delle fonti i cui figli sono lavori distinti, separate da «|».
+# METIS_MAPPA_CONTENITORI=Gare|Consulenze
+# Giorni senza attività oltre i quali un lavoro è proposto per l'archivio.
+# METIS_MAPPA_GIORNI_FERMO=90
+# Archivio del vault con una cartella per anno (sì) o piatto (no).
+METIS_ARCHIVIO_PER_ANNO=sì
+# Cartella dove spostare a fine lavoro le cartelle su disco; vuota = restano dove sono (consigliato).
+METIS_FONTI_ARCHIVIO=
+
 # LaunchAgent: prefisso delle etichette e job installati.
 METIS_LABEL=com.metis.utente
 METIS_JOBS=daily-digest inbox-processor

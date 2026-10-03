@@ -3,7 +3,7 @@
 # L'hook di avvio ne mostra il sunto. Fa anche da test di conformità dopo un'installazione o un aggiornamento.
 #
 # Controlli: tetti del contesto (letti dalla tabella di _Claude.md), onboarding, operazioni di inizio mese,
-# frontmatter e tag, stati e impegni, log di sessione, Inbox, automazioni, log grandi, affidabilità del report.
+# frontmatter e tag, stati e impegni, mappa delle cartelle, log di sessione, Inbox, automazioni, log grandi, affidabilità del report.
 # Percorsi e ruoli dalla configurazione (scripts/lib/config.sh): nessun percorso scritto qui.
 #
 # Uso: bash doctor.sh            (configurazione in ~/.config/metis/config o in $METIS_CONFIG)
@@ -154,6 +154,23 @@ else
   [ "$DECADUTE" -gt 0 ] && add warn "$DECADUTE attese oltre la data di decadenza, da chiudere come ⊘ decaduta (auto $OGGI)" || add ok "Nessuna attesa oltre la decadenza"
   [ -n "$DORMIENTI" ] && add warn "Lavori fermi da più di 30 giorni:$DORMIENTI" || add ok "Nessun lavoro fermo da più di 30 giorni"
 fi
+
+# --- Mappa delle cartelle: inventario, fotografia del giorno e confronto con la precedente (scripts/mappa.py) ---
+# Avviso solo per i lavori che perdono la cartella su disco; il resto è informazione.
+sec "Mappa delle cartelle"
+RIEP=$(python3 "$METIS_ROOT/scripts/mappa.py" 2>/dev/null | tail -1)
+case "$RIEP" in
+  "mappa: ERRORE"*|"") add warn "Mappa non generata: ${RIEP:-nessuna uscita} (python3 $METIS_ROOT/scripts/mappa.py)" ;;
+  *) add info "${RIEP#mappa: } — $METIS_RUOLO_CLAUDE/mappa-inventario.md"
+     NSP=0; SPOST="$CL/cache/mappa-spostamenti.txt"; [ -f "$SPOST" ] || SPOST=/dev/null
+     while IFS='|' read -r LIV TESTO; do
+       [ -n "$LIV" ] || continue
+       if [ "$LIV" = warn ]; then add warn "$TESTO"
+       else NSP=$((NSP+1)); [ "$NSP" -le 8 ] && add info "$TESTO"; fi
+     done < "$SPOST"
+     [ "$NSP" -gt 8 ] && add info "… e altri $((NSP-8)) spostamenti: elenco completo nell'inventario"
+     case "$RIEP" in *" 0 fermi "*) ;; *) add info "Lavori fermi da tempo: proposte per l'archivio nell'inventario (skill archiviazione, alla prima sessione del mese)" ;; esac ;;
+esac
 
 # --- Log di sessione: se ieri si è lavorato nel vault, il log di ieri deve esserci ---
 sec "Log di sessione"

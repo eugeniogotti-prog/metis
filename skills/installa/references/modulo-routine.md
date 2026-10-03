@@ -30,7 +30,7 @@ L'esito va in una riga sotto «# Memo» nella nota del giorno: 🤖 se riuscito,
 
 - **Mac acceso e sveglio agli orari.** Se a quell'ora il Mac dorme, macOS esegue il giro al risveglio; se è spento, il giro salta.
 - **Quota.** Ogni giro di Claude consuma la quota dell'abbonamento: un digest del mattino sul vault di prova ha richiesto circa 25 secondi.
-- **Login.** I connettori di claude.ai nei giri automatici funzionano finché il login di Claude Code resta valido; se scade, i giri falliscono e il doctor lo segnala. Il rimedio è aprire Claude Code e rifare `/login`. Per questo le routine usano il server Google locale.
+- **Login.** I connettori di claude.ai nei giri automatici funzionano finché il login di Claude Code resta valido; se scade, i giri falliscono e il doctor lo segnala. Il rimedio è aprire Claude Code e rifare `/login`.
 
 ## Dipendenze
 
