@@ -1,9 +1,21 @@
 # Metis (nome provvisorio)
 
-Plugin di Claude Code che installa su un vault Obsidian la memoria a tre livelli, l'onboarding e il ciclo correzioni → regole.
-Stato: in costruzione, uso interno. Il nome del prodotto è una variabile (`METIS_PRODOTTO` in `config/config.example`).
+Plugin di Claude Code (solo Mac) che porta su un vault Obsidian il metodo di lavoro con Claude: memoria a tre livelli, profilo del cliente con onboarding, ciclo correzioni → regole, lavori con obiettivo e impegni, mappa delle cartelle e archivio, giri automatici facoltativi.
+Stato: in costruzione, pilota dal 9/10/2026. Il nome del prodotto è una variabile (`METIS_PRODOTTO` in `config/config.example`).
 
-- `hooks/session-orient.sh` — hook di avvio: inietta profilo e stato attuale; muto fuori dal vault configurato.
-- `scripts/doctor.sh` — controllo giornaliero: tetti del contesto, onboarding, inizio mese, convenzioni, stati, Inbox, automazioni.
-- `scripts/lib/config.sh` — lettura della configurazione e ruoli delle cartelle.
-- `tests/test-passo3.sh <cartella dei modelli>` — prova su vault temporanei.
+## Installazione
+
+1. Copiare la cartella del plugin sul Mac, in un posto dove resterà (per esempio `~/Metis`): Claude Code carica il plugin da lì a ogni avvio, e se la cartella sparisce il plugin non si carica (provato il 3/10/2026).
+2. `claude plugin marketplace add ~/Metis` e `claude plugin install metis@metis-locale`.
+3. Aprire Claude Code nella cartella del vault e scrivere «installa Metis»: la skill `installa` conduce blocco per blocco.
+
+Aggiornamento: copiare la versione nuova sopra la vecchia, poi `claude plugin marketplace update metis-locale` e `claude plugin update metis@metis-locale`.
+
+## Che cosa c'è
+
+- `skills/` — installa, onboarding, definizione-obiettivi, impegni, autorevisione, archiviazione, daily-digest, weekly-digest, inbox-processor.
+- `hooks/` — orientamento all'avvio, guardia sulle azioni rischiose, controllo delle scritture, salvataggio prima della compattazione.
+- `scripts/` — configurazione e ruoli delle cartelle (`lib/config.sh`, `configura.sh`), installazione (`installa-*.sh`, `verifica-dotazione.sh`), `doctor.sh`, `mappa.py`, `archivia.py`, giri automatici (`metis-agent.sh`), moduli (`moduli/`), Telegram e voce, `trascrizione.py`.
+- `templates/memoria/` — i modelli copiati nel vault del cliente.
+- `docs/guida-cliente.md` — la guida breve per il cliente.
+- `tests/` — prove su vault temporanei: `test-passo3.sh` e `test-installa.sh` (con `templates/memoria`), `test-mappa.sh`, `test-telegram.sh`, `test-routine-google.sh`.
