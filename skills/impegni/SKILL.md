@@ -118,16 +118,16 @@ e confrontare `decade:` con la data di oggi.
 
 ## 7. Riunire più sezioni «## Impegni»
 
-Sintomo: il doctor segnala lo stato, oppure `grep -c '^## Impegni' file.md` restituisce più di 1. Il conteggio prende ogni intestazione che inizia con `## Impegni`, anche «## Impegni aperti».
+Sintomo: il doctor segnala lo stato (2-3 sezioni avviso, oltre 3 critico), oppure `grep -c '^## Impegni' file.md` restituisce più di 1. Il conteggio prende ogni intestazione che inizia con `## Impegni`, anche «## Impegni aperti».
 
-1. Copia di sicurezza del file nella cartella temporanea della sessione.
-2. Contare le `- [ ]` **prima**.
-3. Raccogliere le `- [ ]` di tutte le sezioni come blocchi, con le righe figlie indentate.
-4. Lasciare i `[x]` dove sono, nelle voci datate: sono cronaca, e spostarli stacca la prova dal fatto. L'intestazione `## Impegni` residua di quelle voci si rinomina (per esempio `**Impegni chiusi in questa voce:**`), altrimenti il conteggio delle sezioni non scende.
-5. Scrivere una sola sezione `## Impegni` dopo «Dove siamo», con il commento del modello di stato, aperti in cima e `**Fatti:**` in coda.
-6. Togliere i doppioni: fra due formulazioni della stessa cosa si tiene la più recente e la più precisa.
-7. Verificare: le `- [ ]` **dopo** sono al massimo quante erano prima, e la differenza sono i doppioni, da elencare al cliente; poi `bash "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh"` e, nel report `doctor.md` della cartella di Claude, la sezione «Lavori (stati)» senza quello stato fra quelli con più sezioni.
-8. Marcatore: `<!-- aggiornato da <istanza> AAAA-MM-GG (riunione impegni: N sezioni → 1) -->`.
+La parte meccanica la fa uno script:
+```bash
+bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; shift; python3 "$0/scripts/impegni-consolida.py" "$@"' "${CLAUDE_PLUGIN_ROOT}" x <stato.md>
+```
+1. **Prova**, senza `--scrivi`: dice quante sezioni e quanti aperti ci sono prima e dopo, e quali righe aperte sembrano doppioni.
+2. **Applica**, con `--scrivi --istanza <istanza>`: resta la prima sezione `## Impegni`; le righe aperte delle altre ci vengono spostate come blocchi, con le righe figlie indentate; i `[x]` restano dove sono, nelle voci datate, perché sono cronaca e spostarli staccherebbe la prova dal fatto; le intestazioni in più diventano testo, così il conteggio scende a 1. Lo script scrive solo se il numero di aperti non cambia, e salva una copia del file com'era in `archivio/` della cartella di Claude.
+3. **I doppioni non li fonde lo script**: serve giudizio su quale formulazione tenere. Fra due formulazioni della stessa cosa si tiene la più recente e la più precisa; l'elenco va al cliente.
+4. **Verificare**: `bash "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh"` e, nel report `doctor.md`, la sezione «Lavori (stati)» senza quello stato fra quelli con più sezioni.
 
 Se un'altra sessione sta lavorando sullo stesso stato, si aspetta che abbia finito: due scritture sullo stesso file si sovrascrivono.
 

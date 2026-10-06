@@ -23,11 +23,12 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 - Prima di dire «manca», sapere che cosa vede lo strumento. Esempi: un estrattore di testo da documenti Word salta immagini e testo cancellato; l'indice della posta registra i messaggi con ritardo; una ricerca con contesto a lunghezza fissa salta le righe più corte della finestra, quindi prima di «non c'è» serve una ricerca nuda sul termine; un file ricevuto per posta può stare come link nel corpo del messaggio e non fra gli allegati.
 - Una richiesta che torna vuota: prima verificare che la richiesta sia corretta (parametri, filtri, fuso orario, maiuscole e minuscole). Un errore segnalato dall'utente si riproduce con lo stesso strumento che l'ha prodotto.
 - «Non posso verificare», «non si può» e ogni scetticismo scritto sono affermazioni. Cercare ciò che li smentirebbe (l'aiuto del comando elenca le sue capacità), oppure scrivere «non ho controllato».
-- «Non parte da solo» si dimostra cercando tutti i possibili chiamanti: automazioni, script, istruzioni. «È guasto» si dimostra dopo aver cercato se qualcuno l'ha spento di proposito (file che lo sospendono, decisioni registrate).
+- «Non parte da solo» si dimostra cercando tutti i possibili chiamanti: automazioni, script, istruzioni. «È guasto» si dimostra dopo aver cercato se qualcuno l'ha spento di proposito (file che lo sospendono, decisioni registrate). «Non tiene il passo» si dimostra leggendo come il meccanismo è stato disegnato e guardando le date degli elementi contati: un arretrato tutto recente è lavoro in corso.
 - Prima di indagare un'anomalia di uno strumento d'uso quotidiano, chiedersi se è una sua funzione e se le note del vault l'hanno già documentata.
 - Prima di dichiarare mancante una fonte, guardare che cosa producono già le automazioni del sistema.
 - Una ricognizione a supporto di un piano si costruisce sulla griglia delle domande, con una casella «non c'è» compilabile per ciascuna.
 - «Verificato sul file» si scrive punto per punto, e solo per i punti per cui il file è stato aperto.
+- Un elemento del materiale lasciato cadere con «nulla da dire» si riapre chiedendosi se è irrilevante o solo non capito.
 - Davanti a «sempre» o «mai», il caso da provare è l'altro, quello su cui la regola non è stata verificata.
 - Un controllo accurato fatto al livello sbagliato rassicura più di uno superficiale. Una colonna si controlla sui valori, un nome sulla funzione che svolge, il rimedio separatamente dalla diagnosi.
 - «X manca nei documenti di una parte» si verifica su tutti i suoi documenti. Un passaggio attribuito a qualcuno si verifica sul testo di quella persona.
@@ -36,7 +37,7 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 
 - Stati, digest, le nostre stesse note e bozze, registri, sintesi di pagine web e resoconti di altri agenti sono materiale derivato: i dati su cui poggia una conclusione si riaprono sulla fonte primaria. Ruoli, interlocutori e appuntamenti letti in un riassunto si prendono dal calendario o dalla fonte.
 - Assenze e spiegazioni causali riportate da un altro agente si riverificano prima di riferirle all'utente. Segnale d'allarme: un'assenza accompagnata da incertezza dichiarata sul metodo.
-- «Citazione corretta» significa passo letto nel documento citato; altrimenti si marca [?]. Date e numeri di protocollo si riscontrano sempre.
+- «Citazione corretta» significa passo letto nel documento citato; altrimenti si marca [?]. Il tipo di una fonte (testo dell'atto, commento, articolo di giornale) si dichiara dopo averla aperta: il titolo trovato in una ricerca non basta. Date e numeri di protocollo si riscontrano sempre.
 - Un passo confermato parola per parola lascia aperta l'inferenza che se ne trae. Due clausole si contraddicono solo se regolano la stessa cosa sullo stesso piano.
 - Quando un testo cita un atto «come modificato da», il numero che riporta è quello vigente: prima di smentire un «originariamente», cercare la versione precedente. Se chi agisce si comporta contro il dato, il dato è incompleto.
 - «Entro N giorni da X» decorre da X. Chi corregge una data altrui cita la fonte parola per parola e dice a che cosa si riferisce il termine.
@@ -62,7 +63,8 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 
 - Prima di analizzare o rispondere su una materia, aprire la scheda di dominio che la copre. Cercare prima nella cartella dove starebbe, poi per parola.
 - Se l'utente ha chiesto uno studio prima di costruire qualcosa, lo studio è il punto di partenza e il materiale già presente si legge per intero. Se il sistema vecchio registra ciò che il nuovo si limita a dedurre, il nuovo ha un difetto.
-- Prima di aggiungere o togliere una parte in un documento lavorato a più riprese, verificare nel registro delle decisioni se la sua assenza è voluta. Una contraddizione interna si scioglie con la storia delle decisioni.
+- Prima di aggiungere, togliere o riscrivere una parte in un documento lavorato a più riprese, verificare nel registro delle decisioni, nel piano del lavoro e nei commenti ancorati a quel passaggio se il testo è così per scelta. Una contraddizione interna si scioglie con la storia delle decisioni. Prima di confrontare due strade si rileggono le decisioni più recenti su entrambe, soprattutto quelle cambiate in giornata.
+- Un piano di prodotto o di lavoro parte dall'inventario completo delle parti, anche quando la richiesta nasce da un solo componente: il componente si colloca nell'insieme e ciò che resta fuori si dichiara («qui copro solo X»).
 - Quando si adotta la struttura proposta da un interlocutore, rileggere la propria analisi per i vincoli che la vecchia struttura soddisfaceva. Ogni rimando generico («il predetto decreto», «la citata delibera») si scioglie con il nome esatto.
 - Prima di cancellare o spostare file, leggere le istruzioni (README) delle cartelle di origine e di destinazione. Ciò che si vorrebbe cancellare si mette in quarantena, e la scelta di distruggere resta all'utente.
 - Prima di archiviare un file, cercare chi rimanda a esso.
@@ -81,7 +83,7 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 - Un file tenuto aperto da un'altra applicazione (Word, un programma di sincronizzazione) si modifica da quell'applicazione o a programma chiuso, e si rilegge dopo.
 - Ogni orario scritto si prende dall'orologio del sistema; il giorno della settimana si calcola. Molti registri e servizi usano l'ora di Greenwich: si converte prima di confrontare.
 - Se un vincolo tecnico peggiora il testo, si cambia tecnica.
-- Una ricerca di testo su un documento convertito da PDF o Word conta stringhe: zero risultati vuol dire «testo da leggere».
+- Una ricerca di testo su un documento convertito da PDF o Word conta stringhe: zero risultati vuol dire «testo da leggere». Un termine trovato in un manuale diventa una regola dopo aver letto il titolo della sezione e la frase che dice a chi si applica.
 - Un documento Word con revisioni si legge in due viste, testo finale e parti marcate. «È sparito» si verifica cercando il concetto. Un difetto grossolano nel testo altrui accusa prima l'estrazione. Il riscontro all'utente sta in un solo file.
 - Prima di consegnare un diagramma, aprirne un'immagine resa.
 
@@ -107,22 +109,24 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 ## 10. Documenti condivisi con l'utente
 
 - Un file che l'utente può avere modificato si rilegge prima di sovrascriverlo o cancellarlo. Il suo stato si riverifica quando lo si afferma e dopo ogni scrittura. Un documento già consegnato si aggiorna con un file nuovo.
-- La versione già inviata è quella autorevole. Prima di rigenerare un documento rivisto o impaginato da altri, misurare l'allineamento con il sorgente e lavorare sul file che circola.
+- La versione già inviata è quella autorevole. Prima di rigenerare un documento rivisto o impaginato da altri, misurare l'allineamento con il sorgente e lavorare sul file che circola. Dopo un invio, il contenuto si legge dal messaggio partito (posta inviata, cronologia della chat): l'utente può aver cambiato la bozza prima di spedirla.
 - Un testo riscritto da un interlocutore, che l'utente ha chiesto di integrare, si recepisce per confronto parola per parola. Le proposte del cliente si recepiscono nella forma proposta; i limiti tecnici vanno in un commento.
 - Parti gemelle di un documento: il punto da modificare si individua dal testo esatto che lo contiene, si procede dall'ultima occorrenza e si rilegge il risultato.
-- Dopo una cancellazione parziale si rilegge la frase che resta; dopo un accorpamento si ricontano gli elementi annunciati nel titolo. «Diverso» e «identico» si stabiliscono sul testo. Niente aggiunte senza fonte.
+- Dopo una cancellazione parziale si rilegge la frase che resta; dopo un accorpamento si ricontano gli elementi annunciati nel titolo. «Diverso» e «identico» si stabiliscono sul testo. Niente aggiunte senza fonte. Un'affermazione altrui priva di fonte si prova a fondare prima di toglierla: spesso l'errore sta nell'attribuzione (a chi la si fa dire) e la tesi regge su un'altra fonte.
 - Paragrafi e pagine si contano come li vede il destinatario, nel suo documento e nel suo programma.
 - In un documento da approvare la numerazione è continua e il raccordo fra versioni sta in una nota a parte. «Recepito» si scrive solo per una proposta accolta.
 - Un documento destinato a confluire in un testo madre (un modulo, un allegato) contiene solo ciò che è specifico della sua parte: regole, definizioni e tempistiche che il testo ospitante già fornisce non si ripetono.
 
 ## 11. Numeri e tabelle
 
-- Valore assoluto e percentuale nella stessa frase vengono dalla stessa rilevazione e dallo stesso periodo, e la divisione si rifà; lo stesso per totali e somme. Una percentuale si traduce in persone o unità prima di scrivere un ordine di grandezza. Un dato provvisorio si ricontrolla sull'ultima pubblicazione.
+- Valore assoluto e percentuale nella stessa frase vengono dalla stessa rilevazione e dallo stesso periodo, e la divisione si rifà; lo stesso per totali e somme. Due dati della stessa fonte che non tornano fra loro si riconciliano prima di usarne uno. Una percentuale si traduce in persone o unità prima di scrivere un ordine di grandezza. Un dato provvisorio si ricontrolla sull'ultima pubblicazione.
 - In un documento che propone un parametro nuovo, tutte le proiezioni usano il parametro nuovo.
 - Un valore di ripiego porta una marcatura nel punto in cui compare il numero. Se un totale cala perché si è tolto un dato falso, lo si dichiara. Una colonna si copia insieme al dato che la riempie.
 - Uno strumento di monitoraggio registra una sequenza, una riga per evento, e ne calcola il riepilogo.
-- L'etichetta di una serie di dati nomina il fenomeno e l'unità di misura. Cambiata un'etichetta, si controllano tutte le stringhe che la ripetono.
+- L'etichetta di una serie di dati nomina il fenomeno e l'unità di misura. Cambiata un'etichetta o corretta una formula, si cercano tutte le stringhe che la ripetono in tutto il documento, appendici comprese, con una chiave di ricerca più corta della frase intera.
 - Prima di riusare un argomento in un contesto diverso, chiedersi che cosa dimostra lì. Per un incentivo, chiedersi quale comportamento mancherebbe senza.
+- Un calcolo o un modello che applica una norma (tetti, proporzioni, limiti) si costruisce dopo aver letto la norma, con il criterio e la fonte scritti nel file. «Mi risulta» non basta, nemmeno per un lavoro informale.
+- Un numero di cui lo strumento non dichiara valuta o unità si verifica prima di attaccargli un simbolo: lo stesso strumento può esprimere i totali in una valuta e le singole voci in un'altra.
 
 ## 12. Comunicare gli esiti
 
@@ -131,3 +135,7 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 - Una richiesta già fatta da un altro nello stesso thread non si ripete.
 - In una mail a colleghi di un gruppo di lavoro si riportano esiti e fatti, senza assegnare compiti (nemmeno a sé) e senza autocritica sul lavoro comune; sul terreno degli altri si scrive con cautela.
 - Una risposta breve a un cliente ringrazia e dice che cosa arriva e quando.
+- Un documento per chi decide segue in ogni sezione l'ordine del lettore: testo, fonte, conseguenza, proposta. La fonte vincolante apre; l'atto ancora in bozza va in coda. Un testo contorto si riscrive con un filo unico per sezione: la rifinitura lascia il problema dov'è.
+- Il registro dipende dalla sede oltre che dalla firma: la stessa persona scrive asciutta in un articolo di giornale e con più respiro in un capitolo di un libro collettivo. Prima di applicare lo stile legato a una persona, controllare che la sede sia la stessa.
+- A una mail di gruppo si risponde con il mittente in A e gli altri destinatari originali in Cc, salvo diversa indicazione dell'utente.
+- Se il perimetro dei destinatari è incerto («mandalo a tutti»), chiedere, oppure preparare la bozza con l'elenco largo da restringere: allargare dopo costa una bozza rifatta e una da cestinare a mano.

@@ -20,6 +20,11 @@ Regole per il lavoro tecnico di Claude: comandi, script, automazioni, collaudi. 
 - Mai una ricerca di file sull'intera cartella home.
 - Un comando che può non terminare si lancia con un limite di tempo o in background. Un'attesa su un agente in background ha un limite di tempo.
 
+- Negli script shell, una variabile seguita da un carattere non ASCII (virgolette «», trattini lunghi, lettere accentate) si scrive con le graffe, `${var}»`: senza, bash può leggere il carattere come parte del nome e la variabile esce vuota.
+- Le cancellazioni si fanno con il percorso assoluto, verificato prima di lanciarle; mai su un percorso costruito da una variabile che potrebbe essere vuota.
+- Su macOS `timeout` non esiste: al suo posto lo script `con-timeout.sh` del plugin. Un comando che non esiste dà un'uscita vuota, che non va letta come un risultato.
+- Per catturare una schermata si cattura la sola finestra che serve, mai lo schermo intero: lo schermo mostra anche ciò che non c'entra.
+
 ## Mentre gira
 
 - Un comando che riporta la misura del problema che risolve (arretrato, coda) si collauda su quella misura: se non cala, il comando ha fatto altro.

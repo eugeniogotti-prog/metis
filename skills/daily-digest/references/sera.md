@@ -35,6 +35,9 @@ Una o due frasi sul lavoro che ha concentrato più attività, oppure «Nessun fi
 3. …
 ```
 
+### Copertura
+Una riga: le fonti lette (✓) e quelle saltate (✗) con il motivo. Per ogni fonte saltata, una riga in coda a `<cartella di Claude>/cache/digest-copertura.log` nel formato `AAAA-MM-GG|fonte|motivo`, con gli stessi nomi di fonte del mattino (vedi `SKILL.md`).
+
 ## Regole
 
 - Un elenco ragionato, da 5 a 12 voci: si raggruppano gli elementi dello stesso lavoro e si tolgono i movimenti di servizio.

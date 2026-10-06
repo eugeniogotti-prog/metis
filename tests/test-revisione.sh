@@ -113,6 +113,55 @@ check "niente dentro il vault" '! grep -rq "Ricevuto" "$V"'
 python3 "$ROOT/scripts/revisione-tracce.py" pulisci 2099-01 >/dev/null
 check "pulizia: cartella temporanea cancellata" '[ ! -d "$C" ]'
 
+echo "6. Assenze dichiarate senza ricerca (hook di validazione)"
+scrivi_stato() {  # scrivi_stato <testo nuovo> → codice dell'hook
+  printf '%s\n' "$1" > "$CL/stati/prova-assenze.md"
+  python3 -c 'import json,sys; print(json.dumps({"tool_input": {"file_path": sys.argv[1], "content": sys.argv[2]}}))' "$CL/stati/prova-assenze.md" "$1" \
+    | bash "$ROOT/hooks/valida-scrittura.sh" 2>"$T/hook.err"; echo $?
+}
+check "assenza senza ricerca: avviso" '[ "$(scrivi_stato "La mail di Bianchi non risulta.")" = 2 ] && grep -q "\[assenza\]" "$T/hook.err"'
+check "assenza con ricerca dichiarata: silenzio" '[ "$(scrivi_stato "La mail di Bianchi non risulta: cercato nella posta inviata, 60 giorni.")" = 0 ]'
+check "affermazione di merito: silenzio" '[ "$(scrivi_stato "La norma non prevede una proroga del termine.")" = 0 ]'
+check "fuori da stati, dominio e sessioni: silenzio" 'mkdir -p "$V/1 - Progetti/X"; printf -- "---\ncreated_at: 2026-10-06\ntags:\n- tipo/appunti\nup:\n- x\n---\nLa mail non risulta.\n" > "$V/1 - Progetti/X/n.md"; python3 -c "import json,sys; print(json.dumps({\"tool_input\": {\"file_path\": sys.argv[1], \"content\": \"La mail non risulta.\"}}))" "$V/1 - Progetti/X/n.md" | bash "$ROOT/hooks/valida-scrittura.sh" 2>/dev/null'
+rm -f "$CL/stati/prova-assenze.md"
+
+echo "7. Ascolto del telefono"
+PL="$METIS_LAUNCHAGENTS/com.metis.prova.telegram.plist"; ST="$T/telegram-stato.json"
+sezione_ascolto() { sed -n '/^### Ascolto del telefono/,/^### /p' "$CL/doctor.md"; }
+doctor
+check "senza ascoltatore installato: nessuna sezione" '! grep -q "Ascolto del telefono" "$CL/doctor.md"'
+cp "$METIS_LAUNCHAGENTS/com.metis.prova.con.plist" "$PL"; echo '{}' > "$ST"
+METIS_TELEGRAM_STATO="$ST" METIS_ASCOLTO_PROCESSO=1 doctor
+check "battito fresco: ok" 'sezione_ascolto | grep -q "✅ Ascoltatore del bot attivo"'
+touch -t "$(date -v-3H +%Y%m%d%H%M)" "$ST"
+METIS_TELEGRAM_STATO="$ST" METIS_ASCOLTO_PROCESSO=1 METIS_WAKETIME=$(( $(date +%s) - 86400 )) doctor
+check "battito di 3 ore fa, Mac sveglio da un giorno: critico" 'sezione_ascolto | grep -q "❌ Ascoltatore del bot fermo"'
+METIS_TELEGRAM_STATO="$ST" METIS_ASCOLTO_PROCESSO=1 METIS_WAKETIME=$(( $(date +%s) - 120 )) doctor
+check "battito vecchio ma Mac appena svegliato: solo informazione" 'sezione_ascolto | grep -q "ℹ️ Ascoltatore del bot: Mac svegliato" && ! sezione_ascolto | grep -q "❌"'
+METIS_TELEGRAM_STATO="$ST" METIS_ASCOLTO_PROCESSO=0 doctor
+check "processo assente: critico" 'sezione_ascolto | grep -q "❌ L.ascoltatore del bot non gira"'
+rm -f "$PL"
+
+echo "8. Copertura del digest"
+OGGI_=$(date +%F); mkdir -p "$CL/cache"
+for g in 1 2; do echo "$(date -v-${g}d +%F)|documenti|tempo scaduto" >> "$CL/cache/digest-copertura.log"; done
+doctor
+check "fonte saltata 2 giorni su 7: silenzio" 'grep -q "✅ Digest: nessuna fonte saltata" "$CL/doctor.md"'
+echo "$OGGI_|Documenti|tempo scaduto" >> "$CL/cache/digest-copertura.log"; echo "$(date -v-20d +%F)|posta|login" >> "$CL/cache/digest-copertura.log"
+doctor
+check "fonte saltata 3 giorni su 7: avviso, solo per quella" 'grep -q "⚠️ Digest: la fonte «documenti» è saltata in 3 giorni" "$CL/doctor.md" && ! grep -q "fonte «posta»" "$CL/doctor.md"'
+
+echo "9. Consolidamento delle sezioni Impegni"
+SC="$CL/stati/da-riunire.md"
+printf -- '---\nstatus: attivo\n---\n# Stato\n## Dove siamo\nok\n## Impegni\n- [ ] Primo | 2026-10-20 | palla:me\n\n**Fatti:**\n- [x] Vecchio ✅ 2026-09-01\n\n## 2026-10-01 — voce\n## Impegni\n- [ ] Secondo | 2026-10-21 | palla:me\n  - dettaglio del secondo\n- [x] Chiuso nella voce ✅ 2026-10-01\n## 2026-10-02 — voce\n## Impegni aperti\n- [ ] Primo | 2026-10-20 | palla:me\n' > "$SC"
+cp "$SC" "$T/prima.md"
+P1=$(METIS_CL="$CL" python3 "$ROOT/scripts/impegni-consolida.py" "$SC")
+check "prova: non scrive, dice 3 → 1 e aperti 3 → 3, segnala il doppione" 'cmp -s "$SC" "$T/prima.md" && printf "%s" "$P1" | grep -q "sezioni 3 → 1; aperti 3 → 3" && printf "%s" "$P1" | grep -q "possibile doppione"'
+METIS_CL="$CL" python3 "$ROOT/scripts/impegni-consolida.py" --scrivi --istanza cli:prova "$SC" >/dev/null
+check "scritto: una sola sezione, aperti invariati, figlia con il suo blocco" '[ "$(grep -c "^## Impegni" "$SC")" = 1 ] && [ "$(grep -c "^- \[ \]" "$SC")" = 3 ] && grep -A1 "^- \[ \] Secondo" "$SC" | grep -q "dettaglio del secondo"'
+check "chiusi lasciati nella voce, marcatore e copia di prima in archivio" 'grep -B2 "Chiuso nella voce" "$SC" | grep -q "sezione consolidata" && grep -q "aggiornato da cli:prova" "$SC" && ls "$CL"/archivio/stati-prima-del-consolidamento-*/da-riunire.md >/dev/null'
+rm -f "$SC"
+
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]

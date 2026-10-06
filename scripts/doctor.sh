@@ -178,6 +178,26 @@ case "$RIEP" in
      case "$RIEP" in *" 0 fermi "*) ;; *) add info "Lavori fermi da tempo: proposte per l'archivio nell'inventario (skill archiviazione, alla prima sessione del mese)" ;; esac ;;
 esac
 
+# --- Ascolto del telefono (6/10/2026): solo se è installato l'ascoltatore Telegram ---
+# L'ascoltatore riscrive il suo file di stato a ogni ciclo (circa un minuto): la data del file è il battito. Se il Mac si
+# è svegliato da poco, un battito vecchio è normale (durante il sonno launchd sospende tutto) e non è un allarme.
+# Variabili per le prove: METIS_TELEGRAM_STATO, METIS_ASCOLTO_PROCESSO (1/0), METIS_WAKETIME (epoch).
+if [ -f "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL.telegram.plist" ]; then
+  sec "Ascolto del telefono"
+  ST="${METIS_TELEGRAM_STATO:-$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/telegram-stato.json}"
+  VIVO="${METIS_ASCOLTO_PROCESSO:-$(pgrep -f "metis_telegram.py ascolta" >/dev/null 2>&1 && echo 1 || echo 0)}"
+  SVEGLIA="${METIS_WAKETIME:-$(sysctl -n kern.waketime 2>/dev/null | sed -n 's/.*sec = \([0-9]*\).*/\1/p')}"
+  if [ "$VIVO" != 1 ]; then add crit "L'ascoltatore del bot non gira: i messaggi dal telefono non arrivano nel vault (bash scripts/moduli/telegram.sh controlla)"
+  elif [ ! -f "$ST" ]; then add warn "L'ascoltatore gira ma non ha ancora scritto il suo stato ($ST)"
+  else
+    BATT=$(stat -f %m "$ST" 2>/dev/null || echo 0); ETA=$(( (NOW - BATT) / 60 ))
+    if [ "$ETA" -le 15 ]; then add ok "Ascoltatore del bot attivo (battito $ETA min fa)"
+    elif [ -n "$SVEGLIA" ] && [ "$BATT" -lt "$SVEGLIA" ] && [ $(( (NOW - SVEGLIA) / 60 )) -le 10 ]; then add info "Ascoltatore del bot: Mac svegliato da $(( (NOW - SVEGLIA) / 60 )) min, battito non ancora ripreso"
+    elif [ "$ETA" -le 60 ]; then add warn "Ascoltatore del bot: ultimo battito $ETA min fa"
+    else add crit "Ascoltatore del bot fermo: ultimo battito $ETA min fa, il processo c'è ma non ascolta (ricaricarlo: bash scripts/lib/launchd.sh carica telegram)"; fi
+  fi
+fi
+
 # --- Segreti in chiaro nel vault (6/10/2026) ---
 # trascrizione.py oscura token e chiavi quando stampa; questo è il controllo dietro: un segreto incollato in una nota,
 # in un log o in un file arrivato da fuori si vede il giorno dopo. Si stampano solo file e tipo, mai il segreto.
@@ -246,6 +266,32 @@ else
   if [ -n "$JOURNAL" ] && [ -f "$JOURNAL/$IERI.md" ]; then
     grep -q '⚠️ metis-agent' "$JOURNAL/$IERI.md" 2>/dev/null && add crit "Un giro automatico è fallito ieri: vedere la daily di ieri e $METIS_LOG_DIR"
   fi
+fi
+
+# --- Copertura del digest (6/10/2026) ---
+# Il digest del mattino appende a cache/digest-copertura.log una riga «AAAA-MM-GG|fonte|motivo» per ogni fonte che non ha
+# potuto leggere. Dichiararlo ogni mattina non basta: se la stessa fonte salta 3 giorni su 7, c'è una causa da trovare.
+sec "Copertura del digest"
+COPLOG="$CL/cache/digest-copertura.log"
+if [ ! -f "$COPLOG" ]; then
+  add info "Registro di copertura non ancora creato (nasce al primo digest con una fonte saltata)"
+else
+  COPOUT=$(python3 - "$COPLOG" "$OGGI" <<'PY' 2>/dev/null
+import collections, datetime, sys
+oggi = datetime.date.fromisoformat(sys.argv[2]); giorni = collections.defaultdict(set)
+for l in open(sys.argv[1], encoding="utf-8", errors="ignore"):
+    p = l.strip().split("|")
+    if len(p) < 2: continue
+    try: d = datetime.date.fromisoformat(p[0].strip())
+    except ValueError: continue
+    if 0 <= (oggi - d).days <= 7: giorni[p[1].strip().lower()].add(d)
+for f, ds in sorted(giorni.items()):
+    if len(ds) >= 3: print(f"{f}|{len(ds)}")
+PY
+)
+  if [ -n "$COPOUT" ]; then
+    while IFS='|' read -r f n; do add warn "Digest: la fonte «${f}» è saltata in ${n} giorni degli ultimi 7: trovare la causa invece di dichiararla ogni mattina"; done <<< "$COPOUT"
+  else add ok "Digest: nessuna fonte saltata tre o più volte negli ultimi 7 giorni"; fi
 fi
 
 # --- Moduli installati: il controllo di ciascuno (il doctor fa anche da test di conformità) ---
