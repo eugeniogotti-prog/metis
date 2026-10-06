@@ -116,6 +116,36 @@ nota "$V/Clienti/Piccolo/Nota.md" 2026-01-01
 archivia ricognizione --lavoro Piccolo > "$T/r2.out"
 check "destinazione senza anno" 'grep -q "destinazione: Chiusi/Piccolo" "$T/r2.out"'
 
+echo "6. Segnaposto {anno} nelle radici"
+D="$T/Drive"; mkdir -p "$D/2026 attività in corso/Cliente A" "$D/Archivio fisso/X"
+echo x > "$D/2026 attività in corso/Cliente A/a.pdf"; echo x > "$D/Archivio fisso/X/b.pdf"
+radici_di() {  # radici_di <oggi> → etichette delle radici
+  METIS_OGGI="$1" METIS_MAPPA_RADICI="$D/{anno} attività in corso|$D/Archivio fisso" bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; METIS_OGGI="$1" python3 -c "
+import sys, importlib.util
+s = importlib.util.spec_from_file_location(\"m\", sys.argv[1] + \"/scripts/mappa.py\"); m = importlib.util.module_from_spec(s); s.loader.exec_module(m)
+print(\"\n\".join(e for e, _, _ in m.radici()))" "$0"' "$ROOT" "$1"
+}
+check "solo la cartella 2026: nel 2027 prende la 2026 (gennaio)" 'radici_di 2027-01-05 | grep -q "Drive/2026 attività in corso$"'
+mkdir -p "$D/2027 attività in corso/Cliente B"; echo x > "$D/2027 attività in corso/Cliente B/c.pdf"
+check "2026 e 2027 presenti: nel 2027 prende la 2027" 'radici_di 2027-03-01 | grep -q "Drive/2027 attività in corso$" && ! radici_di 2027-03-01 | grep -q "2026 attività"'
+check "nel 2026, con anche la 2027 già creata: prende la 2026" 'radici_di 2026-12-20 | grep -q "Drive/2026 attività in corso$"'
+check "radice senza {anno}: invariata" 'radici_di 2027-03-01 | grep -q "Drive/Archivio fisso$"'
+NFD=$(python3 -c "import unicodedata;print(unicodedata.normalize('NFD','2028 attività in corso'))")
+mkdir -p "$D/$NFD/Cliente C"
+check "nome in NFD sul disco: trovato, etichetta in NFC" 'radici_di 2028-02-01 | python3 -c "import sys,unicodedata; t=sys.stdin.read(); sys.exit(0 if \"2028 attività in corso\" in t and t==unicodedata.normalize(\"NFC\",t) else 1)"'
+
+echo "7. Passaggio d'anno nella fotografia"
+G="$T/Giri"; mkdir -p "$G/2026 attività in corso/Cliente A" "$G/2026 attività in corso/Cliente Z"
+echo x > "$G/2026 attività in corso/Cliente A/a.pdf"; echo x > "$G/2026 attività in corso/Cliente Z/z.pdf"
+giro_anno() { METIS_OGGI="$1" METIS_MAPPA_RADICI="Clienti|$G/{anno} attività in corso" bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; python3 "$0/scripts/mappa.py" >/dev/null' "$ROOT"; }
+giro_anno 2026-12-30
+mkdir -p "$G/2027 attività in corso/Cliente B"; echo x > "$G/2027 attività in corso/Cliente B/b.pdf"
+giro_anno 2027-01-02
+SP="$CL/cache/mappa-spostamenti.txt"
+check "anno nuovo: una riga «radice nuova» al posto della vecchia" 'grep -q "Radice nuova: .*2027 attività in corso.* (al posto di .*2026 attività in corso" "$SP"'
+check "nessuna cartella dell'anno vecchio data per sparita" '! grep -q "sparita.*2026 attività" "$SP"'
+check "nessuna cartella dell'anno nuovo elencata come nuova una per una" '! grep -q "Cartella nuova: .*Cliente B" "$SP"'
+
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]

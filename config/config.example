@@ -34,7 +34,8 @@ METIS_TAG_PREFISSI=tipo argomento contenuto status
 
 # Mappa delle cartelle e archivio (scripts/mappa.py, skill archiviazione). Tutte facoltative.
 # Radici da fotografare ogni giorno, separate da «|», relative al vault o assolute (default: lavori, archivio, fonti).
-# METIS_MAPPA_RADICI=Clienti|Chiusi|~/Documents/Fonti
+# {anno} vale l'anno corrente (o la cartella più recente, se quella dell'anno non c'è ancora).
+# METIS_MAPPA_RADICI=Clienti|Chiusi|~/Documents/Fonti|~/Drive/{anno} attività in corso
 # Cartelle di primo livello delle fonti i cui figli sono lavori distinti, separate da «|».
 # METIS_MAPPA_CONTENITORI=Gare|Consulenze
 # Giorni senza attività oltre i quali un lavoro è proposto per l'archivio.

@@ -20,7 +20,9 @@ Che cosa fa (generalizzato il 3/10/2026 dallo script del vault di riferimento):
      <Claude>/cache/mappa-spostamenti.txt («warn|testo» / «info|testo»).
 
 Configurazione (tutte facoltative):
-  METIS_MAPPA_RADICI        radici da fotografare, separate da «|»: relative al vault o assolute.
+  METIS_MAPPA_RADICI        radici da fotografare, separate da «|»: relative al vault o assolute. Il segnaposto
+                            {anno} vale l'anno corrente, o la cartella più recente se quella dell'anno non c'è ancora
+                            (es. «~/Drive/{anno} attività in corso»).
                             Default: cartella PROGETTI, cartella ARCHIVIO, METIS_FONTI.
   METIS_MAPPA_CONTENITORI   nomi di cartelle di primo livello delle radici su disco i cui figli sono lavori
                             distinti, separati da «|» (oltre a quelle con almeno 10 sottocartelle).
@@ -150,14 +152,41 @@ def etichetta(path):
     return "~" + p[len(casa):] if p.startswith(casa + os.sep) else p
 
 
+def con_anno(voce):
+    """Risolve il segnaposto {anno} in un percorso (6/10/2026): la cartella dell'anno corrente; se non c'è ancora (a
+    gennaio, per esempio), la più recente che esiste. I nomi si confrontano in NFC, perché su Drive i nomi con accenti
+    possono essere in NFD. Si restituisce il nome com'è sul disco. Una voce senza {anno} resta com'è."""
+    if "{anno}" not in voce:
+        return voce
+    parti = voce.split(os.sep)
+    i = next(k for k, x in enumerate(parti) if "{anno}" in x)
+    padre = os.sep.join(parti[:i]) or os.sep
+    rx = re.compile("^" + re.escape(nfc(parti[i])).replace(re.escape("{anno}"), r"(\d{4})") + "$")
+    trovati = {}
+    try:
+        for n in os.listdir(padre):
+            m = rx.match(nfc(n))
+            if m:
+                trovati[int(m.group(1))] = n
+    except OSError:
+        pass
+    if not trovati:
+        return voce.replace("{anno}", str(TODAY.year))
+    anno = TODAY.year if TODAY.year in trovati else max(a for a in trovati if a <= TODAY.year) if any(a <= TODAY.year for a in trovati) else max(trovati)
+    return os.sep.join(parti[:i] + [trovati[anno]] + parti[i + 1:])
+
+
 def radici():
-    """[(etichetta, percorso, su_disco)] delle radici da fotografare, solo quelle che esistono."""
+    """[(etichetta, percorso, su_disco)] delle radici da fotografare, solo quelle che esistono. Nelle voci di
+    METIS_MAPPA_RADICI il segnaposto {anno} si risolve a ogni giro (con_anno): l'etichetta è quella risolta, quindi
+    il passaggio d'anno compare come una radice nuova, non come cartelle sparite."""
     voci = [x.strip() for x in env("METIS_MAPPA_RADICI").split("|") if x.strip()]
     percorsi = []
     if voci:
         for v in voci:
             v = os.path.expanduser(v)
-            percorsi.append(v if os.path.isabs(v) else os.path.join(VAULT, v))
+            v = v if os.path.isabs(v) else os.path.join(VAULT, v)
+            percorsi.append(con_anno(v))
     else:
         percorsi = [p for p in (PROGETTI, ARCHIVIO, FONTI) if p]
     out, viste = [], set()
@@ -455,12 +484,28 @@ def main():
     n_arch = genera_archivio(stati_arch, righe_disco, stdout_only)
 
     # f) spostamenti
-    foto_nuova = {"cartelle": fotografa(),
+    foto_nuova = {"cartelle": fotografa(), "radici": [e for e, _, _ in radici()],
                   "fp": {s["nome"]: [s["fp_esito"], s["fp_path"]] for s in stati if s["fp"]}}
     data_prec, foto_prec = ultima_foto()
     righe = []
     if foto_prec:
-        spostate, sparite, comparse = confronta(foto_prec.get("cartelle", {}), foto_nuova["cartelle"])
+        # Radici cambiate (passaggio d'anno di una voce con {anno}, o configurazione cambiata): le loro cartelle non si
+        # confrontano una per una, altrimenti un anno nuovo sembrerebbe un anno intero di cartelle sparite.
+        vecchie_r = foto_prec.get("radici")
+        if vecchie_r is None:   # fotografie di prima del 6/10/2026: radici ricavate dalle chiavi
+            vecchie_r = sorted({k.rsplit("/", 1)[0] for k in foto_prec.get("cartelle", {}) if "/" in k})
+        nuove_r = foto_nuova["radici"]
+        tolte = [r_ for r_ in vecchie_r if r_ not in nuove_r and not any(r_.startswith(n + "/") for n in nuove_r)]
+        aggiunte = [r_ for r_ in nuove_r if r_ not in vecchie_r and foto_prec.get("radici") is not None]
+        fuori = lambda k, rr: any(k == r_ or k.startswith(r_ + "/") for r_ in rr)
+        vecchia = {k: v for k, v in foto_prec.get("cartelle", {}).items() if not fuori(k, tolte)}
+        nuova = {k: v for k, v in foto_nuova["cartelle"].items() if not fuori(k, aggiunte)}
+        for r_ in aggiunte:
+            righe.append(("info", "Radice nuova: `%s`%s" % (r_, (" (al posto di `%s`)" % tolte[0]) if len(tolte) == 1 and len(aggiunte) == 1 else "")))
+        for r_ in tolte:
+            if not (len(tolte) == 1 and len(aggiunte) == 1):
+                righe.append(("info", "Radice non più fotografata: `%s`" % r_))
+        spostate, sparite, comparse = confronta(vecchia, nuova)
         seguite = {r_[0] + "/" + r_[1] for r_ in righe_disco if r_[3]}
         seguite |= {etichetta(PROGETTI) + "/" + l["nome"] for l in lavori if l["stati"]}
         for a, b in spostate:
