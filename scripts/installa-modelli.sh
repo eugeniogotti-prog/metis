@@ -48,6 +48,11 @@ else
 fi
 copia "$MOD/memory/MEMORY.md.txt" "$METIS_MEMORY_DIR/MEMORY.md"
 
+# Banco di prova delle skill (decisione del 6/10/2026): la cartella dei casi del cliente, con il protocollo.
+# I casi nascono dalle sue correzioni (CLAUDE.md, «Il ciclo delle correzioni», punto 4).
+mkdir -p "$CL/banco-skill/impegni/casi"
+[ -e "$CL/banco-skill/README.md" ] || cp "$METIS_ROOT/banco/README.md" "$CL/banco-skill/README.md"
+
 # Modelli delle note (giornaliera, settimanale) nella cartella dei template: sintassi di Templater, quindi nessuna
 # sostituzione oltre al nome della cartella delle note giornaliere. Si copiano con Obsidian chiuso (blocco 2).
 DT="$(metis_ruolo TEMPLATE)"

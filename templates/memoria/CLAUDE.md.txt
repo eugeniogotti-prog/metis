@@ -62,6 +62,7 @@ La memoria di Claude ha tre livelli. Il primo si carica a ogni avvio e ha un tet
 1. **Il caso.** Claude registra la correzione in `{{RUOLO_CLAUDE}}/correzioni.md` nello stesso turno, prima di rifare il lavoro, qualunque sia il tipo di correzione. La regola di merito va in `dominio/`, quella che riguarda un solo lavoro nel suo stato. Se la regola riguarda lo stile o il rapporto con {{Nome}}, è univoca e {{Nome}} la conferma, entra subito anche nel profilo.
 2. **La regola.** A inizio mese i casi del mese chiuso diventano regole in `{{RUOLO_CLAUDE}}/regole-di-metodo.md` (lavoro e verifica) o nel profilo (stile e rapporto), fondendo prima di aggiungere. Una regola che serve a un solo compito va nella sua skill.
 3. **Il controllo.** Il doctor misura i tetti e segnala se la distillazione del mese non è stata fatta.
+4. **Il banco di prova.** Se la correzione riguarda il modo in cui lavora una skill (impegni, autorevisione, digest…), Claude scrive anche un caso in `{{RUOLO_CLAUDE}}/banco-skill/<skill>/casi/`, nel formato di `{{RUOLO_CLAUDE}}/banco-skill/README.md`: la situazione di allora, il compito, l'errore e il criterio con cui si riconosce la risposta giusta, senza dati riservati di terzi. Una modifica a una skill si misura sul banco prima di entrare, e entra solo con il sì di {{Nome}}.
 
 ## Inizio sessione
 
