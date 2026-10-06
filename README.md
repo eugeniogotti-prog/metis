@@ -1,130 +1,103 @@
-# Metis (nome provvisorio)
+# Metis
 
-Plugin di Claude Code (solo Mac) che porta su un vault Obsidian il metodo di lavoro con Claude: memoria a tre livelli, profilo del cliente con onboarding, ciclo correzioni → regole, lavori con obiettivo e impegni, mappa delle cartelle e archivio, giri automatici facoltativi.
-Stato: in costruzione, pilota dal 9/10/2026. Il nome del prodotto è una variabile (`METIS_PRODOTTO` in `config/config.example`).
+**Il metodo di lavoro con Claude, nel tuo vault.**
 
-## Installazione sul Mac di un cliente, passo per passo
+Metis fa lavorare Claude Code dentro le tue cartelle, con una memoria organizzata che cresce con le tue correzioni. Claude impara chi sei, come scrivi, su che cosa stai lavorando e che cosa gli hai già corretto, e lo ricorda da una sessione all'altra. Dopo qualche settimana lavora come un collaboratore che ti conosce.
 
-Chi fa che cosa: **chi installa** prepara e guida, **il cliente** usa tastiera e password, **Claude** conduce l'installazione con la skill `installa`, blocco per blocco, e a ogni blocco esegue il controllo di riuscita. Durata: mezza giornata con il profilo e il primo lavoro; i moduli facoltativi si possono rimandare.
+Funziona su Mac, con Claude Code e il tuo abbonamento Claude. Obsidian è consigliato per leggere e scrivere le note.
 
-### Prima della giornata (chi installa)
+## Che cosa ottieni
 
-1. **Le domande al cliente**, per mail:
-   - Mac e versione di macOS; permessi di amministratore;
-   - abbonamento Claude (Pro, Max, oppure Team/Enterprise dell'organizzazione: in quel caso i connettori li governa l'amministratore Claude);
-   - posta e calendario: Google o Microsoft 365; se Microsoft 365, chi è l'IT che può dare il consenso al connettore;
-   - Obsidian sì o no, e se ha già un vault;
-   - **5-10 documenti ben fatti** suoi, di tipi diversi, senza dati riservati di terzi (servono al profilo); meglio ancora coppie «bozza → versione mandata»;
-   - **un lavoro vivo** da usare come primo lavoro;
-   - Telegram sì o no;
-   - **il nome utente GitHub** (o crearne uno): serve per l'accesso al repository.
-2. **L'accesso al repository**: invitare il cliente in lettura e fargli accettare l'invito.
-   ```bash
-   gh api -X PUT repos/eugeniogotti-prog/metis/collaborators/<nome-utente> -f permission=pull
-   ```
-3. **Le schede di dominio di partenza**, se sono state preparate per questo cliente (file `<materia>.md.txt`, ripulite da nomi e casi di chi le ha scritte): su una chiavetta o in un file da mandargli.
-4. **La versione**: prima di una giornata le prove devono passare (`bash tests/test-installa.sh templates/memoria` e le altre in `tests/`).
+- **Un profilo**: le regole su come scrivi e come vuoi lavorare. Parte da un profilo di partenza, nato da mesi di correzioni, che rivedi regola per regola: restano solo quelle in cui ti riconosci.
+- **I tuoi lavori in ordine**: per ogni lavoro un file con l'obiettivo e il perché, a che punto siamo, gli impegni (chi deve muoversi ed entro quando) e i lavori simili già chiusi.
+- **Un diario** delle sessioni, con le decisioni e il loro perché.
+- **Ciò che Claude sa del tuo campo**, con la fonte e il grado di verifica di ogni affermazione.
+- **Una mappa** dei lavori in corso e di quelli chiusi, che a ogni controllo del sistema segnala le cartelle spostate o rinominate.
+- **Protezioni**: mail e messaggi verso altri restano bozze finché non dici di inviarli; prima di cancellare o di operazioni delicate Claude chiede; una cartella riservata, se la indichi, non viene mai letta.
+- **Moduli facoltativi**: posta e calendario (Google o Microsoft 365), lettura di PDF e documenti Office, Telegram e note vocali, giri automatici (briefing del mattino, sistemazione degli arrivi, sintesi della sera, riepilogo della settimana).
 
-### 0. Prerequisiti (dieci minuti)
+## Che cosa ti serve
 
-- **Claude Code** installato (claude.com/claude-code) e collegato al **suo** abbonamento: nel Terminale `claude`, poi `/login` se lo chiede.
-- Se nel Terminale è impostata una chiave API di Anthropic, Claude Code fatturerebbe sulla Console invece che sull'abbonamento: il blocco 0 lo controlla.
-- `/usage` in Claude Code: annotare quanto resta della quota prima di cominciare.
+- un Mac con macOS recente e i permessi di amministratore;
+- un abbonamento Claude (Pro o Max; con un abbonamento Team o Enterprise dell'organizzazione, i connettori di posta e calendario li abilita l'amministratore);
+- **Claude Code** installato (claude.com/claude-code) e collegato al tuo abbonamento;
+- un account **GitHub**, con l'invito al repository di Metis accettato (te lo manda chi ti segue nell'installazione);
+- se vuoi posta e calendario aziendali Microsoft 365: il consenso, una volta, di un amministratore dell'IT;
+- per il profilo: **5-10 tuoi documenti ben fatti**, di tipi diversi, senza dati riservati di altri.
 
-### A. Il plugin (il cliente al Terminale)
+## Installazione
 
-1. `brew install gh`, poi `gh auth login`: GitHub.com → HTTPS → **sì** alla domanda «Authenticate Git with your GitHub credentials?» → login dal browser. Controllo: `gh auth status`.
-2. Il plugin:
-   ```bash
-   claude plugin marketplace add eugeniogotti-prog/metis
-   claude plugin install metis@metis
-   claude plugin list
-   ```
-   Atteso: `metis@metis` «enabled». Claude Code tiene una copia propria del plugin: sul Mac non resta nessuna cartella da conservare. Se il primo comando dice «Please make sure you have the correct access rights», manca l'invito accettato oppure Git non è collegato a GitHub.
+### 1. Collegare il Mac a GitHub (una volta)
 
-**Ripiego senza GitHub**: copiare la cartella del plugin sul Mac (per esempio in `~/Metis`) e lasciarla lì; `claude plugin marketplace add ~/Metis` e `claude plugin install metis@metis`. Con un catalogo locale, tolta la cartella d'origine `claude plugin list` dà il plugin «failed to load» (provato il 3/10/2026).
+Nel Terminale:
+```bash
+brew install gh
+gh auth login
+```
+Scegli GitHub.com e HTTPS, rispondi **sì** alla domanda «Authenticate Git with your GitHub credentials?» e completa il login nel browser. Se `brew` non c'è, prima installa Homebrew da brew.sh.
 
-### B. L'avvio
+### 2. Installare il plugin
 
-`cd "<cartella del vault>"` e `claude` (se il vault non esiste ancora, si crea prima una cartella vuota, per esempio `~/Documents/Vault`). Il cliente scrive **«installa Metis»**. Da qui conduce Claude; chi installa interviene sulle scelte.
+```bash
+claude plugin marketplace add eugeniogotti-prog/metis
+claude plugin install metis@metis
+claude plugin list
+```
+L'ultimo comando deve mostrare `metis@metis` con «enabled».
 
-### C. Blocco 0: dotazione e scelte
+### 3. Lasciar condurre Claude
 
-Claude controlla il Mac (macOS, Claude Code, python3, git, jq, Homebrew, Obsidian) e chiede: dove sta il vault, **in quale cartella del disco il cliente tiene i documenti di lavoro** (resta quella che usa già, fuori dal vault), posta e calendario, Telegram, voce, Mac acceso di giorno, cartella riservata, cartelle da leggere senza toccare. Se manca un programma, Claude dà il comando e il cliente lo esegue (Homebrew chiede la password del Mac).
+Entra nella cartella del tuo vault (o creane una vuota, per esempio `~/Documents/Vault`) e apri Claude Code:
+```bash
+cd ~/Documents/Vault
+claude
+```
+Scrivi **«installa Metis»**. Claude conduce l'installazione un passo alla volta, ti fa le domande e controlla che ogni passo sia riuscito:
+1. **il tuo Mac**: che cosa c'è e che cosa manca; se manca un programma, Claude ti dà il comando da lanciare;
+2. **le cartelle**: se hai già un vault, Claude propone il ruolo di ogni cartella (lavori, aree, risorse, persone, archivio, arrivi, diario) e **non sposta nessuna nota**; se parti da zero, propone una struttura. Ti chiede anche in quale cartella del disco tieni i documenti di lavoro: resta quella che usi già;
+3. **la memoria**: profilo, regole, modelli delle note. Tieni **Obsidian chiuso** in questo passo;
+4. **le protezioni**: alla fine Claude ti chiederà di chiudere Claude Code, riaprirlo nella cartella del vault e **accettare la finestra che chiede se ti fidi della cartella**. Senza quel sì le protezioni non valgono;
+5. **il profilo**: Claude legge i tuoi documenti d'esempio, se acconsenti, e ti presenta il profilo di partenza regola per regola. Circa un'ora;
+6. **i moduli** che scegli, uno alla volta, anche in giorni diversi: «installa google», «installa microsoft», «installa markitdown», «installa telegram», «installa voce», «installa routine»;
+7. **il primo lavoro**: ne scegli uno vivo e Claude ne scrive obiettivo, perché e impegni, in bozza da correggere.
 
-### D. Blocco 1: struttura del vault e mappa
+## Come si lavora: quattro gesti
 
-- **Vault esistente**: Claude legge l'albero delle cartelle e propone quale fa da ingresso, lavori, aree, risorse, persone, archivio, diario. Il cliente corregge. **Nessuna nota si sposta.**
-- **Vault nuovo**: struttura PARA.
-- Quattro domande per la mappa e l'archivio, con le risposte già proposte: quali cartelle tenere d'occhio; se nella cartella dei documenti c'è un «contenitore» i cui figli sono lavori distinti; archivio per anno o piatto; cartelle su disco ferme a fine lavoro (consigliato) o spostate.
+Pensa a Claude come a un collaboratore junior appena arrivato: capace e veloce, ma all'inizio non conosce te né il tuo lavoro. Lo formi lavorando insieme e lui cresce; a differenza di un junior in carne e ossa, non dimentica niente di ciò che gli insegni, perché lo scrive.
 
-### E. Blocco 2: memoria (Obsidian chiuso)
+1. **Aprire**: Claude Code nella cartella del vault. Prima che tu dica una parola, Claude ha già letto il tuo profilo, lo stato dei lavori, gli impegni in scadenza e l'esito dell'ultimo controllo del sistema.
+2. **Correggere**: quando un risultato non va, spiega il perché e lascia che il lavoro lo rifaccia lui: **«questo non va perché…, d'ora in poi…»**. Se lo sistemi a mano, non impara. Le regole di stile che confermi entrano subito nel profilo; ogni mese le correzioni diventano regole stabili.
+3. **Chiudere**: prima di uscire scrivi **«chiudi sessione»**, poi `/exit`. Claude scrive il diario, aggiorna i lavori, le persone e ciò che ha imparato. Se esci senza chiudere, il giorno dopo te lo segnala e propone di ricostruire il diario.
+4. **Decidere**: Claude prepara, tu approvi. Quanto deve chiederti e quanto può fare da solo è una regola del profilo, che cambi quando vuoi.
 
-- **Chiudere Obsidian**: si copiano anche i modelli della nota del giorno e della settimana, che Templater potrebbe alterare appena compaiono (da verificare la prima volta).
-- Se ci sono le schede di partenza, copiarle prima sul Mac e dare a Claude il percorso: vanno in `dominio/`.
-- Claude installa profilo di partenza, stato attuale, regole di metodo, correzioni, decisioni, routine di fine sessione, protocollo di propagazione, `CLAUDE.md`. Se il cliente ha già un suo `CLAUDE.md`, resta com'è e il nucleo di Metis va in `CLAUDE.local.md`.
-- Controllo: il doctor ha i tetti in verde; l'avviso «Onboarding non finito» è atteso.
+La guida breve per tutti i giorni è in [docs/guida-cliente.md](docs/guida-cliente.md).
 
-### F. Blocco 3: hook e permessi
+## Abbonamento, quota e login
 
-Claude installa protezioni e regole. Poi **il cliente chiude Claude Code, lo riapre nel vault e accetta la finestra che chiede se si fida della cartella**: senza quel sì le regole non valgono. Tre prove: all'apertura compare l'orientamento; una lettura nella cartella riservata viene bloccata; una nota senza intestazione produce un avviso.
+- Claude Code usa il tuo abbonamento: la quota è una sola per claude.ai e Claude Code, e la consumano anche i giri automatici. `/usage` in Claude Code mostra quanto ne resta.
+- Posta e calendario passano dai connettori che attivi su claude.ai (Impostazioni → Connettori). Nei giri automatici Claude li legge e non invia niente.
+- Se il login scade, i giri automatici non leggono più posta e calendario e il controllo del mattino lo segnala: apri Claude Code e scrivi `/login`.
+- I giri automatici partono solo con il Mac acceso agli orari scelti.
 
-### G. Profilo (onboarding, fase 1; circa un'ora)
+## Aggiornare
 
-«Riprendi l'onboarding». Claude chiede il consenso a leggere i documenti d'esempio, li legge uno per uno e presenta il **profilo di partenza regola per regola**, dicendo se i documenti la confermano o la contraddicono. Restano solo le regole in cui il cliente si riconosce. Poi le domande che i documenti non risolvono (quanta autonomia, come vuole le risposte), al massimo dodici. Prova finale: Claude scrive un testo breve vero e il cliente lo corregge con il gesto.
-
-### H. Moduli (ciascuno facoltativo: «installa <modulo>»)
-
-- **Posta e calendario.** Google: su claude.ai → Impostazioni → Connettori si attivano Gmail, Calendar e Drive; prova «che cosa ho in calendario domani?»; poi `installa google` mette le routine in sola lettura. Microsoft 365: il connettore di claude.ai, con il consenso di un amministratore dell'IT una volta (testo per l'IT in `skills/installa/references/procedura-m365.md`); poi `installa microsoft`.
-- **Documenti Office e PDF**: `installa markitdown`.
-- **Telefono**: `installa telegram`. Il cliente crea il bot con @BotFather (Claude lo guida a parole) e incolla il token nel comando che Claude gli indica: il token non compare a schermo e non passa dalla chat. Scrive «ciao» al bot; Claude trova la chat e manda una prova. Se vuole, l'ascoltatore: ciò che manda al bot finisce nell'Inbox e può parlare con Claude. Voce: `installa voce`, con una chiave creata dal cliente su console.groq.com.
-- **Giri automatici**: `installa routine`, con gli orari del cliente. Controllo: un briefing di prova scrive la sua riga nella nota del giorno. Costi da dire: Mac acceso agli orari, quota dell'abbonamento.
-
-### I. Primo lavoro (fase 2)
-
-Il cliente sceglie il lavoro vivo. Claude (skill `definizione-obiettivi`) cerca i precedenti (al primo giorno non ce ne sono, e lo dice), scrive lo stato con obiettivo e perché in bozza da correggere, gli impegni, le note delle persone coinvolte, i temi per i tag.
-
-### J. Patto e chiusura (fase 3)
-
-- Il patto: Claude è un **collaboratore junior** che si forma lavorando; quando sbaglia, gli si spiega perché e come migliorare il metodo, senza correggere il file a mano.
-- Il cliente corregge un risultato della giornata con il gesto «questo non va perché…, d'ora in poi…»; Claude registra il caso e, se è di stile, la regola nel profilo.
-- Il cliente scrive **«chiudi sessione»**: Claude scrive il diario, lo stato dell'installazione e un riepilogo.
-
-### Prima di andare via
-
-- [ ] doctor verde, o giallo con motivi noti (di solito: onboarding da completare);
-- [ ] plugin attivo (`claude plugin list`);
-- [ ] la guida per il cliente, [`docs/guida-cliente.md`](docs/guida-cliente.md), letta insieme;
-- [ ] `/usage` a fine giornata;
-- [ ] fissata la call di rodaggio a trenta giorni.
-
-### Se qualcosa va storto
-
-| Problema | Che cosa fare |
-|---|---|
-| Manca Homebrew o un programma | la verifica dà il comando; il cliente lo esegue; si rilancia «installa» |
-| Il catalogo su GitHub non si aggiunge | invito non accettato, oppure Git non collegato: `gh auth login`, sì alla domanda su Git |
-| La posta aziendale non si collega | si prosegue: testo per l'IT, e intanto le mail utili si salvano a mano |
-| L'orientamento non compare | riaprire Claude Code nel vault; controllare che il plugin risulti attivo (`claude plugin list`) |
-| Le regole sembrano non valere | manca la finestra di fiducia: riaprire Claude Code nel vault e accettarla |
-| Un giro automatico fallisce | la nota del giorno ha la riga «⚠️ metis-agent» con il file di log; il doctor lo segnala il mattino dopo |
-| Si rompe qualcosa a metà | ogni blocco si rilancia: «installa <modulo>», oppure «installa» riprende dal primo blocco che non passa |
-| Il tempo non basta | si rimandano telefono, voce e giri automatici: memoria, profilo e primo lavoro sono la parte che conta |
-
-## Aggiornare Metis
-
-Chi mantiene il plugin alza la versione in `.claude-plugin/plugin.json` e pubblica (`git push`). Sul Mac del cliente:
+Quando esce una versione nuova:
 ```bash
 claude plugin marketplace update metis
 claude plugin update metis@metis
 ```
-Con il ripiego locale, prima si copia la versione nuova sopra la cartella del plugin.
 
-## Che cosa c'è
+## Se qualcosa non va
 
-- `skills/` — installa, onboarding, definizione-obiettivi, impegni, autorevisione, archiviazione, daily-digest, weekly-digest, inbox-processor.
-- `hooks/` — orientamento all'avvio, guardia sulle azioni rischiose, controllo delle scritture, salvataggio prima della compattazione.
-- `scripts/` — configurazione e ruoli delle cartelle (`lib/config.sh`, `configura.sh`), installazione (`installa-*.sh`, `verifica-dotazione.sh`), `doctor.sh`, `mappa.py`, `archivia.py`, giri automatici (`metis-agent.sh`), moduli (`moduli/`), Telegram e voce, `trascrizione.py`.
-- `templates/memoria/` — i modelli copiati nel vault del cliente.
-- `docs/guida-cliente.md` — la guida breve per il cliente.
-- `tests/` — prove su vault temporanei: `test-passo3.sh` e `test-installa.sh` (con `templates/memoria`), `test-mappa.sh`, `test-telegram.sh`, `test-routine-google.sh`.
+| Che cosa vedi | Che cosa fare |
+|---|---|
+| `marketplace add` dice «Please make sure you have the correct access rights» | l'invito al repository non è stato accettato, oppure Git non è collegato a GitHub: rifai `gh auth login` e rispondi sì alla domanda su Git |
+| All'apertura non compare l'orientamento di Metis | riapri Claude Code dentro la cartella del vault; controlla con `claude plugin list` che il plugin sia attivo |
+| Le protezioni sembrano non valere | manca il sì alla finestra di fiducia: riapri Claude Code nella cartella del vault e accettala |
+| Il controllo del mattino è giallo o rosso | chiedi a Claude «che cosa dice il doctor?»: legge il report e ti propone il rimedio |
+| Claude non vede più posta o calendario | `/login` in Claude Code; poi controlla su claude.ai che i connettori siano attivi |
+| L'installazione si è interrotta a metà | scrivi di nuovo «installa Metis» (o «installa <modulo>»): riprende dal primo passo non riuscito |
+
+---
+
+*Per chi installa e mantiene Metis: [docs/procedura-installazione.md](docs/procedura-installazione.md).*
