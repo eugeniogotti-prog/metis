@@ -86,6 +86,7 @@ Quando esce una versione nuova:
 claude plugin marketplace update metis
 claude plugin update metis@metis
 ```
+Poi, in Claude Code nel vault: «aggiorna i permessi di Metis». Le regole contengono il percorso del plugin, che cambia a ogni versione; se te ne dimentichi, il controllo del mattino lo segnala.
 
 ## Se qualcosa non va
 

@@ -151,6 +151,13 @@ echo "$OGGI_|Documenti|tempo scaduto" >> "$CL/cache/digest-copertura.log"; echo 
 doctor
 check "fonte saltata 3 giorni su 7: avviso, solo per quella" 'grep -q "⚠️ Digest: la fonte «documenti» è saltata in 3 giorni" "$CL/doctor.md" && ! grep -q "fonte «posta»" "$CL/doctor.md"'
 
+echo "8b. Regole dei permessi e versione del plugin"
+bash "$ROOT/scripts/installa-permessi.sh" >/dev/null 2>&1; doctor
+check "regole allineate al plugin: silenzio" '! grep -q "puntano a un.altra versione" "$CL/doctor.md"'
+check "script del plugin ammessi nei giri" 'grep -qF "Bash(bash $ROOT/scripts/con-timeout.sh *)" "$(dirname "$METIS_CONFIG")/permessi-routine.json"'
+sed -i '' "s#$ROOT/scripts/doctor.sh#/vecchio/plugin/0.1.0/scripts/doctor.sh#" "$(dirname "$METIS_CONFIG")/permessi-routine.json"; doctor
+check "regole di una versione vecchia: avviso" 'grep -q "⚠️ Le regole dei permessi puntano a un.altra versione" "$CL/doctor.md"'
+
 echo "9. Consolidamento delle sezioni Impegni"
 SC="$CL/stati/da-riunire.md"
 printf -- '---\nstatus: attivo\n---\n# Stato\n## Dove siamo\nok\n## Impegni\n- [ ] Primo | 2026-10-20 | palla:me\n\n**Fatti:**\n- [x] Vecchio ✅ 2026-09-01\n\n## 2026-10-01 — voce\n## Impegni\n- [ ] Secondo | 2026-10-21 | palla:me\n  - dettaglio del secondo\n- [x] Chiuso nella voce ✅ 2026-10-01\n## 2026-10-02 — voce\n## Impegni aperti\n- [ ] Primo | 2026-10-20 | palla:me\n' > "$SC"

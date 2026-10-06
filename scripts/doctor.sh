@@ -268,6 +268,13 @@ else
   fi
 fi
 
+# Le regole dei permessi contengono il percorso del plugin, che cambia a ogni versione: dopo un aggiornamento vanno
+# riscritte, altrimenti i giri automatici si vedono negare gli script del plugin (6/10/2026).
+RPERM="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/permessi-routine.json"
+if [ -f "$RPERM" ] && grep -q "/scripts/doctor.sh" "$RPERM" && ! grep -qF "$METIS_ROOT/scripts/doctor.sh" "$RPERM"; then
+  add warn "Le regole dei permessi puntano a un'altra versione del plugin: rilanciare bash \"$METIS_ROOT/scripts/installa-permessi.sh\""
+fi
+
 # --- Copertura del digest (6/10/2026) ---
 # Il digest del mattino appende a cache/digest-copertura.log una riga «AAAA-MM-GG|fonte|motivo» per ogni fonte che non ha
 # potuto leggere. Dichiararlo ogni mattina non basta: se la stessa fonte salta 3 giorni su 7, c'è una causa da trovare.

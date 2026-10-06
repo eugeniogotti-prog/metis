@@ -22,7 +22,7 @@ JOURNAL=$(metis_ruolo JOURNAL); DAILY="$JOURNAL/$OGGI.md"
 mkdir -p "$METIS_LOG_DIR" "$JOURNAL" "$METIS_CL/sessioni"
 
 # Regola in testa a ogni prompt: un giro non ha un dopo.
-REGOLA="[Giro automatico di $METIS_PRODOTTO, senza nessuno davanti allo schermo. Cartella del plugin: $METIS_ROOT. Un giro non ha un dopo: niente attese, niente lavori in background, niente domande. Non mandare mail né messaggi a nessuno: prepara bozze. Chiudi con un resoconto di tre righe al massimo: che cosa hai fatto, dove l'hai scritto, che cosa resta.]"
+REGOLA="[Giro automatico di $METIS_PRODOTTO, senza nessuno davanti allo schermo. Cartella del plugin: $METIS_ROOT. Un giro non ha un dopo: niente attese, niente lavori in background, niente domande. Non mandare mail né messaggi a nessuno: prepara bozze. Comandi di shell semplici, uno per volta, senza variabili né catene con «;» o «&&»: quelli composti vengono rifiutati; per leggere e cercare file usa gli strumenti Read, Grep e Glob. La riga d'esito «🤖 HH:MM <giro>: …» nel «# Memo» la scrive il lanciatore: non scriverla tu; il contenuto del giro (per esempio il briefing) va dove dice la skill. Chiudi con un resoconto di tre righe al massimo: che cosa hai fatto, dove l'hai scritto, che cosa resta.]"
 
 case "$LAVORO" in
   daily-digest)    SKILL=daily-digest;    COMPITO="Esegui la skill daily-digest in modalità mattino." ;;

@@ -117,6 +117,7 @@ Chi mantiene il plugin alza la versione in `.claude-plugin/plugin.json` e pubbli
 claude plugin marketplace update metis
 claude plugin update metis@metis
 ```
+Poi `bash scripts/installa-permessi.sh` dalla cartella del plugin installato (lo fa Claude su «aggiorna i permessi di Metis»): le regole contengono il percorso del plugin, che cambia a ogni versione. Il doctor avvisa se le regole puntano a una versione vecchia.
 Con il ripiego locale, prima si copia la versione nuova sopra la cartella del plugin.
 
 ## Che cosa c'è

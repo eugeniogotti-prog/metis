@@ -38,9 +38,16 @@ allow = [
     "Read(~/.claude/plugins/**)",                              # riferimenti delle skill dentro il plugin (passo 5)
     f"Read({ass(root)}/**)",
     "Bash(ls *)", "Bash(wc *)", "Bash(grep *)", "Bash(head *)", "Bash(tail *)", "Bash(date *)",
+    # sola lettura, per i giri automatici (misura del 6/10: 11 azioni negate in 4 giri, quasi tutte comandi composti
+    # di sola lettura); nelle sessioni non servono, perché sono senza richieste di permesso
+    "Bash(cd *)", "Bash(cat *)", "Bash(sed -n *)", "Bash(sort *)", "Bash(uniq *)", "Bash(cut *)", "Bash(echo *)",
+    "Bash(printf *)", "Bash(stat *)", "Bash(file *)", "Bash(basename *)", "Bash(dirname *)", "Bash(test *)",
+    "Bash(unzip -l *)", "Bash(mdls *)",
     "Bash(pgrep *)", "Bash(textutil *)", "Bash(unzip -p *)", "Bash(mkdir *)",
     "Bash(obsidian move *)", "Bash(obsidian rename *)", "Bash(obsidian daily:append *)", "Bash(obsidian daily:read*)",
     f"Bash(bash {root}/scripts/doctor.sh)",
+    # script del plugin che le skill richiamano nei giri automatici (misura del 6/10)
+    f"Bash(bash {root}/scripts/configura.sh get *)", f"Bash(bash {root}/scripts/con-timeout.sh *)",
     # giri automatici: spostare e togliere singoli file (le cancellazioni ricorsive le ferma la guardia),
     # messaggio sul telefono alla sola chat del cliente, lettura delle pagine dei link salvati nell'Inbox
     "Bash(mv *)", "Bash(cp *)", "Bash(rm *)", "Bash(find *)",
