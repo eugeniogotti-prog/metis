@@ -22,15 +22,17 @@ giudica:   un giudice separato riceve il caso intero e la risposta e dà PASSA o
            «Criterio di successo». Verdetti in <caso>.verdetto.md, riepilogo in RIEPILOGO.md.
 confronta: tabella caso per caso fra due giri (prima e dopo una modifica).
 
-Modelli: METIS_BANCO_ESECUTORE (default opus), METIS_BANCO_GIUDICE (default opus), METIS_BANCO_CONTROLLO
-(default sonnet). Ogni chiamata consuma la quota dell'abbonamento: un giro su 4 casi sono circa 10 chiamate.
+Modelli: METIS_BANCO_ESECUTORE (default opus), METIS_BANCO_GIUDICE (default fable, con ripiego su opus se il piano
+non lo offre), METIS_BANCO_CONTROLLO (default sonnet). Il giudice conta più dell'esecutore per la costanza: il 6/10,
+rigiudicando tre volte le stesse 29 risposte, opus ha cambiato verdetto su 6 casi, fable su 1. Ogni chiamata consuma la quota dell'abbonamento: un giro su 4 casi sono circa 10 chiamate.
 """
 import argparse, concurrent.futures as cf, datetime, json, os, re, subprocess, sys, tempfile
 
 RADICE = os.environ.get("METIS_ROOT") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CL = os.environ.get("METIS_CL", "")
 ESECUTORE = os.environ.get("METIS_BANCO_ESECUTORE", "opus")
-GIUDICE = os.environ.get("METIS_BANCO_GIUDICE", "opus")
+GIUDICE = os.environ.get("METIS_BANCO_GIUDICE", "fable")
+GIUDICE_RIPIEGO = "opus"
 CONTROLLO_MODELLO = os.environ.get("METIS_BANCO_CONTROLLO", "sonnet")
 SCRATCH = tempfile.mkdtemp(prefix="metis-banco-")
 
@@ -156,7 +158,10 @@ def giudica(a):
     def uno(cid):
         caso = open(os.path.join(origine, "casi", cid + ".md"), encoding="utf-8").read()
         risp = open(os.path.join(out, cid + ".risposta.md"), encoding="utf-8").read()
-        v = claude("%s\n\n=== CASO ===\n%s\n=== RISPOSTA DELL'AGENTE ===\n%s" % (ISTRUZIONI_GIUDICE, caso, risp), GIUDICE)
+        prompt = "%s\n\n=== CASO ===\n%s\n=== RISPOSTA DELL'AGENTE ===\n%s" % (ISTRUZIONI_GIUDICE, caso, risp)
+        v = claude(prompt, GIUDICE)
+        if v.startswith("[ERRORE]") and GIUDICE != GIUDICE_RIPIEGO:
+            v = claude(prompt, GIUDICE_RIPIEGO) + "\n\n[giudice: %s, ripiego perché %s non ha risposto]" % (GIUDICE_RIPIEGO, GIUDICE)
         open(os.path.join(out, cid + ".verdetto.md"), "w", encoding="utf-8").write(v + "\n")
         m = re.findall(r"ESITO:\s*(PASSA|PARZIALE\s*\d+/\d+|NON PASSA)", v)
         return cid, m[-1] if m else "?"

@@ -27,3 +27,12 @@ Per la regola di accettazione la v1 **non è accettabile così com'è**, nonosta
 ## 2026-10-06 — v1b misurata, decisione sospesa, skill riportata alla base
 
 v1b (sola prima frase), tre giri sui 15 casi decisivi: migliora es-01, es-02 (3/3), imp-12, imp-13, imp-14, imp-16, imp-20; porta da «passa» a «non passa» imp-02, imp-05, imp-11, imp-23 (2/3 → 0 o 1/3), con imp-05 che peggiora su un punto estraneo alla modifica. Con il rumore misurato (base 24 e 19 su 29) tre esecuzioni non distinguono un effetto dal caso. Decisione di Eugenio: prima si diagnostica lo strumento (giudice o esecutore), poi si decide; intanto la skill torna com'era. v1 e v1b restano candidate.
+
+## 2026-10-06 — diagnosi dello strumento e v1b rimisurata
+
+**Il giudice era la prima fonte di rumore.** Rigiudicando tre volte le stesse 29 risposte di `baseA`: con `opus` cambiano verdetto 6 casi su 29 (totali 22-24 a risposte identiche); con `fable` 1 caso (imp-23). Fra due giri completi la base variava di 5 casi: circa metà del rumore veniva dal giudice. Da qui: `fable` giudice predefinito di `banco.py`, con ripiego su `opus`.
+
+**v1b rigiudicata con `fable`** (le stesse risposte dei giri base A-C e v1b A-C, 15 casi decisivi): **base 28 passaggi su 45, v1b 33**. I «peggioramenti» di imp-02, imp-11 e imp-23 erano oscillazioni del giudice. Migliorano es-01 (0/3 → 2/3), imp-11 (0 → 1), imp-12 (2 → 3), imp-14 (2 → 3), imp-16 (0 → 2). es-02 passa 3/3 già con la base: anche il fallimento che aveva motivato la modifica era rumore del giudice, ma la formula «a detta del cliente» resta ambigua nei casi in cui il cliente ha a sua volta clienti.
+**Unico calo: imp-05**, ripetuto cinque volte per parte: base 2/5, v1b 1/5 (in tutto 4/8 contro 1/8). Il caso è instabile già nella base e fallisce sul punto «dire "ridatato" solo dopo aver scritto la riga», che un esecutore senza strumenti soddisfa a fatica e che la modifica non tocca. Segnato come *instabile*.
+
+Proposta a Eugenio: accettare la v1b (nessun peggioramento oltre il rumore misurato, cinque miglioramenti fra i tenuti da parte). Lezione per il protocollo: la regola «nessun caso da passa a non passa» vale solo con un giudice stabile e almeno tre esecuzioni; altrimenti boccia qualunque modifica.
