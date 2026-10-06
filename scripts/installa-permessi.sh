@@ -48,6 +48,8 @@ allow = [
     f"Bash(bash {root}/scripts/doctor.sh)",
     # script del plugin che le skill richiamano nei giri automatici (misura del 6/10)
     f"Bash(bash {root}/scripts/configura.sh get *)", f"Bash(bash {root}/scripts/con-timeout.sh *)",
+    # la stessa regola con il percorso fra virgolette, come Claude spesso lo scrive (terza misura del 6/10)
+    f'Bash(bash "{root}/scripts/configura.sh" get *)', f'Bash(bash "{root}/scripts/con-timeout.sh" *)',
     # giri automatici: spostare e togliere singoli file (le cancellazioni ricorsive le ferma la guardia),
     # messaggio sul telefono alla sola chat del cliente, lettura delle pagine dei link salvati nell'Inbox
     "Bash(mv *)", "Bash(cp *)", "Bash(rm *)", "Bash(find *)",
