@@ -36,3 +36,7 @@ v1b (sola prima frase), tre giri sui 15 casi decisivi: migliora es-01, es-02 (3/
 **Unico calo: imp-05**, ripetuto cinque volte per parte: base 2/5, v1b 1/5 (in tutto 4/8 contro 1/8). Il caso è instabile già nella base e fallisce sul punto «dire "ridatato" solo dopo aver scritto la riga», che un esecutore senza strumenti soddisfa a fatica e che la modifica non tocca. Segnato come *instabile*.
 
 Proposta a Eugenio: accettare la v1b (nessun peggioramento oltre il rumore misurato, cinque miglioramenti fra i tenuti da parte). Lezione per il protocollo: la regola «nessun caso da passa a non passa» vale solo con un giudice stabile e almeno tre esecuzioni; altrimenti boccia qualunque modifica.
+
+## 2026-10-06 — v1b ACCETTATA
+
+Eugenio: «procedi». La v1b è ora `skills/impegni/SKILL.md`: la base più la sola frase sulla prova con il nome di chi l'ha detta (verificato con un confronto fra i file prima di sostituirla). La v1 resta respinta: la frase «verificato nella posta inviata solo se la posta è stata aperta» rendeva l'agente troppo prudente nel chiudere sulla parola del cliente (imp-11). Prossimo giro: imp-05 (instabile) e imp-22 (fallisce sempre).
