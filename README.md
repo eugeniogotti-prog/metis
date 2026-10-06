@@ -14,7 +14,7 @@ Funziona su Mac, con Claude Code e il tuo abbonamento Claude. Obsidian è consig
 - **Ciò che Claude sa del tuo campo**, con la fonte e il grado di verifica di ogni affermazione.
 - **Una mappa** dei lavori in corso e di quelli chiusi, che a ogni controllo del sistema segnala le cartelle spostate o rinominate.
 - **Protezioni**: Claude lavora senza chiederti il permesso a ogni passo, ma mail e messaggi verso altri restano bozze finché non dici di inviarli; prima di cancellare cartelle o di operazioni delicate chiede; una cartella riservata, se la indichi, e le cartelle con le credenziali del Mac non vengono mai lette.
-- **Moduli facoltativi**: posta e calendario (Google o Microsoft 365), lettura di PDF e documenti Office, Telegram e note vocali, giri automatici (briefing del mattino, sistemazione degli arrivi, sintesi della sera, riepilogo della settimana).
+- **Moduli facoltativi**: posta e calendario (Google o Microsoft 365), lettura di PDF e documenti Office, consegna delle note come documenti Word, Telegram e note vocali, giri automatici (briefing del mattino, sistemazione degli arrivi, sintesi della sera, riepilogo della settimana).
 
 ## Che cosa ti serve
 
@@ -58,7 +58,7 @@ Scrivi **«installa Metis»**. Claude conduce l'installazione un passo alla volt
 3. **la memoria**: profilo, regole, modelli delle note. Tieni **Obsidian chiuso** in questo passo;
 4. **le protezioni**: alla fine Claude ti chiederà di chiudere Claude Code, riaprirlo nella cartella del vault e **accettare la finestra che chiede se ti fidi della cartella** (ed eventualmente l'avviso sulla modalità senza richieste di permesso). Senza quel sì le protezioni non valgono;
 5. **il profilo**: Claude legge i tuoi documenti d'esempio, se acconsenti, e ti presenta il profilo di partenza regola per regola. Circa un'ora;
-6. **i moduli** che scegli, uno alla volta, anche in giorni diversi: «installa google», «installa microsoft», «installa markitdown», «installa telegram», «installa voce», «installa routine»;
+6. **i moduli** che scegli, uno alla volta, anche in giorni diversi: «installa google», «installa microsoft», «installa markitdown», «installa docx», «installa telegram», «installa voce», «installa routine»;
 7. **il primo lavoro**: ne scegli uno vivo e Claude ne scrive obiettivo, perché e impegni, in bozza da correggere.
 
 ## Come si lavora: quattro gesti
