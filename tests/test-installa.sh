@@ -70,7 +70,10 @@ check "copia del file del cliente fatta una volta" '[ -f "$P.prima-di-metis" ] &
 check "nessuna regola doppia dopo due esecuzioni" '[ "$(python3 -c "import json;a=json.load(open(\"$P\"))[\"permissions\"][\"allow\"];print(len(a)-len(set(a)))")" = 0 ]'
 check "lettura del plugin consentita" 'grep -q "Read(~/.claude/plugins/\*\*)" "$P"'
 check "cartella riservata negata in lettura" 'grep -q "_Privato/\*\*)" "$P"'
-check "niente skip-permissions né bypass" '! grep -qi "bypass\|skip" "$P"'
+check "sessioni senza richieste di permesso (decisione del 6/10)" 'python3 -c "import json,sys; sys.exit(0 if json.load(open(\"$P\"))[\"permissions\"][\"defaultMode\"]==\"bypassPermissions\" else 1)"'
+check "divieti sulle cartelle delle credenziali" 'grep -q "Read(~/.ssh/\*\*)" "$P" && grep -q "Library/Keychains" "$P"'
+R_=$(dirname "$METIS_CONFIG")/permessi-routine.json
+check "routine sempre in acceptEdits" 'grep -q "\"defaultMode\": \"acceptEdits\"" "$R_"'
 check "copia per le routine scritta" 'python3 -m json.tool "$T/permessi-routine.json" >/dev/null'
 
 echo "5. Guardia"

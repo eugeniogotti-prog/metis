@@ -9,8 +9,12 @@
 #                                      dove valgono anche senza la finestra di fiducia (verificato con 2.1.284).
 # Le regole di Metis stanno fra quelle del cliente senza sostituirle: si aggiungono le voci mancanti; quelle del
 # cliente restano. Una copia del file precedente va in <vault>/.claude/settings.json.prima-di-metis (solo la prima volta).
-# Niente --dangerously-skip-permissions: modalità predefinita acceptEdits, comandi ammessi per nome, divieti espliciti;
-# le azioni irreversibili e gli invii li ferma l'hook guardia.
+# Sessioni senza richieste di permesso (decisione di Eugenio del 6/10/2026, dopo la misura: 12 richieste in 8 compiti
+# con le sole regole «allow»): modalità predefinita bypassPermissions, la stessa di --dangerously-skip-permissions.
+# Le protezioni restano e non dipendono dalle richieste: i divieti (deny) valgono anche in questa modalità (provato il
+# 6/10: lettura negata di un file vietato), e l'hook guardia blocca la cartella riservata e sudo e chiede conferma per
+# invii, cancellazioni ricorsive e push. Con METIS_PERMESSI=con-richieste si torna ad acceptEdits con le regole allow.
+# Le routine hanno la loro copia, sempre in acceptEdits con gli strumenti ammessi per nome (metis-agent.sh).
 
 set -uo pipefail
 METIS_ROOT="${METIS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
@@ -46,18 +50,23 @@ allow = [
 ]
 if fonti:
     allow += [f"Read({ass(fonti)}/**)", f"Edit({ass(fonti)}/**)"]
-deny = ["Bash(sudo *)", "Bash(rm -rf /*)", "Bash(rm -rf ~*)"]
+deny = ["Bash(sudo *)", "Bash(rm -rf /*)", "Bash(rm -rf ~*)",
+        # cartelle del Mac con chiavi e credenziali: Claude non le legge mai, in nessuna modalità
+        "Read(~/.ssh/**)", "Read(~/.aws/**)", "Read(~/.gnupg/**)", "Read(~/Library/Keychains/**)",
+        "Read(~/.config/gh/**)", "Read(~/.netrc)", "Edit(~/.ssh/**)", "Edit(~/.aws/**)", "Edit(~/.gnupg/**)"]
 if ris:
     deny += [f"Read({ass(vault)}/{ris}/**)", f"Edit({ass(vault)}/{ris}/**)"]
 # cartelle che Claude legge ma non modifica (METIS_SOLA_LETTURA, relative al vault, separate da «|»)
 for c in [x.strip() for x in env.get("METIS_SOLA_LETTURA", "").split("|") if x.strip()]:
     deny += [f"Edit({ass(vault)}/{c}/**)", f"Write({ass(vault)}/{c}/**)"]
-metis = {"permissions": {"defaultMode": "acceptEdits", "allow": allow, "deny": deny,
+modo = "acceptEdits" if env.get("METIS_PERMESSI", "senza-richieste") == "con-richieste" else "bypassPermissions"
+metis = {"permissions": {"defaultMode": modo, "allow": allow, "deny": deny,
                          "additionalDirectories": [fonti] if fonti else []}}
+routine = {"permissions": dict(metis["permissions"], defaultMode="acceptEdits")}
 
 def unisci(base, add):
     p = base.setdefault("permissions", {})
-    p.setdefault("defaultMode", add["permissions"]["defaultMode"])
+    p["defaultMode"] = add["permissions"]["defaultMode"]   # la modalità di Metis prevale (copia del file in .prima-di-metis)
     for k in ("allow", "deny", "additionalDirectories"):
         lista = p.setdefault(k, [])
         for v in add["permissions"][k]:
@@ -67,7 +76,7 @@ def unisci(base, add):
 s = env["S"]
 base = json.load(open(s)) if os.path.exists(s) else {}
 json.dump(unisci(base, metis), open(s, "w"), indent=2, ensure_ascii=False)
-json.dump(metis, open(env["R"], "w"), indent=2, ensure_ascii=False)
-print(f"installa-permessi: {len(allow)} regole allow, {len(deny)} deny → {s}")
+json.dump(routine, open(env["R"], "w"), indent=2, ensure_ascii=False)
+print(f"installa-permessi: modalità {modo}, {len(allow)} regole allow, {len(deny)} deny → {s}")
 print(f"installa-permessi: copia per le routine → {env['R']}")
 PY

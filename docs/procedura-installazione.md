@@ -66,7 +66,7 @@ Claude controlla il Mac (macOS, Claude Code, python3, git, jq, Homebrew, Obsidia
 
 ### F. Blocco 3: hook e permessi
 
-Claude installa protezioni e regole. Poi **il cliente chiude Claude Code, lo riapre nel vault e accetta la finestra che chiede se si fida della cartella**: senza quel sì le regole non valgono. Tre prove: all'apertura compare l'orientamento; una lettura nella cartella riservata viene bloccata; una nota senza intestazione produce un avviso.
+Claude installa protezioni e regole: sessioni **senza richieste di permesso** (`bypassPermissions`, decisione del 6/10/2026), con i divieti e la guardia che restano attivi. Poi **il cliente chiude Claude Code, lo riapre nel vault e accetta la finestra che chiede se si fida della cartella**: senza quel sì le regole non valgono. Tre prove: all'apertura compare l'orientamento; una lettura nella cartella riservata viene bloccata; una nota senza intestazione produce un avviso.
 
 ### G. Profilo (onboarding, fase 1; circa un'ora)
 
