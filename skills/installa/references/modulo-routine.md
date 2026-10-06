@@ -16,7 +16,7 @@ Gli orari si cambiano con `METIS_ORARI_<LAVORO>` nella configurazione (per esemp
 
 `metis-agent.sh <lavoro>` lancia `claude -p` nel vault con:
 - le regole delle routine (`--settings`, la copia scritta da `installa-permessi.sh`), in modalità `acceptEdits`, senza saltare i controlli;
-- i server MCP delle routine (`--mcp-config`: il server Google in sola lettura, MarkItDown) e i loro strumenti ammessi per nome (`METIS_ROUTINE_STRUMENTI`);
+- gli strumenti ammessi per nome (`METIS_ROUTINE_STRUMENTI`): quelli di lettura dei connettori di claude.ai, mentre quelli che scrivono sono negati; più i server MCP locali dichiarati (`--mcp-config`: MarkItDown e, se installato, il server Google in sola lettura);
 - una regola in testa: nessuno è davanti allo schermo, niente attese, niente invii, un resoconto di tre righe.
 L'esito va in una riga sotto «# Memo» nella nota del giorno: 🤖 se riuscito, «⚠️ metis-agent» se fallito. Il doctor del mattino dopo diventa rosso se trova un giro fallito. Il resoconto va anche nel log di sessione del giorno.
 
