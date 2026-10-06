@@ -64,15 +64,40 @@ comandi.append(cur)
 def contiene(percorso):
     a = os.path.realpath(os.path.join(cwd, os.path.expanduser(percorso)))
     return ris_abs == a or ris_abs.startswith(a.rstrip("/") + "/")
+def svolgi(c):
+    """Toglie gli involucri davanti al comando vero (6/10/2026): con-timeout.sh SECONDI, bash/sh <script>, env VAR=…,
+    nice, command, time, sudo è già bloccato altrove. Senza, `bash con-timeout.sh 90 find …` non veniva controllato."""
+    while c:
+        b = os.path.basename(c[0])
+        if b in ("bash", "sh", "zsh") and len(c) > 1 and os.path.basename(c[1]) == "con-timeout.sh":
+            c = c[3:]
+        elif b == "con-timeout.sh":
+            c = c[2:]
+        elif b in ("env", "nice", "command", "time", "nohup"):
+            c = c[1:]
+            while c and ("=" in c[0] and not c[0].startswith("-") or c[0].startswith("-")):
+                c = c[1:]
+        elif "=" in c[0] and not c[0].startswith("-") and os.path.basename(c[0].split("=")[0]) == c[0].split("=")[0]:
+            c = c[1:]                     # VAR=valore davanti al comando
+        else:
+            return c
+    return c
 for c in comandi:
+    c = svolgi(c)
     if not c: continue
     nome = os.path.basename(c[0])
     if nome not in ("grep", "egrep", "rg", "ag", "find"): continue
     if ris in " ".join(c[1:]):          # la cartella è nominata: è un'esclusione (o la regola 1 ha già deciso)
         continue
     if nome == "find":
-        percorsi = []
-        for a in c[1:]:
+        percorsi, args = [], c[1:]
+        # opzioni che stanno PRIMA dei percorsi (BSD e GNU): -H -L -P -E -X -d -s -x, -f <percorso>, -O<livello>
+        while args and (args[0] in ("-H", "-L", "-P", "-E", "-X", "-d", "-s", "-x") or args[0].startswith("-O") or args[0] == "-f"):
+            if args[0] == "-f" and len(args) > 1:
+                percorsi.append(args[1]); args = args[2:]
+            else:
+                args = args[1:]
+        for a in args:
             if a.startswith("-") or a in ("(", "!", ")"): break
             percorsi.append(a)
         percorsi = percorsi or ["."]

@@ -106,6 +106,11 @@ check "find con -not -path della cartella: ammesso" '[ -z "$(r "find . -not -pat
 check "rg con -g !cartella: ammesso" '[ -z "$(r "rg -g !_Privato segreto")" ]'
 check "grep non ricorsivo in una pipe: ammesso" '[ -z "$(r "cat CLAUDE.md | grep Metis")" ]'
 check "find su un'altra cartella del disco: ammesso" '[ -z "$(r "find /tmp -name x")" ]'
+check "find -L su un'altra cartella del disco: ammesso (falso allarme del 6/10)" '[ -z "$(r "find -L /tmp -maxdepth 2 -type f")" ]'
+check "find -L dalla radice del vault: bloccato" 'r "find -L . -type f" | grep -q "\"deny\""'
+check "find avvolto in con-timeout dalla radice: bloccato" 'r "bash /x/scripts/con-timeout.sh 90 find . -name x" | grep -q "\"deny\""'
+check "grep -r avvolto in con-timeout e env: bloccato" 'r "env LC_ALL=C bash /x/scripts/con-timeout.sh 30 grep -r segreto ." | grep -q "\"deny\""'
+check "find avvolto in con-timeout su un'altra cartella: ammesso" '[ -z "$(r "bash /x/scripts/con-timeout.sh 90 find -L /tmp -type f")" ]'
 
 echo "6. Validazione delle scritture"
 w() { printf '{"tool_name":"Write","tool_input":{"file_path":"%s"}}' "$1" | bash "$ROOT/hooks/valida-scrittura.sh" 2>"$T/w.err"; echo $?; }
