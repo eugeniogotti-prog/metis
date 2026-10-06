@@ -25,6 +25,7 @@ case "$*" in *stream-json*)   # evento di avvio con i connettori, come Claude Co
 case "${ESITO_FINTO:-ok}" in
   ok) printf '{"result":"Digest scritto nella nota del giorno.\\nTre scadenze questa settimana.","is_error":false}' ;;
   errore) printf '{"result":"login scaduto","is_error":true}' ;;
+  negate) printf '{"result":"Inbox sistemata.","is_error":false,"permission_denials":[{"tool_name":"Bash","tool_input":{"command":"cd vault; cat nota.md"}},{"tool_name":"WebSearch","tool_input":{"query":"x"}}]}' ;;
   crash) exit 1 ;;
 esac
 EOF
@@ -42,6 +43,9 @@ ESITO_FINTO=errore bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null 2
 check "errore dichiarato da Claude: codice 1 e riga ⚠️ metis-agent" '[ "$RC" = 1 ] && grep -q "⚠️ metis-agent .* daily-digest: fallito" "$D"'
 ESITO_FINTO=crash bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null 2>&1
 check "Claude che si ferma: riga ⚠️ metis-agent" '[ "$(grep -c "⚠️ metis-agent" "$D")" = 2 ]'
+ESITO_FINTO=negate bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null 2>&1
+check "azioni negate: numero nella nota del giorno, dettaglio nel log" 'grep -q "Inbox sistemata. (2 azioni negate" "$D" && grep -q "negata: Bash: cd vault; cat nota.md" "$T/log/daily-digest.log" 2>/dev/null || grep -rq "negata: Bash: cd vault" "$T"'
+check "giro senza negazioni: negate=0 nel log" 'grep -rq "negate=0" "$T"'
 rm -rf "$ROOT/skills/weekly-digest"   # nella copia: simula una skill non ancora installata
 bash "$ROOT/scripts/metis-agent.sh" weekly-digest >/dev/null 2>&1; RC=$?
 check "skill assente nel plugin: il giro non parte e lo dice" '[ "$RC" = 1 ] && grep -q "weekly-digest: non partito, la skill weekly-digest non è ancora nel plugin" "$D"'

@@ -78,6 +78,12 @@ if [ -f "$CL/correzioni.md" ] && grep -q "^## $MESEPREC-" "$CL/correzioni.md" 2>
   echo "- Inizio mese: $N casi di $MESEPREC in correzioni.md da distillare in regole-di-metodo.md e archiviare in archivio/correzioni-$MESEPREC.md (CLAUDE.md, «Prima sessione del mese»)."
   SEGNALI=1
 fi
+# Revisione mensile delle tracce (decisione del 6/10/2026): Claude la propone, il cliente decide. Nei primi 10 giorni,
+# finché non c'è revisioni/<mese>/ (la crea la revisione, oppure Claude con RINUNCIA.md se il cliente dice no).
+G=$(date +%d); G=${G#0}
+if [ "$G" -le 10 ] && [ ! -d "$CL/revisioni/$MESEPREC" ]; then
+  echo "- Inizio mese: proporre al cliente, in una riga, la revisione delle tracce di $MESEPREC (skill revisione-mensile): costa quota, le trascrizioni durano circa 30 giorni. Se dice no: creare revisioni/$MESEPREC/RINUNCIA.md con la data."
+fi
 if ls "$CL/sessioni/$MESEPREC"-*.md >/dev/null 2>&1; then
   echo "- Inizio mese: log di sessione di $MESEPREC da compattare in sessioni/archivio/$MESEPREC.md."
   SEGNALI=1

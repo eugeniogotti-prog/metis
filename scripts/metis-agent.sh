@@ -88,12 +88,23 @@ RESOCONTO=$(printf '%s' "$OUT" | python3 -c 'import json,sys
 try:
     d = json.load(sys.stdin); print(("ERRORE " if d.get("is_error") else "") + (d.get("result") or "").strip())
 except Exception: print("ERRORE uscita non leggibile")' 2>/dev/null)
-echo "$(date '+%F %T') rc=$RC ${DURATA}s $(printf '%s' "$RESOCONTO" | head -1 | cut -c1-200)" >> "$METIS_LOG_DIR/$LAVORO.log"
+# Azioni negate dalle regole delle routine (6/10/2026): un giro che inciampa su un permesso spesso finisce lo stesso,
+# con un ripiego, e senza questa riga nessuno lo saprebbe. Nel log gli strumenti e i comandi, nella nota del giorno il numero.
+NEGATE=$(printf '%s' "$OUT" | python3 -c 'import json,sys
+try: d = json.load(sys.stdin)
+except Exception: sys.exit()
+for x in d.get("permission_denials") or []:
+    i = x.get("tool_input") or {}
+    print("%s: %s" % (x.get("tool_name"), (i.get("command") or i.get("file_path") or json.dumps(i, ensure_ascii=False))[:160].replace("\n", " ")))' 2>/dev/null)
+NNEG=$(printf '%s' "$NEGATE" | grep -c . ; true)
+echo "$(date '+%F %T') rc=$RC ${DURATA}s negate=$NNEG $(printf '%s' "$RESOCONTO" | head -1 | cut -c1-200)" >> "$METIS_LOG_DIR/$LAVORO.log"
+[ "$NNEG" -gt 0 ] && printf '%s\n' "$NEGATE" | sed 's/^/    negata: /' >> "$METIS_LOG_DIR/$LAVORO.log"
 
 if [ "$RC" -ne 0 ] || [ -z "$RESOCONTO" ] || [ "${RESOCONTO#ERRORE}" != "$RESOCONTO" ]; then
   memo "- ⚠️ metis-agent $ORA $LAVORO: fallito (codice $RC, vedi $METIS_LOG_DIR/$LAVORO.log)"
   exit 1
 fi
-memo "- 🤖 $ORA $LAVORO: $(printf '%s' "$RESOCONTO" | head -1 | cut -c1-200)"
+NOTA=""; [ "$NNEG" -gt 0 ] && NOTA=" ($NNEG azioni negate dalle regole delle routine: vedi $METIS_LOG_DIR/$LAVORO.log)"
+memo "- 🤖 $ORA $LAVORO: $(printf '%s' "$RESOCONTO" | head -1 | cut -c1-200)$NOTA"
 printf '\n## %s — giro automatico %s (%s s)\n\n%s\n' "$ORA" "$LAVORO" "$DURATA" "$RESOCONTO" >> "$METIS_CL/sessioni/$OGGI.md"
 exit 0

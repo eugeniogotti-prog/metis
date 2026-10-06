@@ -82,6 +82,18 @@ check "scade: codice 142 (codice $RC)" '[ "$RC" -eq 142 ]'
 bash "$ROOT/scripts/con-timeout.sh" 5 true; RC=$?
 check "non scade: codice del comando (codice $RC)" '[ "$RC" -eq 0 ]'
 
+echo "4b. Proposta della revisione mensile all'avvio"
+G=$(date +%d); G=${G#0}; MP=$(date -v-1m +%Y-%m)
+H=$(echo "{\"cwd\":\"$V\"}" | bash "$ROOT/hooks/session-orient.sh")
+if [ "$G" -le 10 ]; then
+  check "nei primi 10 giorni: proposta della revisione di $MP" 'printf "%s" "$H" | grep -q "revisione delle tracce di $MP"'
+  mkdir -p "$CL/revisioni/$MP"; echo "rinuncia" > "$CL/revisioni/$MP/RINUNCIA.md"
+  H=$(echo "{\"cwd\":\"$V\"}" | bash "$ROOT/hooks/session-orient.sh")
+  check "dopo la rinuncia: nessuna proposta" '! printf "%s" "$H" | grep -q "revisione delle tracce"'
+else
+  check "dopo il giorno 10: nessuna proposta" '! printf "%s" "$H" | grep -q "revisione delle tracce"'
+fi
+
 echo "5. Tracce per la revisione mensile"
 PRJ="$T/projects"; SL=$(cd "$V" && pwd -P | sed 's/[^A-Za-z0-9]/-/g'); mkdir -p "$PRJ/$SL" "$PRJ/$SL-1---Progetti"
 python3 - "$PRJ/$SL/aaaaaaaa-1111.jsonl" "$TG" <<'PY'
