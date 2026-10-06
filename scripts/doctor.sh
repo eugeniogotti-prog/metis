@@ -148,7 +148,13 @@ else
       [ "$E" -gt 0 ] && [ $(( (NOW - E) / 86400 )) -gt 30 ] && DORMIENTI="$DORMIENTI $nome($(( (NOW - E) / 86400 ))gg)"
     fi
   done <<< "$STATI"
-  [ -n "$MULTI" ] && add warn "Stati con più di una sezione ## Impegni (skill impegni):$MULTI" || add ok "Una sola sezione ## Impegni per stato"
+  # Soglie (6/10/2026, dal vault di riferimento): 2-3 sezioni avviso, oltre 3 critico. Ogni sezione in più è un posto
+  # dove un impegno si duplica o resta aperto a fatto avvenuto.
+  MCRIT=$(printf '%s' "$MULTI" | tr ' ' '\n' | sed -n 's/^\(.*\)(\([0-9]*\))$/\2 \1/p' | awk '$1>3{printf "%s %s(%s)", s, $2, $1; s=","}')
+  MWARN=$(printf '%s' "$MULTI" | tr ' ' '\n' | sed -n 's/^\(.*\)(\([0-9]*\))$/\2 \1/p' | awk '$1<=3{printf "%s %s(%s)", s, $2, $1; s=","}')
+  [ -n "$MCRIT" ] && add crit "Stati con più di 3 sezioni ## Impegni, da riunire (skill impegni § 7):$MCRIT"
+  [ -n "$MWARN" ] && add warn "Stati con 2-3 sezioni ## Impegni (skill impegni § 7):$MWARN"
+  [ -z "$MULTI" ] && add ok "Una sola sezione ## Impegni per stato"
   [ "$MALFORMATE" -gt 0 ] && add warn "$MALFORMATE righe d'impegno senza palla valida o attese senza decade:" || add ok "Righe d'impegno a norma"
   [ "$SCADUTI" -gt 0 ] && add warn "$SCADUTI impegni palla:me con la scadenza passata" || add ok "Nessun impegno scaduto"
   [ "$DECADUTE" -gt 0 ] && add warn "$DECADUTE attese oltre la data di decadenza, da chiudere come ⊘ decaduta (auto $OGGI)" || add ok "Nessuna attesa oltre la decadenza"
@@ -171,6 +177,36 @@ case "$RIEP" in
      [ "$NSP" -gt 8 ] && add info "… e altri $((NSP-8)) spostamenti: elenco completo nell'inventario"
      case "$RIEP" in *" 0 fermi "*) ;; *) add info "Lavori fermi da tempo: proposte per l'archivio nell'inventario (skill archiviazione, alla prima sessione del mese)" ;; esac ;;
 esac
+
+# --- Segreti in chiaro nel vault (6/10/2026) ---
+# trascrizione.py oscura token e chiavi quando stampa; questo è il controllo dietro: un segreto incollato in una nota,
+# in un log o in un file arrivato da fuori si vede il giorno dopo. Si stampano solo file e tipo, mai il segreto.
+# La cartella riservata non si legge mai.
+sec "Segreti"
+ESCL=(); RIS=$(metis_ruolo RISERVATA); [ -n "$RIS" ] && ESCL=(--escludi "$RIS")
+SEGR=$(python3 "$METIS_ROOT/scripts/segreti.py" --cerca "$METIS_VAULT" ${ESCL[@]+"${ESCL[@]}"} 2>/dev/null)
+if [ -z "$SEGR" ]; then add ok "Nessun token o chiave in chiaro nelle note"
+else add crit "Token o chiavi in chiaro in $(printf '%s\n' "$SEGR" | grep -c .) note: $(printf '%s\n' "$SEGR" | head -3 | sed "s|$METIS_VAULT/||" | tr '\t\n' ' ;') — oscurarli (le regole sono in scripts/segreti.py) e valutare la revoca"; fi
+
+# --- Portabilità macOS (6/10/2026) ---
+# Comandi GNU che su macOS non esistono o si comportano diversamente: un giro automatico che li usa riceve
+# «command not found» e può leggere l'uscita vuota come un risultato. Si cercano negli script e nelle skill del plugin
+# e nelle istruzioni del vault; al posto di timeout c'è scripts/con-timeout.sh. Poi il PATH dei LaunchAgent di Metis.
+sec "Portabilità macOS"
+PORT=$( { ls "$METIS_ROOT"/scripts/*.sh "$METIS_ROOT"/scripts/*/*.sh "$METIS_ROOT"/hooks/*.sh "$METIS_ROOT"/skills/*/SKILL.md "$METIS_VAULT/CLAUDE.md" "$METIS_VAULT/CLAUDE.local.md" "$CL/regole-di-metodo.md" "$CL/regole-di-metodo-strumenti.md" 2>/dev/null; } \
+  | while IFS= read -r f; do grep -nHE '(^|[`;&|( ])(g?timeout [0-9]+|date -d |grep -[a-zA-Z]*P |readlink -f )' "$f" 2>/dev/null; done \
+  | grep -vE ':[0-9]+:[[:space:]]*#' | grep -vE 'con-timeout|grep -nHE|date -v|date -j' | sed "s|$METIS_ROOT/||; s|$METIS_VAULT/||" | cut -c1-110)
+if [ -n "$PORT" ]; then add warn "Comandi GNU assenti su macOS in $(printf '%s\n' "$PORT" | grep -c .) punti: $(printf '%s\n' "$PORT" | head -3 | tr '\n' ';')"
+else add ok "Nessun comando GNU assente su macOS (timeout, date con -d, grep -P, readlink -f) negli script e nelle istruzioni"; fi
+NOHB=""; NPL=0
+for f in "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL".*.plist; do
+  [ -f "$f" ] || continue; NPL=$((NPL+1))
+  P=$(plutil -extract EnvironmentVariables.PATH raw "$f" 2>/dev/null) || { NOHB="$NOHB $(basename "$f" .plist)"; continue; }
+  case ":$P:" in *:/opt/homebrew/bin:*) ;; *) NOHB="$NOHB $(basename "$f" .plist)" ;; esac
+done
+if [ -n "$NOHB" ]; then add warn "LaunchAgent di $METIS_PRODOTTO con PATH senza /opt/homebrew/bin (python3, ffmpeg, jq di Homebrew non trovati):$NOHB"
+elif [ "$NPL" -gt 0 ]; then add ok "I $NPL LaunchAgent di $METIS_PRODOTTO hanno /opt/homebrew/bin nel PATH"
+else add info "Nessun LaunchAgent di $METIS_PRODOTTO installato"; fi
 
 # --- Log di sessione: se ieri si è lavorato nel vault, il log di ieri deve esserci ---
 sec "Log di sessione"

@@ -39,7 +39,7 @@ Le caselle aperte `- [ ]` si scrivono solo nella sezione `## Impegni`. Il doctor
 
 Una riga può avere righe figlie indentate sotto (dettagli, passaggi): restano attaccate alla riga madre in ogni spostamento.
 
-## 2. Prima di scrivere un impegno: tre domande
+## 2. Prima di scrivere un impegno: quattro domande
 
 **(a) C'è un'azione che deve compiere il cliente, o Claude?**
 - Sì: è un impegno, `palla:me` o `palla:claude`.
@@ -57,6 +57,8 @@ grep -n '^- \[ \]' "$CL"/stati/*.md | grep -i "parola"
 ```
 
 **(c) È già stato fatto?** Se l'impegno è un invio o una risposta, prima di scriverlo si guarda la posta inviata (strumenti della posta, se collegati). «Da verificare se è partita», scritto per una mail che sta nella posta inviata da un giorno, sposta sul cliente un controllo che tocca a Claude. Se la posta non è collegata, lo si chiede al cliente in una riga.
+
+**(d) A che cosa serve?** Ogni impegno esiste per uno scopo: un dato, un documento, una decisione. **Si chiude quando lo scopo è raggiunto**, anche se l'ente o l'interlocutore non ha chiuso il suo calendario. Un monitoraggio «finché esce X» si chiude quando il dato che serviva è arrivato, anche se X è ancora provvisorio; l'eventuale versione successiva diventa al più un `◇`, senza ricerche periodiche. Un'attesa che muore («non mi aspetto riscontri», un documento arrivato solo per conoscenza) **si chiude**: non diventa un compito `palla:me` o `palla:claude` per procurarsi da sé ciò che non arriva, se il cliente non ha detto a che cosa gli serve. Nel dubbio si chiede «a che cosa ti serve?» e si propone di chiudere.
 
 ## 3. Prima di aggiungere una voce datata a uno stato
 
@@ -78,6 +80,8 @@ Tre esiti, e nessun altro:
 - la data spostata avanti: la data di riesame per `palla:loro` (con `decade:` spostato di conseguenza), la scadenza per `palla:me` e `palla:claude`.
 
 La riga chiusa si sposta sotto `**Fatti:**`.
+
+**Quando arriva il fatto di un `◇`**: la riga non si cancella, diventa `◆` (stessa riga, con la data e l'esito) e il fatto va in una riga di log nella voce datata. Se ne segue un'azione nostra, prima di aprirla si controlla che non sia già fatta (posta inviata: § 2c); se è già fatta, si registra e non si apre niente.
 
 - **Un'attesa ha sempre uno dei tre esiti.** Una casella aperta con un testo che racconta la chiusura è una voce fantasma: i conteggi la vedono aperta, chi legge la crede chiusa.
 - **Si chiude su prova.** «Non trovo tracce» non prova niente: molti impegni passano per telefono, a voce o per messaggio. L'errore è asimmetrico: un impegno aperto di troppo si vede al rastrello, uno chiuso e non fatto sparisce. Senza prova, si chiede al cliente; una chiusura sulla sua parola si scrive così: `✅ AAAA-MM-GG — fatto, a detta del cliente`.

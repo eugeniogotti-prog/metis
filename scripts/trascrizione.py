@@ -5,9 +5,12 @@ in ~/.claude/projects/, fuori dal vault.
 
 Uso: trascrizione.py <file .jsonl> [--giorno YYYY-MM-DD]
 Stampa i messaggi dell'utente, i testi di Claude e i nomi degli strumenti usati, in ordine; con --giorno solo quelli
-di quel giorno (ora locale). Gli avvisi di sistema si saltano.
+di quel giorno (ora locale). Gli avvisi di sistema si saltano. Token e chiavi escono oscurati (scripts/segreti.py).
 """
-import json, sys
+import json, os, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from segreti import oscura   # token e chiavi non arrivano mai nel testo stampato (6/10/2026)
 from datetime import datetime
 
 
@@ -37,7 +40,7 @@ def main(a):
                 t = b["text"].strip()
                 if t.startswith("<system-reminder>"):
                     continue
-                print(("Utente: " if tipo == "user" else "Claude: ") + t + "\n")
+                print(("Utente: " if tipo == "user" else "Claude: ") + oscura(t) + "\n")
             elif b.get("type") == "tool_use" and tipo == "assistant":
                 print(f"  [strumento: {b.get('name')}]")
     return 0
