@@ -82,6 +82,25 @@ check "scade: codice 142 (codice $RC)" '[ "$RC" -eq 142 ]'
 bash "$ROOT/scripts/con-timeout.sh" 5 true; RC=$?
 check "non scade: codice del comando (codice $RC)" '[ "$RC" -eq 0 ]'
 
+echo "5. Tracce per la revisione mensile"
+PRJ="$T/projects"; SL=$(cd "$V" && pwd -P | sed 's/[^A-Za-z0-9]/-/g'); mkdir -p "$PRJ/$SL" "$PRJ/$SL-1---Progetti"
+python3 - "$PRJ/$SL/aaaaaaaa-1111.jsonl" "$TG" <<'PY'
+import json, sys
+p, tg = sys.argv[1:]
+r = [{"type": "user", "timestamp": "2099-01-05T09:00:00Z", "message": {"content": "ecco il token " + tg}},
+     {"type": "assistant", "timestamp": "2099-01-05T09:00:05Z", "message": {"content": [{"type": "text", "text": "Ricevuto."}]}},
+     {"type": "user", "timestamp": "2099-02-01T09:00:00Z", "message": {"content": "messaggio del mese dopo"}}]
+open(p, "w").write("\n".join(json.dumps(x) for x in r) + "\n")
+PY
+cp "$PRJ/$SL/aaaaaaaa-1111.jsonl" "$PRJ/$SL-1---Progetti/bbbbbbbb-2222.jsonl"
+OUTR=$(METIS_CLAUDE_PROJECTS="$PRJ" bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; python3 "$0/scripts/revisione-tracce.py" prepara 2099-01' "$ROOT")
+C="$HOME/Library/Caches/metis/revisione-2099-01"
+check "due sessioni del mese, anche da una sottocartella del vault" 'printf "%s" "$OUTR" | grep -q "2 sessioni del 2099-01"'
+check "token oscurato, messaggio del mese dopo escluso" '! grep -rq "$TG" "$C/tracce" && grep -rq "TELEGRAM-OSCURATO" "$C/tracce" && ! grep -rq "mese dopo" "$C/tracce"'
+check "niente dentro il vault" '! grep -rq "Ricevuto" "$V"'
+python3 "$ROOT/scripts/revisione-tracce.py" pulisci 2099-01 >/dev/null
+check "pulizia: cartella temporanea cancellata" '[ ! -d "$C" ]'
+
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]
