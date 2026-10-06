@@ -5,11 +5,15 @@ Stato: in costruzione, pilota dal 9/10/2026. Il nome del prodotto è una variabi
 
 ## Installazione
 
-1. Copiare la cartella del plugin sul Mac, in un posto dove resterà (per esempio `~/Metis`): con un catalogo locale, tolta la cartella d'origine `claude plugin list` dà il plugin «failed to load» (provato il 3/10/2026; il comportamento in una sessione vera non è ancora provato).
-2. `claude plugin marketplace add ~/Metis` e `claude plugin install metis@metis-locale`.
+Il plugin sta in un repository privato su GitHub (`eugeniogotti-prog/metis`): serve un account GitHub con accesso al repository e Git collegato a quell'account sul Mac (`gh auth login`).
+
+1. `claude plugin marketplace add eugeniogotti-prog/metis`
+2. `claude plugin install metis@metis`
 3. Aprire Claude Code nella cartella del vault e scrivere «installa Metis»: la skill `installa` conduce blocco per blocco.
 
-Aggiornamento: copiare la versione nuova sopra la vecchia, poi `claude plugin marketplace update metis-locale` e `claude plugin update metis@metis-locale`.
+Aggiornamento: `claude plugin marketplace update metis` e `claude plugin update metis@metis`.
+
+Senza GitHub (ripiego provato il 3/10/2026): copiare la cartella del plugin sul Mac in un posto dove resterà, `claude plugin marketplace add <cartella>` e `claude plugin install metis@metis`. Con un catalogo locale, tolta la cartella d'origine `claude plugin list` dà il plugin «failed to load».
 
 ## Che cosa c'è
 

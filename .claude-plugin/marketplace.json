@@ -1,7 +1,14 @@
 {
-  "name": "metis-locale",
-  "owner": { "name": "Metis" },
+  "name": "metis",
+  "owner": {
+    "name": "Eugenio Gotti"
+  },
   "plugins": [
-    { "name": "metis", "source": "./", "description": "Memoria a tre livelli, onboarding e ciclo correzioni → regole per un vault Obsidian con Claude Code." }
-  ]
+    {
+      "name": "metis",
+      "source": "./",
+      "description": "Memoria a tre livelli, onboarding e ciclo correzioni → regole per un vault Obsidian con Claude Code."
+    }
+  ],
+  "description": "Metis: il metodo di lavoro con Claude Code in un vault Obsidian"
 }
