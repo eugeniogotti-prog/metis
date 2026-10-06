@@ -5,7 +5,7 @@ Stato: in costruzione, pilota dal 9/10/2026. Il nome del prodotto è una variabi
 
 ## Installazione
 
-1. Copiare la cartella del plugin sul Mac, in un posto dove resterà (per esempio `~/Metis`): Claude Code carica il plugin da lì a ogni avvio, e se la cartella sparisce il plugin non si carica (provato il 3/10/2026).
+1. Copiare la cartella del plugin sul Mac, in un posto dove resterà (per esempio `~/Metis`): con un catalogo locale, tolta la cartella d'origine `claude plugin list` dà il plugin «failed to load» (provato il 3/10/2026; il comportamento in una sessione vera non è ancora provato).
 2. `claude plugin marketplace add ~/Metis` e `claude plugin install metis@metis-locale`.
 3. Aprire Claude Code nella cartella del vault e scrivere «installa Metis»: la skill `installa` conduce blocco per blocco.
 
