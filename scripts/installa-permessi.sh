@@ -9,7 +9,7 @@
 #                                      dove valgono anche senza la finestra di fiducia (verificato con 2.1.284).
 # Le regole di Metis stanno fra quelle del cliente senza sostituirle: si aggiungono le voci mancanti; quelle del
 # cliente restano. Una copia del file precedente va in <vault>/.claude/settings.json.prima-di-metis (solo la prima volta).
-# Sessioni senza richieste di permesso (decisione di Eugenio del 6/10/2026, dopo la misura: 12 richieste in 8 compiti
+# Sessioni senza richieste di permesso (decisione del 6/10/2026, dopo la misura: 12 richieste in 8 compiti
 # con le sole regole «allow»): modalità predefinita bypassPermissions, la stessa di --dangerously-skip-permissions.
 # Le protezioni restano e non dipendono dalle richieste: i divieti (deny) valgono anche in questa modalità (provato il
 # 6/10: lettura negata di un file vietato), e l'hook guardia blocca la cartella riservata e sudo e chiede conferma per
