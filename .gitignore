@@ -4,3 +4,7 @@ prove/**
 !prove/*/resoconto.md
 !prove/*/claude-prova.sh
 .DS_Store
+
+# File compilati di Python: li rigenera ogni esecuzione degli script e dei test.
+__pycache__/
+*.pyc
