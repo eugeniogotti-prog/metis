@@ -29,7 +29,8 @@ check "invio del connettore con conferma" '[ "$(decisione mcp__${UUID}__send_mes
 echo "2b. Guardia sulle cancellazioni (23/10/2026)"
 check "cestino di Drive del connettore (UUID) con conferma" '[ "$(decisione mcp__${UUID}__trash_file)" = ask ]'
 check "evento cancellato con conferma" '[ "$(decisione mcp__claude_ai_Google_Calendar__delete_event)" = ask ]'
-check "bozza cancellata con conferma (delete_draft non esce come bozza)" '[ "$(decisione mcp__gmail-locale__delete_draft)" = ask ]'
+check "bozza cancellata senza conferma" '[ "$(decisione mcp__gmail-locale__delete_draft)" = passa ] && [ "$(decisione mcp__claude_ai_Gmail__delete_draft)" = passa ]'
+check "mail cancellata con conferma" '[ "$(decisione mcp__google-workspace__delete_email)" = ask ]'
 check "cestino svuotato e cancellazione in blocco con conferma" '[ "$(decisione mcp__google-workspace__empty_trash)" = ask ] && [ "$(decisione mcp__google-workspace__batch_delete)" = ask ]'
 check "file tolto con conferma" '[ "$(decisione mcp__drive__remove_file)" = ask ]'
 check "bozza nuova libera" '[ "$(decisione mcp__gmail-locale__draft_email)" = passa ]'

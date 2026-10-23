@@ -79,9 +79,9 @@ routine_deny = []
 if env.get("METIS_POSTA", "connettori") == "locale":
     g = lambda nomi: ["mcp__gmail-locale__" + n for n in nomi.split()]
     legge = g("search_emails read_email download_attachment list_drafts list_labels list_filters get_status list_tools")
-    bozze = g("draft_email")
+    bozze = g("draft_email delete_draft")
     scrive = g("send_email modify_email update_label get_or_create_label create_filter")
-    cancella = g("delete_email delete_draft delete_label delete_filter")
+    cancella = g("delete_email delete_label delete_filter")
     allow += legge + bozze + [f"Bash(node {root}/scripts/gmail-bozza.mjs *)", f'Bash(node "{root}/scripts/gmail-bozza.mjs" *)',
                               f"Bash(python3 {root}/scripts/google-token.py*)"]
     ask += scrive        # invii ed etichette: conferma del cliente (la guardia chiede anche lei per gli invii)
