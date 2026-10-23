@@ -4,6 +4,8 @@
 #   2. azioni irreversibili: cancellazioni ricorsive, cestino di Obsidian, push, reset, scaricamento dei LaunchAgent → conferma (ask);
 #   3. invii verso l'esterno: strumenti di posta e messaggistica che mandano, inoltrano o rispondono; eventi di calendario
 #      con invitati e risposte agli inviti; condivisioni di file e cartelle (Drive) → conferma (ask).
+# L'azione si riconosce dalla fine del nome dello strumento: nell'app di Claude i connettori si chiamano
+# mcp__<identificativo>__<azione>, non mcp__claude_ai_<servizio>__<azione> come in Claude Code (verificato il 23/10/2026).
 # Le bozze restano libere. In una sessione non interattiva (claude -p) una richiesta di conferma equivale a un blocco:
 # è il comportamento voluto per i giri automatici (verificato con Claude Code 2.1.284).
 # Uscita: JSON hookSpecificOutput sullo stdout quando decide; niente output quando lascia passare.

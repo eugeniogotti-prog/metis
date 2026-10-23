@@ -1,7 +1,7 @@
 {
   "name": "metis",
   "description": "Memoria a tre livelli, onboarding e ciclo correzioni → regole per un vault Obsidian con Claude Code.",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "author": {
     "name": "Eugenio Gotti"
   }

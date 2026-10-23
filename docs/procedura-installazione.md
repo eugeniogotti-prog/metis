@@ -111,6 +111,14 @@ Il cliente sceglie il lavoro vivo. Claude (skill `definizione-obiettivi`) cerca 
 | Si rompe qualcosa a metà | ogni blocco si rilancia: «installa <modulo>», oppure «installa» riprende dal primo blocco che non passa |
 | Il tempo non basta | si rimandano telefono, voce e giri automatici: memoria, profilo e primo lavoro sono la parte che conta |
 
+## Connettori e protezioni nell'app di Claude
+
+Verificato il 23/10/2026 in una prova con l'app di Claude e Metis installato:
+
+- **Nomi degli strumenti.** Nell'app i connettori di claude.ai si chiamano `mcp__<identificativo>__<azione>` (per esempio `mcp__0a1b2c3d-…__send_message`), con un identificativo che cambia da un account all'altro. In Claude Code al Terminale lo stesso strumento si chiama `mcp__claude_ai_Gmail__send_message`. Una regola di permesso scritta per nome (un `deny` su `mcp__claude_ai_Gmail__send_message`) nell'app quindi **non scatta**. La guardia riconosce l'azione dalla fine del nome (`send_message`, `reply`, `share_file`, `create_event`…) e vale con entrambe le forme. Un divieto o un permesso su un connettore che deve valere anche nell'app va scritto come hook che legge la fine del nome, non come regola per nome.
+- **Modalità Auto.** La richiesta di conferma della guardia (`ask`) arriva al cliente come finestra di conferma: se conferma, l'azione parte. È il comportamento voluto: un invio parte solo con il suo via. Per un «mai», invece, serve un hook che risponda `deny`.
+- **Routine.** Le regole delle routine (`installa google`, `installa microsoft`) restano per nome: i giri automatici girano in Claude Code (`claude -p`), dove i nomi sono `mcp__claude_ai_…`.
+
 ## Aggiornare Metis
 
 Chi mantiene il plugin alza la versione in `.claude-plugin/plugin.json` e pubblica (`git push`). Sul Mac del cliente:

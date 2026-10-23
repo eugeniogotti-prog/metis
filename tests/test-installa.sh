@@ -98,6 +98,10 @@ check "risposta a un invito: conferma" 'g mcp__claude_ai_Google_Calendar__respon
 check "condivisione di un file: conferma" 'g mcp__claude_ai_Google_Drive__share_file "$V" "{}" | grep -q "\"ask\""'
 check "condivisione multipla: conferma" 'g mcp__google-workspace-mcp__batch_share "$V" "{}" | grep -q "\"ask\""'
 check "lettura dei permessi di condivisione: passa" '[ -z "$(g mcp__google-workspace-mcp__get_sharing "$V" "{}")" ]'
+APP=mcp__0a1b2c3d-0000-4000-8000-000000000000   # nome di un connettore nell'app di Claude (identificativo inventato)
+check "app: invio di posta con il nome dell'app: conferma" 'g ${APP}__send_message "$V" "{\"to\":\"a@b.it\"}" | grep -q "\"ask\""'
+check "app: bozza con il nome dell'app: passa" '[ -z "$(g ${APP}__create_draft "$V" "{}")" ]'
+check "app: condivisione con il nome dell'app: conferma" 'g ${APP}__share_file "$V" "{}" | grep -q "\"ask\""'
 check "lettura normale: passa" '[ -z "$(g Read "$V" "{\"file_path\":\"$V/CLAUDE.md\"}")" ]'
 check "fuori dal vault: nessun intervento" '[ -z "$(g Bash "$T" "{\"command\":\"rm -rf x\"}")" ]'
 
