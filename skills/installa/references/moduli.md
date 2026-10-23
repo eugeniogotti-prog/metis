@@ -25,7 +25,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 2. `bash scripts/moduli/docx.sh installa`: crea l'ambiente Python del modulo con python-docx (serve la rete).
 3. Facoltativo: il modello Word del cliente, con i suoi stili e, se vuole la data nel piè di pagina, il segnaposto `§DATA§`: `bash scripts/configura.sh set METIS_DOCX_MODELLO "<percorso del .docx>"`.
 
-**Uso**: `bash scripts/docx/esporta-docx.sh <nota.md> [-o file.docx] [--toc] [--borders]`. Senza `-o` il documento va nella cartella dei documenti di lavoro, fuori dal vault. Se il documento è aperto in Word, o è stato salvato da qualcuno dopo l'ultima esportazione, lo script si ferma (codice 3) per non cancellare quelle modifiche: si chiude Word o si scrive su un altro file; `--forza` solo su indicazione del cliente. Versioni finali in Word solo quando il cliente le chiede.
+**Uso**: `bash scripts/docx/esporta-docx.sh <nota.md> [-o file.docx] [--toc] [--borders]`. Senza `-o` il documento va nella radice della cartella fonti, dove il doctor lo segnala come file sciolto: per un documento da consegnare si passa `-o "<cartella del lavoro>/_OUT/YYYY-MM-DD <nome>.docx"`. Se il documento è aperto in Word, o è stato salvato da qualcuno dopo l'ultima esportazione, lo script si ferma (codice 3) per non cancellare quelle modifiche: si chiude Word o si scrive su un altro file; `--forza` solo su indicazione del cliente. Versioni finali in Word solo quando il cliente le chiede.
 
 **Controllo:** `bash scripts/moduli/docx.sh controlla`.
 

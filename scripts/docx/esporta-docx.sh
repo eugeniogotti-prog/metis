@@ -4,7 +4,8 @@
 #
 # Uso: esporta-docx.sh <nota.md> [-o file.docx] [--toc] [--borders] [--forza]
 #   -o        file d'uscita. Senza -o: <cartella dei documenti>/<nome della nota>.docx (METIS_FONTI), perché i file
-#             binari stanno fuori dal vault; se la cartella non è configurata, accanto alla nota.
+#             binari stanno fuori dal vault; se la cartella non è configurata, accanto alla nota. Per un documento da
+#             consegnare si passa -o nella _OUT/ della cartella del lavoro: nella radice il doctor lo segnala come sciolto.
 #   --toc     indice dei contenuti (due livelli)
 #   --borders bordi sottili su tutte le tabelle
 #   --forza   scavalca la guardia (file aperto in Word o modificato a mano dopo l'ultima esportazione)

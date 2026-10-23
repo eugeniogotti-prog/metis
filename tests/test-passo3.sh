@@ -138,6 +138,35 @@ check "configurazione assente: doctor esce con 2" '[ "$RC" -eq 2 ]'
 H=$(echo '{}' | METIS_CONFIG="$T/manca" bash "$ROOT/hooks/session-orient.sh"; echo "rc=$?")
 check "configurazione assente: hook muto e codice 0" '[ "$H" = "rc=0" ]'
 
+echo "6. Cartella fonti: una cartella per lavoro"
+V5="$T/vault cinque"; M5="$T/mem5"; F5="$T/fonti cinque"
+installa "$V5" "$M5" "_Claude" "0 - Inbox" >/dev/null
+check "modello: regola della cartella per lavoro in CLAUDE.md" 'grep -q "una cartella per lavoro" "$V5/CLAUDE.md" && grep -q "_IN/" "$V5/CLAUDE.md" && grep -q "_OUT/" "$V5/CLAUDE.md" && grep -q "_Risorse/" "$V5/CLAUDE.md"'
+config "$T/c5" "$V5" "$M5" "METIS_FONTI=$F5"
+stato() {  # stato <nome> <fonte-primaria>
+  printf -- "---\nstatus: attivo\nfonte-primaria: '%s'      # cartella su disco\nupdated_at: %s\n---\n\n# %s\n" "$2" "$(date +%F)" "$1" > "$V5/_Claude/stati/$1.md"
+}
+mkdir -p "$F5/Ente - tema/"{_IN,_fonti,_OUT} "$F5/_Risorse/norme" "$T/altrove/Fuori"
+stato lavoro-a "Ente - tema"
+stato lavoro-fuori "$T/altrove/Fuori"
+touch "$F5/.DS_Store" "$F5/_Risorse/norme/legge.pdf"
+d5() { METIS_CONFIG="$T/c5" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>"$T/d5.err"; cat "$V5/_Claude/doctor.md"; }
+D=$(d5)
+check "fonti in ordine: nessun file sciolto (file nascosti e _Risorse esclusi)" 'printf "%s" "$D" | grep -q "Nessun file sciolto nella radice della cartella fonti"'
+check "fonti in ordine: cartella del lavoro con la struttura" 'printf "%s" "$D" | grep -q "con _IN, _fonti e _OUT (1)"'
+check "cartella fuori dalla cartella fonti: non giudicata" '! printf "%s" "$D" | grep -q "Fuori (manca"'
+check "fonti in ordine: stderr del doctor vuoto" '[ ! -s "$T/d5.err" ]'
+touch "$F5/scaricato.pdf" "$F5/bozza.docx"
+mkdir -p "$F5/Altro ente - altro tema/_IN"
+stato lavoro-b "$F5/Altro ente - altro tema/"
+D=$(d5)
+check "file sciolti nella radice: avviso con il numero" 'printf "%s" "$D" | grep -q "⚠️ 2 file sciolti nella radice della cartella fonti"'
+check "cartella senza _fonti e _OUT: avviso che dice che cosa manca" 'printf "%s" "$D" | grep -q "Altro ente - altro tema (manca _fonti _OUT)"'
+check "la cartella completa non compare fra quelle segnalate" '! printf "%s" "$D" | grep -q "Ente - tema (manca"'
+check "fonti in disordine: solo avvisi, doctor senza rosso" 'METIS_CONFIG="$T/c5" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1'
+rm -rf "$F5"
+check "cartella fonti assente: informazione, non avviso" 'd5 | grep -q "ℹ️ Cartella fonti non ancora creata"'
+
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]

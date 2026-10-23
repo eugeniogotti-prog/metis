@@ -215,6 +215,12 @@ PY2
 [ -n "$ANGOLARI" ] && printf '%s\n' "$ANGOLARI" | sed 's/^/     /'
 check "nessuna parentesi angolare nelle intestazioni (l'app rifiuterebbe il plugin)" '[ -z "$ANGOLARI" ]'
 
+echo "10. Una cartella per lavoro: skill allineate alla regola di CLAUDE.md"
+check "inbox-processor: un file ricevuto va nella _IN del lavoro, mai nella radice" 'grep "file ricevuto" "$ROOT/skills/inbox-processor/SKILL.md" | grep -q "_IN/" && grep "file ricevuto" "$ROOT/skills/inbox-processor/SKILL.md" | grep -q "nella radice della cartella fonti non va"'
+check "installa: le cartelle dei lavori nascono al primo lavoro" 'grep -q "nascono al primo lavoro" "$ROOT/skills/installa/references/blocco-0-dotazione.md"'
+check "archiviazione: la cartella su disco resta intera dov'è" 'grep -q "la cartella su disco resta dov.è" "$ROOT/skills/archiviazione/SKILL.md"'
+check "Word da consegnare: nella _OUT del lavoro" 'grep -q "_OUT/YYYY-MM-DD" "$ROOT/skills/installa/references/moduli.md"'
+
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]

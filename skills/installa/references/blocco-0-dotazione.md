@@ -6,7 +6,7 @@
 
 Una domanda alla volta, ciascuna con una proposta. Le risposte decidono i moduli.
 1. Il vault: ne ha già uno (dove) o se ne crea uno nuovo (dove)? Usa Obsidian?
-2. I documenti di lavoro (PDF, Word, fogli): in quale cartella del disco stanno, o dove vuole tenerli? Diventa la cartella fonti (`METIS_FONTI`), fuori dal vault.
+2. I documenti di lavoro (PDF, Word, fogli): in quale cartella del disco stanno, o dove vuole tenerli? Diventa la cartella fonti (`METIS_FONTI`), fuori dal vault. L'installazione crea solo la cartella: le cartelle dei lavori, con `_IN/`, `_fonti/` e `_OUT/`, nascono al primo lavoro (`CLAUDE.md`, «una cartella per lavoro»), e le cartelle che il cliente ha già non si riordinano.
 3. Posta e calendario: Google (Gmail o Google Workspace), Microsoft 365, altro? Se l'account è aziendale, l'amministratore consente le app di terzi?
 4. Telefono: usa Telegram? Vuole ricevere il riepilogo del mattino sul telefono, mandare cose al vault dal telefono, parlare con Claude dal telefono?
 5. Voce: vuole dettare note vocali che diventano note nel vault?

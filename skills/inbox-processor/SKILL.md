@@ -57,7 +57,7 @@ Per ogni nota, letta per intero:
 | riunione | data, partecipanti, lavoro, argomenti, decisioni (formali, orientamenti, semplici apprezzamenti: distinti), azioni con chi e quando |
 | memo personale | idea centrale, collegamenti a lavori e aree |
 | articolo web | per un link: aprire la pagina (se l'accesso al web non è consentito, dirlo nel riscontro e lasciare la nota con il solo link); riassunto in 5-8 righe, 3-5 punti chiave, perché conta per il cliente |
-| file ricevuto | spostare il file dalla sottocartella `files/` alla cartella fonti su disco, nella sottocartella del lavoro se è chiaro; leggerlo (PDF direttamente, Word con lo strumento di conversione); scrivere la nota che lo descrive con il percorso del file |
+| file ricevuto | spostare il file dalla sottocartella `files/` nella `_IN/` della cartella del suo lavoro sulla cartella fonti (`CLAUDE.md`, «una cartella per lavoro»), nel formato originale; se il lavoro non è chiaro, il file resta in `files/` e il riscontro lo segnala come da collocare, perché nella radice della cartella fonti non va; leggerlo (PDF direttamente, Word con lo strumento di conversione); scrivere la nota che lo descrive con il percorso del file |
 | appunto o testo inoltrato | idea centrale, a quale lavoro o interesse si aggancia |
 | mail salvata | mittente, data, argomento, richieste, informazioni utili |
 | nota generica | riassunto, collegamenti |

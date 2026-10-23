@@ -3,7 +3,7 @@
 # L'hook di avvio ne mostra il sunto. Fa anche da test di conformità dopo un'installazione o un aggiornamento.
 #
 # Controlli: tetti del contesto (letti dalla tabella di _Claude.md), onboarding, operazioni di inizio mese,
-# frontmatter e tag, stati e impegni, mappa delle cartelle, log di sessione, Inbox, automazioni, log grandi, affidabilità del report.
+# frontmatter e tag, stati e impegni, mappa delle cartelle, cartella fonti, log di sessione, Inbox, automazioni, log grandi, affidabilità del report.
 # Percorsi e ruoli dalla configurazione (scripts/lib/config.sh): nessun percorso scritto qui.
 #
 # Uso: bash doctor.sh            (configurazione in ~/.config/metis/config o in $METIS_CONFIG)
@@ -251,6 +251,36 @@ else
   VECCHIA=$(find "$INBOX" -maxdepth 3 -name "*.md" -mtime +7 2>/dev/null | head -1)
   [ -n "$VECCHIA" ] && add warn "Almeno una nota ferma in Inbox da più di 7 giorni: $(basename "$VECCHIA" .md)"
   [ "$TOT" -le 5 ] && [ -z "$VECCHIA" ] && add ok "Inbox sotto controllo"
+fi
+
+# --- Cartella fonti (23/10/2026): una cartella per lavoro, con _IN, _fonti e _OUT (CLAUDE.md, «Binari su disco») ---
+# Solo avvisi. Si guardano i file sciolti nella radice e le cartelle dei lavori aperti (fonte-primaria degli stati non
+# archiviati, dentro la cartella fonti): le cartelle che il cliente aveva prima di Metis non si giudicano.
+sec "Cartella fonti"
+FONTI="${METIS_FONTI%/}"
+if [ ! -d "$FONTI" ]; then
+  add info "Cartella fonti non ancora creata ($FONTI)"
+else
+  NSCIOLTI=$(find "$FONTI" -maxdepth 1 -type f ! -name ".*" 2>/dev/null | conta)
+  if [ "$NSCIOLTI" -gt 0 ]; then
+    add warn "$NSCIOLTI file sciolti nella radice della cartella fonti, da portare nella cartella del loro lavoro o in _Risorse/<tema>/: $(find "$FONTI" -maxdepth 1 -type f ! -name ".*" 2>/dev/null | sed 's#.*/##' | sort | head -3 | tr '\n' ';')"
+  else add ok "Nessun file sciolto nella radice della cartella fonti"; fi
+  SENZA=""; NLAV=0
+  for s in "$CL"/stati/*.md; do
+    case "$(basename "$s")" in _*) continue ;; esac
+    [ -f "$s" ] || continue
+    fp=$(awk 'NR==1 && /^---$/ {f=1; next} f && /^---$/ {exit} f && /^fonte-primaria:/ {sub(/^fonte-primaria:[[:space:]]*/, ""); sub(/[[:space:]]+#.*$/, ""); print}' "$s" | tr -d "'\"")
+    [ -n "$fp" ] || continue
+    case "$fp" in /*) d="$fp" ;; "~"*) d="$HOME${fp#\~}" ;; *) d="$FONTI/$fp" ;; esac
+    d="${d%/}"
+    case "$d/" in "$FONTI"/?*) ;; *) continue ;; esac   # fuori dalla cartella fonti: non si giudica
+    [ -d "$d" ] || continue                             # cartella sparita: la segnala la mappa
+    NLAV=$((NLAV+1)); manca=""
+    for sub in _IN _fonti _OUT; do [ -d "$d/$sub" ] || manca="$manca $sub"; done
+    [ -n "$manca" ] && SENZA="$SENZA ${d#"$FONTI"/} (manca$manca);"
+  done
+  if [ -n "$SENZA" ]; then add warn "Cartelle di lavoro senza la struttura _IN, _fonti, _OUT:$SENZA"
+  elif [ "$NLAV" -gt 0 ]; then add ok "Cartelle dei lavori aperti con _IN, _fonti e _OUT ($NLAV)"; fi
 fi
 
 # --- Automazioni ---
