@@ -57,6 +57,10 @@ allow = [
     # ricostruzione del log di una sessione non chiusa, dalla trascrizione che Claude Code tiene fuori dal vault
     f"Bash(python3 {root}/scripts/trascrizione.py *)",
 ]
+# Cartella fonti: con i documenti accanto alle note (default) è la cartella dei progetti, dentro il vault, e non serve
+# nessuna regola; solo una cartella fuori dal vault (METIS_DOCUMENTI=separati) entra fra le cartelle aggiuntive.
+fuori = lambda p: os.path.realpath(p) != os.path.realpath(vault) and not os.path.realpath(p).startswith(os.path.realpath(vault) + os.sep)
+fonti = fonti if fonti and fuori(fonti) else ""
 if fonti:
     allow += [f"Read({ass(fonti)}/**)", f"Edit({ass(fonti)}/**)"]
 deny = ["Bash(sudo *)", "Bash(rm -rf /*)", "Bash(rm -rf ~*)",

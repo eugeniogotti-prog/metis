@@ -17,7 +17,7 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 
 ## 1. Verificare per smentire
 
-- Prima di dire «non c'è», elencare i posti dove starebbe e guardarli tutti: note del vault, fonti su disco, posta ricevuta e inviata, calendario.
+- Prima di dire «non c'è», elencare i posti dove starebbe e guardarli tutti: note del vault, documenti dei lavori (`_IN/`, `_fonti/`, `_OUT/`) e fonti comuni delle risorse, posta ricevuta e inviata, calendario.
 - Da un'assenza si conclude solo sul termine cercato. Cercare con almeno due chiavi (l'entità e il fatto) e un nome alternativo: italiano e inglese, singolare e plurale, sinonimo.
 - Su «esiste X?» si guarda il conteggio totale dei risultati e si cerca il termine più raro; l'elenco troncato ai primi risultati serve solo per esplorare.
 - Prima di dire «manca», sapere che cosa vede lo strumento. Esempi: un estrattore di testo da documenti Word salta immagini e testo cancellato; l'indice della posta registra i messaggi con ritardo; una ricerca con contesto a lunghezza fissa salta le righe più corte della finestra, quindi prima di «non c'è» serve una ricerca nuda sul termine; un file ricevuto per posta può stare come link nel corpo del messaggio e non fra gli allegati.
@@ -42,7 +42,7 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 - Quando un testo cita un atto «come modificato da», il numero che riporta è quello vigente: prima di smentire un «originariamente», cercare la versione precedente. Se chi agisce si comporta contro il dato, il dato è incompleto.
 - «Entro N giorni da X» decorre da X. Chi corregge una data altrui cita la fonte parola per parola e dice a che cosa si riferisce il termine.
 - Prima di attribuire un dato a una persona, aprire la sua versione del documento. Trovare un documento fra le proprie fonti prova che lo conosciamo; chi l'ha scritto si ricava dal contesto.
-- Prima di scrivere che l'utente non conosce un documento, cercarlo per numero e per nome fra le fonti su disco, nella posta (inviata compresa) e nelle note.
+- Prima di scrivere che l'utente non conosce un documento, cercarlo per numero e per nome fra i documenti dei lavori e le risorse, nella posta (inviata compresa) e nelle note.
 - Prima di citare una propria memoria, aprirla. Se il suo contenuto cambia di sostanza, la sua riga nell'indice delle memorie si aggiorna nello stesso gesto.
 - Un termine tecnico o normativo si corregge solo con la fonte primaria aperta.
 - I commenti scritti di un interlocutore si incrociano con la riunione in cui li ha discussi. Nelle regole che hanno una direzione (regola ed eccezione, ordinario e straordinario) la direzione si ricontrolla.

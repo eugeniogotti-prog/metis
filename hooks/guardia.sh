@@ -3,7 +3,8 @@
 #   1. cartella riservata: ogni strumento che la tocca viene bloccato (deny);
 #   2. azioni irreversibili: cancellazioni ricorsive, cestino di Obsidian, push, reset, scaricamento dei LaunchAgent → conferma (ask);
 #   3. invii verso l'esterno: strumenti di posta e messaggistica che mandano, inoltrano o rispondono; eventi di calendario
-#      con invitati e risposte agli inviti; condivisioni di file e cartelle (Drive) → conferma (ask).
+#      con invitati e risposte agli inviti; condivisioni di file e cartelle (Drive); cancellazioni e cestino degli
+#      strumenti MCP (delete, trash, remove_file, empty_trash, batch_delete) → conferma (ask).
 # L'azione si riconosce dalla fine del nome dello strumento: nell'app di Claude i connettori si chiamano
 # mcp__<identificativo>__<azione>, non mcp__claude_ai_<servizio>__<azione> come in Claude Code (verificato il 23/10/2026).
 # Le bozze restano libere. In una sessione non interattiva (claude -p) una richiesta di conferma equivale a un blocco:
@@ -173,6 +174,11 @@ case "$TOOL" in
   mcp__*)
     AZIONE=$(printf '%s' "${TOOL##*__}" | tr 'A-Z' 'a-z')
     case "$AZIONE" in
+      # Cancellazioni e cestino (23/10/2026): prima dell'uscita delle bozze, perché delete_draft contiene «draft».
+      # Leggere (elenchi, ricerche, permessi) e ripristinare dal cestino restano liberi.
+      list_*|get_*|search_*|read_*|*untrash*|*restore*) ;;
+      *delete*|*trash*|*remove_file*)
+        decidi ask "Cancellazione ($TOOL): toglie un elemento (mail, bozza, evento, file) in un servizio esterno. Serve il via esplicito del cliente per questo elemento." ;;
       *draft*|*bozza*) exit 0 ;;
       send*|*_send|*send_*|forward*|*forward*|reply*|*_reply*|*post_message*|*send_message*)
         decidi ask "Invio verso l'esterno ($TOOL): parte solo con il via esplicito del cliente per questo messaggio e questo destinatario." ;;

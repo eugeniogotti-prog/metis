@@ -4,7 +4,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 
 | Modulo | Che cosa dà | Riferimento |
 |---|---|---|
-| `markitdown` | Claude legge PDF, Word, Excel e PowerPoint della cartella fonti | qui sotto |
+| `markitdown` | Claude legge PDF, Word, Excel e PowerPoint delle cartelle dei lavori (e della cartella fonti, con `METIS_DOCUMENTI=separati`) | qui sotto |
 | `telegram` | riepiloghi sul telefono; ciò che il cliente manda al bot finisce nell'Inbox; conversazione con Claude dal telefono | `modulo-telegram.md` |
 | `voce` | un vocale mandato al bot diventa una nota trascritta | `modulo-telegram.md`, «Voce» |
 | `docx` | Claude consegna le note come documenti Word, con il modello del cliente se c'è, e non riscrive mai un documento aperto in Word o modificato a mano | qui sotto |
@@ -17,7 +17,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 1. `bash scripts/moduli/markitdown.sh installa`: dichiara il server `markitdown` nel `.mcp.json` del vault (con il percorso assoluto di `uvx`, perché le routine non hanno Homebrew nel PATH), lo abilita e ne consente lo strumento nelle impostazioni del vault. I server già dichiarati dal cliente restano.
 2. Il server parte alla prossima sessione di Claude Code nel vault.
 
-**Controllo:** `bash scripts/moduli/markitdown.sh controlla` converte un documento Word creato al momento; poi, nella sessione nuova, si chiede a Claude di convertire un PDF della cartella fonti con lo strumento `convert_to_markdown`.
+**Controllo:** `bash scripts/moduli/markitdown.sh controlla` converte un documento Word creato al momento; poi, nella sessione nuova, si chiede a Claude di convertire un PDF della `_IN/` o della `_fonti/` di un lavoro con lo strumento `convert_to_markdown`.
 
 ## Documenti Word (docx)
 
@@ -25,7 +25,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 2. `bash scripts/moduli/docx.sh installa`: crea l'ambiente Python del modulo con python-docx (serve la rete).
 3. Facoltativo: il modello Word del cliente, con i suoi stili e, se vuole la data nel piè di pagina, il segnaposto `§DATA§`: `bash scripts/configura.sh set METIS_DOCX_MODELLO "<percorso del .docx>"`.
 
-**Uso**: `bash scripts/docx/esporta-docx.sh <nota.md> [-o file.docx] [--toc] [--borders]`. Senza `-o` il documento va nella radice della cartella fonti, dove il doctor lo segnala come file sciolto: per un documento da consegnare si passa `-o "<cartella del lavoro>/_OUT/YYYY-MM-DD <nome>.docx"`. Se il documento è aperto in Word, o è stato salvato da qualcuno dopo l'ultima esportazione, lo script si ferma (codice 3) per non cancellare quelle modifiche: si chiude Word o si scrive su un altro file; `--forza` solo su indicazione del cliente. Versioni finali in Word solo quando il cliente le chiede.
+**Uso**: `bash scripts/docx/esporta-docx.sh <nota.md> [-o file.docx] [--toc] [--borders]`. Senza `-o`, con i documenti accanto alle note (default), il documento va nella `_OUT/` della cartella del lavoro o dell'area in cui sta la nota, con la data davanti al nome (`_OUT/YYYY-MM-DD <nome>.docx`). Con `METIS_DOCUMENTI=separati` va nella radice della cartella fonti, dove il doctor lo segnala come file sciolto: per un documento da consegnare si passa `-o "<cartella del lavoro>/_OUT/YYYY-MM-DD <nome>.docx"`. Se il documento è aperto in Word, o è stato salvato da qualcuno dopo l'ultima esportazione, lo script si ferma (codice 3) per non cancellare quelle modifiche: si chiude Word o si scrive su un altro file; `--forza` solo su indicazione del cliente. Versioni finali in Word solo quando il cliente le chiede.
 
 **Controllo:** `bash scripts/moduli/docx.sh controlla`.
 

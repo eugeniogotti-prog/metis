@@ -7,8 +7,8 @@
     {
       "name": "metis",
       "source": "./",
-      "description": "Memoria a tre livelli, onboarding e ciclo correzioni → regole per un vault Obsidian con Claude Code."
+      "description": "Memoria a tre livelli, onboarding e ciclo correzioni → regole per una cartella di lavoro con Claude Code, con o senza Obsidian."
     }
   ],
-  "description": "Metis: il metodo di lavoro con Claude Code in un vault Obsidian"
+  "description": "Metis: il metodo di lavoro con Claude Code, con o senza Obsidian"
 }

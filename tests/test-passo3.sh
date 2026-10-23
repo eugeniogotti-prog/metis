@@ -141,7 +141,7 @@ check "configurazione assente: hook muto e codice 0" '[ "$H" = "rc=0" ]'
 echo "6. Cartella fonti: una cartella per lavoro"
 V5="$T/vault cinque"; M5="$T/mem5"; F5="$T/fonti cinque"
 installa "$V5" "$M5" "_Claude" "0 - Inbox" >/dev/null
-check "modello: regola della cartella per lavoro in CLAUDE.md" 'grep -q "una cartella per lavoro" "$V5/CLAUDE.md" && grep -q "_IN/" "$V5/CLAUDE.md" && grep -q "_OUT/" "$V5/CLAUDE.md" && grep -q "_Risorse/" "$V5/CLAUDE.md"'
+check "modello: regola della cartella per lavoro in CLAUDE.md" 'grep -q "una cartella per lavoro" "$V5/CLAUDE.md" && grep -q "_IN/" "$V5/CLAUDE.md" && grep -q "_OUT/" "$V5/CLAUDE.md" && grep -q "Risorse/" "$V5/CLAUDE.md"'
 config "$T/c5" "$V5" "$M5" "METIS_FONTI=$F5"
 stato() {  # stato <nome> <fonte-primaria>
   printf -- "---\nstatus: attivo\nfonte-primaria: '%s'      # cartella su disco\nupdated_at: %s\n---\n\n# %s\n" "$2" "$(date +%F)" "$1" > "$V5/_Claude/stati/$1.md"

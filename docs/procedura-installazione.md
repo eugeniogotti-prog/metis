@@ -49,13 +49,13 @@ Chi fa che cosa: **chi installa** prepara e guida, **il cliente** usa tastiera e
 
 ### C. Blocco 0: dotazione e scelte
 
-Claude controlla il Mac (macOS, Claude Code, python3, git, jq, Homebrew, Obsidian) e chiede: dove sta il vault, **in quale cartella del disco il cliente tiene i documenti di lavoro** (resta quella che usa già, fuori dal vault), posta e calendario, Telegram, voce, Mac acceso di giorno, cartella riservata, cartelle da leggere senza toccare. Se manca un programma, Claude dà il comando e il cliente lo esegue (Homebrew chiede la password del Mac).
+Claude controlla il Mac (macOS, Claude Code, python3, git, jq, Homebrew, Obsidian) e chiede: dove sta il vault, **dove stanno i documenti di lavoro**: per default insieme alle note, una cartella per lavoro nella struttura del vault (progetti, aree, risorse, archivio), con `_IN/`, `_fonti/` e `_OUT/`; solo chi usa Obsidian e vuole un vault di sole note li tiene in una cartella fuori dal vault (`METIS_DOCUMENTI=separati`). Le cartelle che il cliente ha già non si riordinano all'installazione; posta e calendario, Telegram, voce, Mac acceso di giorno, cartella riservata, cartelle da leggere senza toccare. Se manca un programma, Claude dà il comando e il cliente lo esegue (Homebrew chiede la password del Mac).
 
 ### D. Blocco 1: struttura del vault e mappa
 
 - **Vault esistente**: Claude legge l'albero delle cartelle e propone quale fa da ingresso, lavori, aree, risorse, persone, archivio, diario. Il cliente corregge. **Nessuna nota si sposta.**
 - **Vault nuovo**: struttura PARA.
-- Quattro domande per la mappa e l'archivio, con le risposte già proposte: quali cartelle tenere d'occhio; se nella cartella dei documenti c'è un «contenitore» i cui figli sono lavori distinti; archivio per anno o piatto; cartelle su disco ferme a fine lavoro (consigliato) o spostate.
+- Quattro domande per la mappa e l'archivio, con le risposte già proposte: quali cartelle tenere d'occhio; se fra le cartelle dei lavori c'è un «contenitore» i cui figli sono lavori distinti; archivio per anno o piatto; a fine lavoro la cartella si archivia intera, documenti compresi (con `separati`: cartelle dei documenti ferme, consigliato, o spostate).
 
 ### E. Blocco 2: memoria (Obsidian chiuso)
 

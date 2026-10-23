@@ -54,7 +54,7 @@ claude
 ```
 Scrivi **«installa Metis»**. Claude conduce l'installazione un passo alla volta, ti fa le domande e controlla che ogni passo sia riuscito:
 1. **il tuo Mac**: che cosa c'è e che cosa manca; se manca un programma, Claude ti dà il comando da lanciare;
-2. **le cartelle**: se hai già un vault, Claude propone il ruolo di ogni cartella (lavori, aree, risorse, persone, archivio, arrivi, diario) e **non sposta nessuna nota**; se parti da zero, propone una struttura. Ti chiede anche in quale cartella del disco tieni i documenti di lavoro: resta quella che usi già;
+2. **le cartelle**: se hai già un vault, Claude propone il ruolo di ogni cartella (lavori, aree, risorse, persone, archivio, arrivi, diario) e **non sposta nessuna nota**; se parti da zero, propone una struttura. Note e documenti di lavoro stanno insieme, una cartella per lavoro con le note e le sottocartelle `_IN/` (ricevuto), `_fonti/` e `_OUT/` (consegnato); le fonti che servono a più lavori stanno nelle risorse, per tema. Se usi Obsidian e preferisci un vault di sole note, i documenti possono restare in una cartella del disco fuori dal vault (`METIS_DOCUMENTI=separati`);
 3. **la memoria**: profilo, regole, modelli delle note. Tieni **Obsidian chiuso** in questo passo;
 4. **le protezioni**: alla fine Claude ti chiederà di chiudere Claude Code, riaprirlo nella cartella del vault e **accettare la finestra che chiede se ti fidi della cartella** (ed eventualmente l'avviso sulla modalità senza richieste di permesso). Senza quel sì le protezioni non valgono;
 5. **il profilo**: Claude legge i tuoi documenti d'esempio, se acconsenti, e ti presenta il profilo di partenza regola per regola. Circa un'ora;

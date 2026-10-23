@@ -6,12 +6,21 @@ Uso (le variabili arrivano dalla configurazione, letta da scripts/lib/config.sh)
     python3 mappa.py --stdout   stampa l'inventario invece di scriverlo (fotografia e righe si scrivono comunque)
 
 Che cosa fa (generalizzato il 3/10/2026 dallo script del vault di riferimento):
-  a) lavori nella cartella del ruolo PROGETTI: numero di note, ultima attività, stato collegato;
-  b) stati in <Claude>/stati/ con la cartella su disco (`fonte-primaria:`) e se esiste ancora;
-  c) cartelle di primo livello delle radici su disco, con lo stato che le segue;
+  a) lavori nella cartella del ruolo PROGETTI: numero di note, ultima attività, stato collegato; le aree (ruolo AREE)
+     con le stesse colonne, senza la proposta d'archivio; con i documenti accanto alle note, i temi delle risorse;
+  b) stati in <Claude>/stati/ con la cartella del lavoro (`fonte-primaria:`) e se esiste ancora;
+  c) cartelle di primo livello delle radici fuori dal vault, con lo stato che le segue;
   d) archivio, in un file a parte (<Claude>/mappa-archivio.md, decisione del 3/10/2026): stati archiviati con
-     oggetto, chiusura, persone e cartella su disco; lavori nella cartella ARCHIVIO; cartelle su disco di lavori
-     chiusi e degli anni passati. Si consulta all'avvio di ogni lavoro nuovo per trovarne i precedenti;
+     oggetto, chiusura, persone e cartella del lavoro; lavori nella cartella ARCHIVIO; con le radici fuori dal vault,
+     le loro cartelle di lavori chiusi e degli anni passati. Si consulta all'avvio di ogni lavoro nuovo per trovarne
+     i precedenti;
+
+Documenti accanto alle note (METIS_DOCUMENTI=accanto, default dal 23/10/2026): la cartella del lavoro è una sola, con
+le note nella radice e i documenti in _IN/, _fonti/ e _OUT/. Queste sottocartelle (come ogni cartella che comincia con
+«_») non sono lavori: non si elencano e non si fotografano a sé, ma i nomi dei loro file servono a riconoscere la
+cartella del lavoro quando si sposta, e la data dei loro file conta come attività del lavoro. Le note si contano fuori
+da esse. Con METIS_DOCUMENTI=separati i documenti stanno in METIS_FONTI, fuori dal vault, e la mappa li tratta come
+radice a parte (sezione c).
   e) incoerenze, compresi i lavori fermi da oltre METIS_MAPPA_GIORNI_FERMO giorni;
   f) spostamenti: ogni giro salva una fotografia delle cartelle fino al secondo livello delle radici
      (<Claude>/cache/mappa-snapshot/AAAA-MM-GG.json, 30 giorni) e la confronta con la precedente:
@@ -23,7 +32,9 @@ Configurazione (tutte facoltative):
   METIS_MAPPA_RADICI        radici da fotografare, separate da «|»: relative al vault o assolute. Il segnaposto
                             {anno} vale l'anno corrente, o la cartella più recente se quella dell'anno non c'è ancora
                             (es. «~/Drive/{anno} attività in corso»).
-                            Default: cartella PROGETTI, cartella ARCHIVIO, METIS_FONTI.
+                            Default con i documenti accanto alle note: cartelle PROGETTI, AREE, RISORSE e ARCHIVIO
+                            (METIS_FONTI coincide con PROGETTI). Con METIS_DOCUMENTI=separati: cartella PROGETTI,
+                            cartella ARCHIVIO, METIS_FONTI.
   METIS_MAPPA_CONTENITORI   nomi di cartelle di primo livello delle radici su disco i cui figli sono lavori
                             distinti, separati da «|» (oltre a quelle con almeno 10 sottocartelle).
   METIS_MAPPA_GIORNI_FERMO  giorni senza attività oltre i quali un lavoro è proposto per l'archivio (90).
@@ -62,6 +73,9 @@ def ruolo(r):
 
 
 PROGETTI = ruolo("PROGETTI")
+AREE = ruolo("AREE")
+RISORSE = ruolo("RISORSE")
+PERSONE = ruolo("PERSONE")
 ARCHIVIO = ruolo("ARCHIVIO")
 RISERVATA = ruolo("RISERVATA")
 OUT = os.path.join(CL, "mappa-inventario.md")
@@ -82,6 +96,17 @@ try:
 except ValueError:
     TODAY = datetime.date.today()
 DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
+SOTTO_LAVORO = {"_IN", "_fonti", "_OUT"}   # documenti del lavoro: ricevuti, fonti, consegnati
+
+
+def _dentro_vault(p):
+    return bool(VAULT and p) and (nfc(os.path.abspath(p)) + os.sep).startswith(nfc(VAULT) + os.sep)
+
+
+# Documenti accanto alle note: dichiarato in configurazione (config.sh lo deduce per le installazioni vecchie); senza,
+# vale «accanto» se la cartella fonti manca o sta nel vault.
+DOCUMENTI = env("METIS_DOCUMENTI") or ("accanto" if not FONTI or _dentro_vault(FONTI) else "separati")
+ACCANTO = DOCUMENTI != "separati"
 
 
 def vietata(path):
@@ -188,7 +213,7 @@ def radici():
             v = v if os.path.isabs(v) else os.path.join(VAULT, v)
             percorsi.append(con_anno(v))
     else:
-        percorsi = [p for p in (PROGETTI, ARCHIVIO, FONTI) if p]
+        percorsi = [p for p in ((PROGETTI, AREE, RISORSE, ARCHIVIO, FONTI) if ACCANTO else (PROGETTI, ARCHIVIO, FONTI)) if p]
     out, viste = [], set()
     for p in percorsi:
         p = os.path.abspath(p)
@@ -280,10 +305,24 @@ def cita(testo, prefisso, nome, fratelli=()):
 
 
 def scan_lavoro(path):
+    """(note, (data, origine)) di una cartella di lavoro. Le note si contano fuori da _IN, _fonti e _OUT; dentro, i
+    file sono documenti e la loro data di modifica conta come attività («doc»)."""
     n, best = 0, None
     for dp, dn, fn in os.walk(path):
         dn[:] = [d for d in dn if not saltare(d, dp)]
+        rel = os.path.relpath(dp, path)
+        documenti = rel != "." and rel.split(os.sep)[0] in SOTTO_LAVORO
         for f in fn:
+            if documenti:
+                if f.startswith("."):
+                    continue
+                try:
+                    cand = (datetime.date.fromtimestamp(os.path.getmtime(os.path.join(dp, f))), "doc")
+                except OSError:
+                    continue
+                if cand[0] <= TODAY and (best is None or cand[0] > best[0]):
+                    best = cand
+                continue
             if not f.endswith(".md"):
                 continue
             n += 1
@@ -454,10 +493,32 @@ def main():
             incoerenze.append(("Lavori fermi da oltre %d giorni (proposte per l'archivio)" % GIORNI_FERMO,
                                "%s — ultima attività %s, %d note" % (nome, best[0].isoformat(), n)))
 
+    # a2) aree: stesse colonne dei lavori, senza la proposta d'archivio (una responsabilità continuativa non si chiude)
+    aree = []
+    nomi_aree = sottocartelle(AREE) if AREE and nfc(AREE) != nfc(PROGETTI) else []
+    for nome in nomi_aree:
+        path = os.path.join(AREE, nome)
+        n, best = scan_lavoro(path)
+        coll, come = stati_del_lavoro(nome, path, stati, nomi_aree)
+        aree.append({"nome": nome, "n": n, "best": best, "stati": coll, "come": come})
+
+    # a3) risorse, con i documenti accanto alle note: temi e sottotemi delle fonti comuni, con il README del tema
+    risorse = []
+    if ACCANTO and RISORSE and os.path.isdir(RISORSE):
+        for tema in sottocartelle(RISORSE):
+            pt = os.path.join(RISORSE, tema)
+            if PERSONE and os.path.realpath(pt) == os.path.realpath(PERSONE):
+                continue   # la cartella delle persone è un ruolo a sé, non un tema delle fonti
+            nfile = 0
+            for dp, dn, fn in os.walk(pt):
+                dn[:] = [d for d in dn if not saltare(d, dp)]
+                nfile += sum(1 for f in fn if not f.startswith(".") and f != "README.md")
+            risorse.append((tema, sottocartelle(pt), nfile, os.path.isfile(os.path.join(pt, "README.md"))))
+
     # b) stati
     for s in stati:
         if s["fp"] and s["fp_esito"] == "✗":
-            incoerenze.append(("Cartella su disco indicata da uno stato e non trovata", "%s → %s" % (s["nome"], s["fp_path"])))
+            incoerenze.append(("Cartella del lavoro indicata da uno stato e non trovata", "%s → %s" % (s["nome"], s["fp_path"])))
 
     # c) radici su disco
     seguiti = [(s["nome"], s["fp_path"]) for s in stati + stati_arch if s["fp_esito"] in ("✓", "≈")]
@@ -508,13 +569,16 @@ def main():
         spostate, sparite, comparse = confronta(vecchia, nuova)
         seguite = {r_[0] + "/" + r_[1] for r_ in righe_disco if r_[3]}
         seguite |= {etichetta(PROGETTI) + "/" + l["nome"] for l in lavori if l["stati"]}
+        # «nessun lavoro la segue» vale per le cartelle dei lavori: progetti e radici fuori dal vault, non aree,
+        # risorse e archivio, che non hanno uno stato per cartella.
+        da_seguire = {etichetta(PROGETTI)} | {e for e, _, su in radici() if su}
         for a, b in spostate:
             righe.append(("info", "Cartella spostata o rinominata: `%s` → `%s`" % (a, b)))
         for k in sparite:
             righe.append(("info", "Cartella sparita (non ritrovata altrove): `%s`" % k))
         for k in comparse:
             rel = relativa(k)
-            nota = " — nessun lavoro la segue" if rel and "/" not in rel and k not in seguite else ""
+            nota = " — nessun lavoro la segue" if rel and "/" not in rel and k not in seguite and k[:-len(rel) - 1] in da_seguire else ""
             righe.append(("info", "Cartella nuova: `%s`%s" % (k, nota)))
         fp_prec = foto_prec.get("fp", {})
         for nome, (esito, percorso) in sorted(foto_nuova["fp"].items()):
@@ -525,7 +589,7 @@ def main():
                     pa, pb = assoluto(a), assoluto(b)
                     if pa and pb and (vecchio[1] == pa or vecchio[1].startswith(pa + os.sep)):
                         sugg = " — forse ora è `%s`" % corto(pb + vecchio[1][len(pa):])
-                righe.append(("warn", "Lavoro [[%s]]: la cartella su disco `%s` non si trova più%s"
+                righe.append(("warn", "Lavoro [[%s]]: la cartella del lavoro `%s` non si trova più%s"
                               % (nome, corto(vecchio[1]), sugg)))
     salva_foto(foto_nuova)
     try:
@@ -545,6 +609,10 @@ def main():
          "# Mappa — inventario generato", "",
          "*Generato il %s dal doctor. Radici: %s.*" % (ts, ", ".join("`%s`" % e for e, _, _ in radici()) or "nessuna"), "",
          "**%d lavori · %d stati attivi · %d incoerenze**" % (len(lavori), len(stati), len(incoerenze)), ""]
+    if ACCANTO:
+        L += ["Documenti accanto alle note: ogni lavoro ha una sola cartella, con le note nella radice e i documenti in "
+              "`_IN/`, `_fonti/` e `_OUT/`. Le note si contano fuori da queste sottocartelle; la data dei documenti conta "
+              "come attività (`doc`).", ""]
     L += ["## Lavori in «%s»" % (etichetta(PROGETTI) if PROGETTI else "—"), "",
           "Ultima attività: la data più recente fra `created_at` e `updated_at` delle note (`fm`), altrimenti la data di modifica del file (`mtime`).", "",
           "| Lavoro | Note | Ultima attività | Stato collegato |", "|---|---:|---|---|"]
@@ -552,16 +620,29 @@ def main():
         best = "%s (%s)" % (l["best"][0].isoformat(), l["best"][1]) if l["best"] else "—"
         st = ", ".join("[[%s]]" % s for s in l["stati"][:4])
         L.append("| %s | %d | %s | %s |" % (cella(l["nome"]), l["n"], best, cella(st + (" (%s)" % l["come"] if st else ""))))
-    L += ["", "## Stati attivi", "", "| Stato | status | ultima-mossa | cartella su disco | Esiste |", "|---|---|---|---|---|"]
+    if aree:
+        L += ["", "## Aree in «%s»" % etichetta(AREE), "", "| Area | Note | Ultima attività | Stato collegato |", "|---|---:|---|---|"]
+        for l in aree:
+            best = "%s (%s)" % (l["best"][0].isoformat(), l["best"][1]) if l["best"] else "—"
+            st = ", ".join("[[%s]]" % s for s in l["stati"][:4])
+            L.append("| %s | %d | %s | %s |" % (cella(l["nome"]), l["n"], best, cella(st + (" (%s)" % l["come"] if st else ""))))
+    if risorse:
+        L += ["", "## Risorse in «%s»" % etichetta(RISORSE), "",
+              "Fonti che servono a più lavori, per tema e sottotema; i `_fonti/` dei lavori rimandano qui senza copiare.", "",
+              "| Tema | Sottotemi | File | README |", "|---|---|---:|---|"]
+        for tema, subs, nfile, readme in risorse:
+            L.append("| %s | %s | %d | %s |" % (cella(tema), cella(", ".join(subs)) or "—", nfile, "sì" if readme else "**manca**"))
+    L += ["", "## Stati attivi", "", "| Stato | status | ultima-mossa | cartella del lavoro | Esiste |", "|---|---|---|---|---|"]
     for s in stati:
         L.append("| [[%s]] | %s | %s | %s | %s |" % (cella(s["nome"]), cella(s["status"] or "—"), cella(s["ultima"] or "—"),
                                                      cella("`%s`" % corto(s["fp_path"]) if s["fp"] else "—"), s["fp_esito"] or "—"))
-    L += ["", "## Cartelle su disco", "", "| Radice | Cartella | Seguita da |", "|---|---|---|"]
-    for etich, rel, cont, chi in righe_disco:
-        L.append("| %s | %s | %s |" % (cella(etich), cella(("**%s** (contenitore)" % rel) if cont else rel),
-                                       cella(", ".join("[[%s]]" % x for x in chi)) or "nessuno"))
+    if righe_disco or not ACCANTO:
+        L += ["", "## Cartelle su disco", "", "| Radice | Cartella | Seguita da |", "|---|---|---|"]
+        for etich, rel, cont, chi in righe_disco:
+            L.append("| %s | %s | %s |" % (cella(etich), cella(("**%s** (contenitore)" % rel) if cont else rel),
+                                           cella(", ".join("[[%s]]" % x for x in chi)) or "nessuno"))
     L += ["", "## Archivio", "",
-          "Lavori chiusi, stati archiviati e cartelle su disco che seguivano: [[mappa-archivio]] (%d stati archiviati, %d lavori archiviati)."
+          "Lavori chiusi, con i loro documenti, e stati archiviati: [[mappa-archivio]] (%d stati archiviati, %d lavori archiviati)."
           % (len(stati_arch), n_arch), "", "## Spostamenti dall'ultima passata", ""]
     if not foto_prec:
         L.append("Prima fotografia delle cartelle: il confronto parte dalla prossima passata.")
@@ -606,8 +687,8 @@ def persone_brevi(v):
 
 
 def genera_archivio(stati_arch, righe_disco, stdout_only):
-    """Scrive <Claude>/mappa-archivio.md: stati archiviati, lavori nell'archivio del vault, cartelle su disco
-    di lavori chiusi. Si consulta all'avvio di ogni lavoro nuovo per trovare i precedenti. Ritorna i lavori archiviati."""
+    """Scrive <Claude>/mappa-archivio.md: stati archiviati, lavori nell'archivio del vault e, con radici fuori dal
+    vault, le loro cartelle di lavori chiusi. Si consulta all'avvio di ogni lavoro nuovo per trovare i precedenti. Ritorna i lavori archiviati."""
     lavori = []   # (gruppo, nome, note, ultima attività, stati)
     if ARCHIVIO and os.path.isdir(ARCHIVIO):
         for d in sottocartelle(ARCHIVIO):
@@ -619,6 +700,7 @@ def genera_archivio(stati_arch, righe_disco, stdout_only):
                 lavori.append((gruppo, nome, n, best, fili))
     chiusi = sorted({e + "/" + r for e, r, _, chi in righe_disco
                      if chi and all(c in {s["nome"] for s in stati_arch} for c in chi)})
+    fuori = any(su for _, _, su in radici())
     anni_disco = []
     for etich, r, su_disco in radici():
         if su_disco:
@@ -633,21 +715,23 @@ def genera_archivio(stati_arch, righe_disco, stdout_only):
          "*Generato il %s dal doctor. Le cose in corso sono in [[mappa-inventario]]. **Da consultare all'avvio di ogni "
          "lavoro nuovo**: stesso cliente, stesso tema, stesse persone → precedente da scrivere in `precedenti:` "
          "nello stato del lavoro nuovo.*" % ts, "",
-         "**%d stati archiviati · %d lavori nell'archivio del vault · %d cartelle su disco di lavori chiusi**"
-         % (len(stati_arch), len(lavori), len(chiusi)), "",
-         "## Stati archiviati", "", "| Lavoro | Oggetto | Chiuso | Persone | Cartella su disco |", "|---|---|---|---|---|"]
+         "**%d stati archiviati · %d lavori nell'archivio del vault%s**"
+         % (len(stati_arch), len(lavori), (" · %d cartelle su disco di lavori chiusi" % len(chiusi)) if fuori else ""), "",
+         "## Stati archiviati", "", "| Lavoro | Oggetto | Chiuso | Persone | Cartella del lavoro |", "|---|---|---|---|---|"]
     for s in sorted(stati_arch, key=lambda x: x["chiuso"] or datetime.date.min, reverse=True):
         L.append("| [[%s]] | %s | %s | %s | %s |" % (cella(s["nome"]), cella(s["titolo"] or "—"),
                  s["chiuso"].isoformat() if s["chiuso"] else "—", cella(persone_brevi(s["persone"])),
                  cella("`%s`" % corto(s["fp_path"])) if s["fp_path"] else "—"))
     L += ["", "## Lavori nell'archivio del vault («%s»)" % (etichetta(ARCHIVIO) if ARCHIVIO else "—"), "",
+          ] + (["Ogni cartella contiene il lavoro intero: le note e i documenti in `_IN/`, `_fonti/` e `_OUT/`.", ""] if ACCANTO else []) + [
           "| Anno | Cartella | Note | Ultima attività | Stato archiviato |", "|---|---|---:|---|---|"]
     for gruppo, nome, n, best, fili in lavori:
         L.append("| %s | %s | %d | %s | %s |" % (gruppo or "—", cella(nome), n, best[0].isoformat() if best else "—",
                                                 cella(", ".join("[[%s]]" % f for f in fili)) or "—"))
-    L += ["", "## Cartelle su disco di lavori chiusi", "",
-          "Restano dove sono: lo stato archiviato le indica in `fonte-primaria:`.", ""]
-    L += ["- `%s`" % c for c in chiusi] or ["Nessuna."]
+    if fuori:
+        L += ["", "## Cartelle su disco di lavori chiusi", "",
+              "Restano dove sono: lo stato archiviato le indica in `fonte-primaria:`.", ""]
+        L += ["- `%s`" % c for c in chiusi] or ["Nessuna."]
     if anni_disco:
         L += ["", "## Cartelle su disco degli anni passati", ""]
         L += ["**%s (%d):** %s" % (k, len(v), " · ".join(v) or "—") for k, v in anni_disco]

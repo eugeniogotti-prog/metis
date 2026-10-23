@@ -28,6 +28,6 @@ Una bozza che il cliente manda al reparto IT o al consulente esterno (Claude non
 
 ## 3. Finché l'IT non risponde
 
-- le mail utili si salvano come file nella cartella dei documenti; l'inbox-processor le lavora da lì;
+- le mail utili si salvano come file nella `_IN/` della cartella del loro lavoro (o, se il lavoro non è chiaro, nella sottocartella `files/` dell'Inbox); l'inbox-processor le lavora da lì;
 - il briefing del mattino dice «posta e calendario non letti»;
 - nello stato `installazione.md`: un impegno `palla:loro` «consenso dell'IT per il connettore Microsoft 365», con data di riesame e `decade:` a 21 giorni, e un `◇` in «Se arriva»: «consenso dell'IT → collegare il connettore e lanciare microsoft.sh installa».

@@ -52,18 +52,19 @@ Corto: la sezione è un metro e va letta in un minuto.
 
 Prima di scrivere una riga dell'obiettivo si cerca se il cliente ha già fatto un lavoro simile. Un precedente porta documenti, persone, errori già fatti e scelte già prese; ignorarlo significa rifare da capo.
 
-- **Dove:** `<cartella di Claude>/mappa-archivio.md`, generata da `scripts/mappa.py` (la lancia il doctor). Contiene gli stati archiviati con oggetto, data di chiusura, persone e cartella su disco; i lavori nell'archivio del vault; le cartelle su disco dei lavori chiusi e degli anni passati. Se manca o è vecchia di giorni, la si rigenera:
+- **Dove:** `<cartella di Claude>/mappa-archivio.md`, generata da `scripts/mappa.py` (la lancia il doctor). Contiene gli stati archiviati con oggetto, data di chiusura, persone e cartella del lavoro; i lavori nell'archivio del vault, per anno, con i loro documenti (con i documenti accanto alle note la cartella archiviata è una sola). Con `METIS_DOCUMENTI=separati` elenca anche le cartelle dei documenti, fuori dal vault, dei lavori chiusi e degli anni passati. Se manca o è vecchia di giorni, la si rigenera:
   ```
   bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; python3 "$0/scripts/mappa.py"' "${CLAUDE_PLUGIN_ROOT}"
   ```
 - **Che cosa cercare:** per cliente o committente, per tema, per persone coinvolte. Si cerca con più parole (nome dell'ente, sigla, materia, cognomi), perché lo stesso lavoro può essere stato chiamato in modi diversi.
+- **Le fonti comuni:** nella cartella delle risorse (ruolo RISORSE), per tema e sottotema, i `README.md` dicono quali fonti ci sono e quali lavori le hanno usate: un lavoro nuovo sullo stesso tema riparte da lì.
 - **Se serve, le note delle persone** (cartella del ruolo PERSONE, `configura.sh get METIS_RUOLO_PERSONE`): la tabella «Interazioni chiave» di un interlocutore del lavoro nuovo può citare lavori passati che la mappa non lega a quel nome.
 - **Se c'è un precedente:** si apre il suo stato archiviato (obiettivo, ultime voci del log, lezioni); lo si scrive nel frontmatter dello stato nuovo in `precedenti: ['[[nome-stato-archiviato]]']`; lo si cita nella bozza dell'obiettivo («riprende…», «si distingue da… perché…»).
 - **Se non c'è:** lo si dice al cliente nominando dove si è cercato e con quali parole («nessun precedente in mappa-archivio.md per "fusione", "Rossi Srl", "Bianchi"; note persone di Bianchi senza lavori passati»). Un «nessun precedente» senza i luoghi della ricerca non vale come verifica.
 
 ### 2. Raccogliere il contesto
 
-Lo stato del lavoro se esiste, i documenti pertinenti, la richiesta del cliente, la cartella su disco del lavoro se c'è.
+Lo stato del lavoro se esiste, i documenti pertinenti, la richiesta del cliente, la cartella del lavoro se c'è. Se non c'è, si crea con le note e le tre sottocartelle `_IN/`, `_fonti/` e `_OUT/` (`CLAUDE.md`, «una cartella per lavoro»), dopo aver cercato che non esista già con un altro nome.
 
 ### 3. Scrivere la bozza
 
@@ -77,7 +78,7 @@ Si presenta la bozza e si raccoglie la reazione. Il cliente corregge, Claude rec
 
 Al via del cliente:
 - **lavoro nuovo:** si crea `stati/<lavoro>.md` copiando il modello `stati/_template-stato.md`. Si compilano il frontmatter (`thread`, `name`, `status`, `ultima-mossa`, `prossima-azione`, `created_at`, `updated_at`) e in più:
-  - `fonte-primaria:` la cartella su disco del lavoro, se c'è (vuota altrimenti);
+  - `fonte-primaria:` la cartella del lavoro, relativa alla cartella fonti (che con i documenti accanto alle note è la cartella dei progetti): per esempio `'Comune - bando biblioteche 2027/'`. Per un'area o una cartella altrove, il percorso assoluto;
   - `persone:` i wikilink alle note delle persone coinvolte; se una persona entra nel lavoro e la nota manca, la si crea (regola «Persone» di `CLAUDE.md`);
   - `precedenti:` quanto trovato al passo 1.
   Poi la sezione `## Obiettivo e perché` confermata, «Dove siamo» e gli impegni nel formato del commento di `## Impegni` del modello, e la riga del marcatore in fondo.

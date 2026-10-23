@@ -9,7 +9,7 @@ Esito: almeno uno stato in `stati/` con obiettivo e impegni a norma; una scheda 
 Si parte da **un solo lavoro vivo**: un incarico in corso, con documenti, scadenze e interlocutori. Meglio un lavoro di qualche settimana che un'intera area di attività.
 
 - **Se posta e calendario sono collegati**: Claude chiede il permesso («posso leggere gli oggetti e i mittenti delle mail e le riunioni delle ultime tre settimane, per proporti i lavori da cui partire?»). Con il sì, propone i tre lavori più presenti, ciascuno in una riga con gli interlocutori, e il cliente sceglie. Il corpo dei messaggi si legge solo per il lavoro scelto.
-- **Se non sono collegati**: si chiede al cliente di indicare il lavoro e di mettere in una cartella i documenti principali (fonti su disco). La cartella resta dov'è.
+- **Se non sono collegati**: si chiede al cliente di indicare il lavoro e dove stanno i documenti principali. Con i documenti accanto alle note (default) si crea la cartella del lavoro nella cartella dei progetti, con `_IN/`, `_fonti/` e `_OUT/`, e il cliente ci copia i documenti (o li si copia con il suo sì): gli originali restano dove sono finché il cliente non decide di spostarli. Con `METIS_DOCUMENTI=separati` la cartella dei documenti resta dov'è, fuori dal vault, e diventa la `fonte-primaria:` dello stato.
 
 ## 2. Lo stato del lavoro
 

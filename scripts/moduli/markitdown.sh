@@ -1,5 +1,5 @@
 #!/bin/bash
-# markitdown.sh — modulo MarkItDown: Claude legge PDF, Word, Excel e PowerPoint della cartella fonti convertendoli in testo.
+# markitdown.sh — modulo MarkItDown: Claude legge PDF, Word, Excel e PowerPoint delle cartelle dei lavori (o della cartella fonti) convertendoli in testo.
 # Uso: markitdown.sh installa | controlla
 #   installa   dichiara il server MCP «markitdown» nel .mcp.json del vault, lo abilita e ne consente lo strumento
 #              nelle impostazioni del vault; aggiunge il modulo alla configurazione. Rilanciabile.

@@ -65,7 +65,15 @@ metis_carica_config() {
     METIS_MEMORY_DIR="$HOME/.claude/projects/$(printf '%s' "$base" | sed 's/[^A-Za-z0-9]/-/g')/memory"
   fi
   export METIS_MEMORY_DIR
-  export METIS_FONTI="${METIS_FONTI:-$HOME/Documents/Fonti}"
+  # Documenti accanto alle note per default (decisione del 23/10/2026): la cartella fonti è la cartella dei progetti del
+  # vault. Con METIS_DOCUMENTI=separati (chi usa Obsidian e vuole un vault di sole note) il default resta fuori dal vault.
+  # Installazioni precedenti: senza METIS_DOCUMENTI ma con una cartella fonti fuori dal vault, valeva «separati» e resta così.
+  if [ -z "${METIS_DOCUMENTI:-}" ] && [ -n "${METIS_FONTI:-}" ]; then
+    case "$(eval echo "$METIS_FONTI")/" in "$METIS_VAULT"/*) METIS_DOCUMENTI=accanto ;; *) METIS_DOCUMENTI=separati ;; esac
+  fi
+  export METIS_DOCUMENTI="${METIS_DOCUMENTI:-accanto}"
+  if [ "$METIS_DOCUMENTI" = separati ]; then export METIS_FONTI="${METIS_FONTI:-$HOME/Documents/Fonti}"
+  else export METIS_FONTI="${METIS_FONTI:-$METIS_VAULT/$METIS_RUOLO_PROGETTI}"; fi
   export METIS_INBOX_FONTI="${METIS_INBOX_FONTI-Clippings files voicenotes}"   # vuoto = Inbox senza sottocartelle
   export METIS_FRONTMATTER_CHIAVI="${METIS_FRONTMATTER_CHIAVI:-created_at tags up}"
   export METIS_TAG_PREFISSI="${METIS_TAG_PREFISSI-tipo argomento contenuto status}"

@@ -90,6 +90,20 @@ for f in "${COPIATI[@]}"; do
   ' "$f"
 done
 
+# Documenti separati dalle note (METIS_DOCUMENTI=separati, chi usa Obsidian e vuole un vault di sole note; il default è
+# «accanto», decisione del 23/10/2026): il blocco fra i marcatori documenti:inizio/fine diventa la variante.
+if [ "${METIS_DOCUMENTI:-accanto}" = separati ] && [ -f "$MOD/varianti/documenti-separati.md.txt" ]; then
+  for c in "$METIS_VAULT/CLAUDE.md" "$METIS_VAULT/CLAUDE.local.md"; do
+    printf '%s\n' "${COPIATI[@]}" | grep -qxF "$c" || continue
+    VAR="$MOD/varianti/documenti-separati.md.txt" perl -0pi -e '
+      open(my $fh, "<:raw", $ENV{VAR}) or die; local $/; my $v = <$fh>; close $fh;
+      $v =~ s/\{\{FONTI\}\}/$ENV{METIS_FONTI}/g; $v =~ s/\{\{RUOLO_([A-Z]+)\}\}/$ENV{"METIS_RUOLO_$1"}/g; $v =~ s/\{\{Nome\}\}/$ENV{NOME}/g;
+      s/(<!-- documenti:inizio[^\n]*-->\n).*?(\n<!-- documenti:fine -->)/$1$v$2/s;
+    ' "$c"
+    perl -0pi -e 's/\n\n(<!-- documenti:fine -->)/\n$1/' "$c"
+  done
+fi
+
 # Cartella riservata assente: si toglie la sezione dal CLAUDE.md appena copiato.
 for c in "$METIS_VAULT/CLAUDE.md" "$METIS_VAULT/CLAUDE.local.md"; do
   if [ -z "$METIS_RUOLO_RISERVATA" ] && printf '%s\n' "${COPIATI[@]}" | grep -qxF "$c"; then

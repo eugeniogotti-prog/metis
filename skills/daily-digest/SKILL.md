@@ -26,7 +26,7 @@ Cartelle dalla tabella dei ruoli in `CLAUDE.md`; stati dei lavori in `stati/` ne
 | posta ricevuta nelle ultime 24 ore | strumenti della posta; leggere il corpo delle mail ambigue | «posta non letta: motivo» |
 | impegni | righe `- [ ]` nella sezione `## Impegni` di ogni stato | — |
 | lavori | stati con `scadenza:` entro 7 giorni | — |
-| documenti su disco | file modificati da ieri nelle cartelle di lavoro (sotto) | «documenti: motivo» |
+| documenti | file modificati da ieri nelle cartelle di lavoro (sotto) | «documenti: motivo» |
 | Inbox | note in attesa per sottocartella | — |
 
 Una fonte che non risponde si dichiara. Niente riunioni, mail o eventi dedotti per riempire un vuoto.
@@ -35,9 +35,10 @@ Una fonte che non risponde si dichiara. Niente riunioni, mail o eventi dedotti p
 
 **Mail programmate.** Una mail fra le inviate con la data nel futuro è un invio programmato: si scrive «programmata per il …» e la richiesta resta da gestire finché la data non è passata. Contarla come inviata fa sparire dal briefing una cosa che il destinatario non ha ancora ricevuto.
 
-**Documenti su disco.** Si guarda solo nelle cartelle di lavoro del cliente, lette dalla configurazione con `bash "${CLAUDE_PLUGIN_ROOT}/scripts/configura.sh" get <CHIAVE>`:
-- `METIS_FONTI`, la cartella fonti (se `get` è vuoto vale il default dell'installazione, `~/Documents/Fonti`);
-- `METIS_MAPPA_RADICI`, se c'è: voci separate da «|»; si prendono quelle assolute fuori dal vault, saltando le cartelle d'archivio. Le voci relative sono cartelle del vault, già coperte dalle note.
+**Documenti.** Si guarda solo nelle cartelle di lavoro del cliente, lette dalla configurazione caricata (`bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; echo "$METIS_DOCUMENTI|$METIS_FONTI"' "${CLAUDE_PLUGIN_ROOT}"`), perché i default li calcola `config.sh` e `configura.sh get` non li conosce:
+- con i documenti accanto alle note (`METIS_DOCUMENTI=accanto`, il default): le cartelle dei progetti e delle aree del vault (ruoli PROGETTI e AREE) e quella delle risorse; si cercano i file che non sono note (`-not -name '*.md'`), perché le note le coprono già le altre fonti del digest;
+- con `METIS_DOCUMENTI=separati`: `METIS_FONTI`, la cartella fonti fuori dal vault;
+- in entrambi i casi `METIS_MAPPA_RADICI`, se c'è: voci separate da «|»; si prendono quelle assolute fuori dal vault, saltando le cartelle d'archivio.
 
 Una scansione su tutto il disco va in tempo scaduto e la sezione resta vuota. Ogni ricerca ha un tempo massimo (su macOS `timeout` non esiste):
 
@@ -45,7 +46,7 @@ Una scansione su tutto il disco va in tempo scaduto e la sezione resta vuota. Og
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/con-timeout.sh" 90 find -L "<cartella>" -maxdepth 5 -type f -mtime -2 -not -name '.*' -not -name '~$*'
 ```
 
-Uscita 142 = tempo scaduto: nella copertura «documenti: scansione interrotta dopo 90 s», senza scrivere che non si è mosso niente. I file trovati si raggruppano per lavoro (`fonte-primaria:` dello stato).
+Uscita 142 = tempo scaduto: nella copertura «documenti: scansione interrotta dopo 90 s», senza scrivere che non si è mosso niente. I file trovati si raggruppano per lavoro (`fonte-primaria:` dello stato, cioè la cartella del lavoro). Un file nuovo sciolto nella radice della cartella dei progetti o nell'Inbox si segnala a parte, con la destinazione proposta.
 
 ## Mattino: impegni e lavori (la sezione che vale di più)
 

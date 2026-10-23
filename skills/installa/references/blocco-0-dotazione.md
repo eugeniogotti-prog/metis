@@ -6,7 +6,7 @@
 
 Una domanda alla volta, ciascuna con una proposta. Le risposte decidono i moduli.
 1. Il vault: ne ha già uno (dove) o se ne crea uno nuovo (dove)? Usa Obsidian?
-2. I documenti di lavoro (PDF, Word, fogli): in quale cartella del disco stanno, o dove vuole tenerli? Diventa la cartella fonti (`METIS_FONTI`), fuori dal vault. L'installazione crea solo la cartella: le cartelle dei lavori, con `_IN/`, `_fonti/` e `_OUT/`, nascono al primo lavoro (`CLAUDE.md`, «una cartella per lavoro»), e le cartelle che il cliente ha già non si riordinano.
+2. I documenti di lavoro (PDF, Word, fogli). **Default (decisione del 23/10/2026): documenti e note insieme**, una cartella per lavoro dentro la struttura PARA del vault (`METIS_DOCUMENTI=accanto`, cartella fonti = cartella dei progetti): non c'è niente da chiedere. Solo se il cliente usa Obsidian e vuole un vault di sole note: `METIS_DOCUMENTI=separati` e una cartella fonti fuori dal vault (in quale cartella del disco stanno i documenti, o dove vuole tenerli?). In entrambi i casi l'installazione crea solo le cartelle dei ruoli (e, con `separati`, la cartella fonti): quelle dei lavori, con `_IN/`, `_fonti/` e `_OUT/`, nascono al primo lavoro (`CLAUDE.md`, «una cartella per lavoro»), e le cartelle che il cliente ha già non si riordinano. Se il cliente ha già i documenti in una cartella fuori dal vault e vuole passare ad «accanto», lo spostamento si fa lavoro per lavoro, con il suo sì, mai in blocco all'installazione.
 3. Posta e calendario: Google (Gmail o Google Workspace), Microsoft 365, altro? Se l'account è aziendale, l'amministratore consente le app di terzi?
 4. Telefono: usa Telegram? Vuole ricevere il riepilogo del mattino sul telefono, mandare cose al vault dal telefono, parlare con Claude dal telefono?
 5. Voce: vuole dettare note vocali che diventano note nel vault?
@@ -28,7 +28,9 @@ Proposta dei moduli dalle risposte:
 
 ```bash
 bash scripts/configura.sh set METIS_VAULT "<vault>"
-bash scripts/configura.sh set METIS_FONTI "<cartella fonti>"
+# solo con METIS_DOCUMENTI=separati (vault di sole note, per chi usa Obsidian):
+# bash scripts/configura.sh set METIS_DOCUMENTI separati
+# bash scripts/configura.sh set METIS_FONTI "<cartella fonti fuori dal vault>"
 bash scripts/configura.sh set METIS_RUOLO_RISERVATA "<cartella riservata, relativa al vault, o vuoto>"
 bash scripts/configura.sh set METIS_SOLA_LETTURA "<cartelle in sola lettura, relative al vault, separate da |, o vuoto>"
 bash scripts/configura.sh set METIS_INBOX_FONTI "<sottocartelle dell'Inbox, separate da spazi; vuoto = nessuna>"

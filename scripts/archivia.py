@@ -11,7 +11,9 @@ Uso (le variabili arrivano dalla configurazione, letta da scripts/lib/config.sh)
          riga di chiusura con motivo e distillato, marcatore; poi lo sposta in <Claude>/stati/archivio/;
       3. cartella del lavoro: dalla cartella PROGETTI all'ARCHIVIO (sotto l'anno, se METIS_ARCHIVIO_PER_ANNO
          non è «no»); rifiuta se la destinazione esiste già;
-      4. cartella su disco: resta dov'è (lo stato archiviato conserva `fonte-primaria:` e la mappa la riconosce).
+      4. cartella su disco: resta dov'è (lo stato archiviato conserva `fonte-primaria:` e la mappa la riconosce);
+         se però è la cartella del lavoro (documenti accanto alle note, METIS_DOCUMENTI=accanto) si sposta con lui
+         e la `fonte-primaria:` dello stato archiviato si aggiorna alla posizione nuova.
          Se METIS_FONTI_ARCHIVIO indica una cartella, stampa la proposta di spostamento: si sposta solo a mano,
          con il sì del cliente, perché spostarla rompe i riferimenti nelle mail e nei documenti.
   --filo e --lavoro: almeno uno. Un lavoro con altri stati ancora vivi non si sposta (lo dice la ricognizione).
@@ -41,6 +43,7 @@ PROGETTI = os.path.join(VAULT, E("METIS_RUOLO_PROGETTI", "")) if E("METIS_RUOLO_
 ARCHIVIO = os.path.join(VAULT, E("METIS_RUOLO_ARCHIVIO", "")) if E("METIS_RUOLO_ARCHIVIO") else ""
 RISERVATA = os.path.join(VAULT, E("METIS_RUOLO_RISERVATA")) if E("METIS_RUOLO_RISERVATA") else ""
 PER_ANNO = (E("METIS_ARCHIVIO_PER_ANNO") or "sì").lower() not in ("no", "0", "false")
+FONTI = os.path.expanduser(E("METIS_FONTI") or "").rstrip("/")
 try:
     OGGI = datetime.date.fromisoformat(E("METIS_OGGI")) if E("METIS_OGGI") else datetime.date.today()
 except ValueError:
@@ -68,6 +71,19 @@ def aperti(testo):
 def campo(testo, chiave):
     m = re.search(r"^%s:\s*(.*)$" % re.escape(chiave), testo.split("\n---", 1)[0], re.M)
     return re.sub(r"\s+#.*$", "", m.group(1)).strip().strip("'\"") if m else ""
+
+
+def assoluto(fp):
+    """fonte-primaria come percorso assoluto, con le regole del doctor: assoluta, con ~, o relativa alla cartella fonti."""
+    if not fp:
+        return ""
+    if fp.startswith("/") or fp.startswith("~"):
+        return os.path.expanduser(fp).rstrip("/")
+    return os.path.join(FONTI, fp).rstrip("/") if FONTI else ""
+
+
+def dentro(p, cartella):
+    return bool(p and cartella) and (os.path.realpath(p) == os.path.realpath(cartella) or os.path.realpath(p).startswith(os.path.realpath(cartella) + os.sep))
 
 
 def imposta(testo, chiave, valore):
@@ -157,7 +173,10 @@ def main():
             print("- impegni aperti: %d%s" % (len(imp), "".join("\n    " + x for x in imp)))
             print("- attese ◇: %d%s" % (len(att), "".join("\n    " + x for x in att)))
             print("- persone: %s" % (campo(testo, "persone") or "—"))
-            print("- cartella su disco: %s (resta dov'è%s)" % (campo(testo, "fonte-primaria") or "—",
+            if lp and dentro(assoluto(campo(testo, "fonte-primaria")), lp):
+                print("- cartella su disco: %s (è la cartella del lavoro: si sposta con lui)" % campo(testo, "fonte-primaria"))
+            else:
+              print("- cartella su disco: %s (resta dov'è%s)" % (campo(testo, "fonte-primaria") or "—",
                   "; proposta di spostamento in %s solo con il sì del cliente" % E("METIS_FONTI_ARCHIVIO") if E("METIS_FONTI_ARCHIVIO") else ""))
         if lp:
             note = note_di(lp)
@@ -183,8 +202,18 @@ def main():
         print("archivia: rifiutato, la destinazione esiste già: %s" % dest)
         return 1
     fatti = []
+    # Documenti accanto alle note: se la fonte-primaria è la cartella del lavoro (o sta dentro), si sposta con lui e lo
+    # stato archiviato deve puntare alla posizione nuova, in forma assoluta (con ~ se sta nella home).
+    fp_vecchia = campo(testo, "fonte-primaria") if sp else ""
+    fp_segue = bool(lp and dest and dentro(assoluto(fp_vecchia), lp))
+    if fp_segue:
+        nuova = os.path.join(dest, os.path.relpath(assoluto(fp_vecchia), lp)).rstrip("/.")
+        casa = os.path.expanduser("~")
+        fp_nuova = ("~" + nuova[len(casa):]) if nuova.startswith(casa + os.sep) else nuova
     if sp:
         t = testo
+        if fp_segue:
+            t = imposta(t, "fonte-primaria", "'%s/'" % fp_nuova)
         for k, v in (("status", "chiuso"), ("ultima-mossa", "'%s'" % OGGI.isoformat()),
                      ("prossima-azione", "'nessuna (archiviato)'"), ("updated_at", "'%s'" % OGGI.isoformat())):
             t = imposta(t, k, v)
@@ -204,7 +233,9 @@ def main():
         shutil.move(lp, dest)
         fatti.append("cartella %s → %s" % (os.path.relpath(lp, VAULT), os.path.relpath(dest, VAULT)))
     fp = campo(testo, "fonte-primaria")
-    if fp:
+    if fp_segue:
+        fatti.append("cartella su disco: era la cartella del lavoro, spostata con lui (fonte-primaria → %s/)" % fp_nuova)
+    elif fp:
         fatti.append("cartella su disco %s: resta dov'è%s" % (fp, " (proposta: %s, solo con il sì del cliente)" % E("METIS_FONTI_ARCHIVIO") if E("METIS_FONTI_ARCHIVIO") else ""))
     print("archivia: fatto — " + "; ".join(fatti))
     return 0

@@ -35,11 +35,11 @@ Prima di aggiungere una voce datata a uno stato:
 
 **Prima di scrivere un impegno**, la domanda: c'è un'azione che deve compiere {{Nome}} o Claude? Se il passo dipende da altri, è al massimo un `◇` in «Se arriva»; se non dipende da nessuno (una scadenza altrui, un evento atteso), non si scrive.
 
-**Prima di lasciare un «da verificare»**: se la verifica è a una ricerca di distanza (una mail nella posta inviata, un file su disco), si fa adesso. Un «da verificare» che si scioglie in dieci secondi sposta su {{Nome}} un controllo che tocca a Claude.
+**Prima di lasciare un «da verificare»**: se la verifica è a una ricerca di distanza (una mail nella posta inviata, un documento nella cartella del lavoro), si fa adesso. Un «da verificare» che si scioglie in dieci secondi sposta su {{Nome}} un controllo che tocca a Claude.
 
 ### Per ogni lavoro toccato: `{{RUOLO_CLAUDE}}/stati/<lavoro>.md`
 
-**Frontmatter**: `status` (caldo, attivo, attesa, dormiente), `ultima-mossa` (oggi), `prossima-azione` (una riga), `scadenza` (data o `nessuna`), `persone` (wikilink alle persone coinvolte direttamente), `fonte-primaria` (cartella su disco, se è cambiata).
+**Frontmatter**: `status` (caldo, attivo, attesa, dormiente), `ultima-mossa` (oggi), `prossima-azione` (una riga), `scadenza` (data o `nessuna`), `persone` (wikilink alle persone coinvolte direttamente), `fonte-primaria` (cartella del lavoro, se è cambiata).
 
 **Corpo**: riscrivere «Dove siamo»; aggiornare «Documenti prodotti»; aggiungere la voce datata nel log.
 

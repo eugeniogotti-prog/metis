@@ -3,9 +3,13 @@
 # Modulo `docx` di Metis (scripts/moduli/docx.sh). Portato il 6/10/2026 dal vault di riferimento e generalizzato.
 #
 # Uso: esporta-docx.sh <nota.md> [-o file.docx] [--toc] [--borders] [--forza]
-#   -o        file d'uscita. Senza -o: <cartella dei documenti>/<nome della nota>.docx (METIS_FONTI), perché i file
-#             binari stanno fuori dal vault; se la cartella non è configurata, accanto alla nota. Per un documento da
-#             consegnare si passa -o nella _OUT/ della cartella del lavoro: nella radice il doctor lo segnala come sciolto.
+#   -o        file d'uscita. Senza -o, con i documenti accanto alle note (default): nella _OUT/ della cartella del lavoro
+#             o dell'area in cui sta la nota (la cartella di primo livello sotto progetti o aree, anche per una nota in
+#             una sua sottocartella), con la data davanti al nome; una nota fuori da un lavoro (risorse, radice) ha il
+#             documento accanto. Con METIS_DOCUMENTI=separati: <cartella dei documenti>/<nome della nota>.docx
+#             (METIS_FONTI), perché i file binari stanno fuori dal vault; se la cartella non è configurata, accanto alla
+#             nota. Per un documento da consegnare si passa -o nella _OUT/ della cartella del lavoro: nella radice il
+#             doctor lo segnala come sciolto.
 #   --toc     indice dei contenuti (due livelli)
 #   --borders bordi sottili su tutte le tabelle
 #   --forza   scavalca la guardia (file aperto in Word o modificato a mano dopo l'ultima esportazione)
@@ -36,11 +40,24 @@ while [ $# -gt 0 ]; do
     *) IN="$1"; shift ;;
   esac
 done
-[ -n "$IN" ] && [ -f "$IN" ] || { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
+[ -n "$IN" ] && [ -f "$IN" ] || { sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
 [ -n "$PANDOC" ] || { echo "esporta-docx: manca pandoc (modulo docx: brew install pandoc)" >&2; exit 1; }
 if [ -z "$OUT" ]; then
   NOME="$(basename "${IN%.md}").docx"
-  if [ -n "${METIS_FONTI:-}" ]; then mkdir -p "$METIS_FONTI"; OUT="$METIS_FONTI/$NOME"; else OUT="${IN%.md}.docx"; fi
+  CART="$(cd "$(dirname "$IN")" && pwd)"
+  LAV=""
+  [ -d "$CART/_OUT" ] && LAV="$CART"
+  if [ -z "$LAV" ] && [ "${METIS_DOCUMENTI:-accanto}" = accanto ]; then
+    # Documenti accanto alle note: la cartella del lavoro è quella di primo livello sotto progetti o aree.
+    for BASE in "${METIS_FONTI%/}" "${METIS_RUOLO_AREE:+$METIS_VAULT/$METIS_RUOLO_AREE}"; do
+      [ -n "$BASE" ] || continue
+      case "$CART/" in "$BASE"/?*) R="${CART#"$BASE"/}"; LAV="$BASE/${R%%/*}"; break ;; esac
+    done
+  fi
+  if [ -n "$LAV" ]; then
+    mkdir -p "$LAV/_OUT"; OUT="$LAV/_OUT/$(date +%Y-%m-%d) $NOME"   # nella _OUT/ del lavoro, con la data
+  elif [ "${METIS_DOCUMENTI:-accanto}" = separati ] && [ -n "${METIS_FONTI:-}" ]; then mkdir -p "$METIS_FONTI"; OUT="$METIS_FONTI/$NOME"
+  else OUT="${IN%.md}.docx"; fi
 fi
 GUARDIA="$QUI/guardia-docx.py"
 if [ "$FORZA" -eq 0 ]; then python3 "$GUARDIA" verifica "$OUT" || exit 3; fi

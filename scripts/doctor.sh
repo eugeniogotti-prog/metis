@@ -3,7 +3,7 @@
 # L'hook di avvio ne mostra il sunto. Fa anche da test di conformità dopo un'installazione o un aggiornamento.
 #
 # Controlli: tetti del contesto (letti dalla tabella di _Claude.md), onboarding, operazioni di inizio mese,
-# frontmatter e tag, stati e impegni, mappa delle cartelle, cartella fonti, log di sessione, Inbox, automazioni, log grandi, affidabilità del report.
+# frontmatter e tag, stati e impegni, mappa delle cartelle, cartelle dei documenti, log di sessione, Inbox, automazioni, log grandi, affidabilità del report.
 # Percorsi e ruoli dalla configurazione (scripts/lib/config.sh): nessun percorso scritto qui.
 #
 # Uso: bash doctor.sh            (configurazione in ~/.config/metis/config o in $METIS_CONFIG)
@@ -53,6 +53,7 @@ note_recenti() {
     salta=0
     for e in "${esclusi[@]}"; do [ -n "$e" ] && case "$f" in "$e"/*) salta=1 ;; esac; done
     case "$f" in */.obsidian/*|*/.trash/*|*/.claude/*) salta=1 ;; esac   # .claude: skill e comandi del progetto, non note
+    case "$f" in */_IN/*|*/_fonti/*|*/_OUT/*) salta=1 ;; esac   # file di lavoro (ricevuti, fonti, consegnati): non note da giudicare
     case "$f" in "$METIS_VAULT"/CLAUDE.md|"$METIS_VAULT"/CLAUDE.local.md) salta=1 ;; esac   # istruzioni, non note
     [ "$salta" -eq 0 ] && printf '%s\n' "$f"
   done
@@ -162,7 +163,7 @@ else
 fi
 
 # --- Mappa delle cartelle: inventario, fotografia del giorno e confronto con la precedente (scripts/mappa.py) ---
-# Avviso solo per i lavori che perdono la cartella su disco; il resto è informazione.
+# Avviso solo per i lavori che perdono la loro cartella (fonte-primaria); il resto è informazione.
 sec "Mappa delle cartelle"
 RIEP=$(python3 "$METIS_ROOT/scripts/mappa.py" 2>/dev/null | tail -1)
 case "$RIEP" in
@@ -253,31 +254,55 @@ else
   [ "$TOT" -le 5 ] && [ -z "$VECCHIA" ] && add ok "Inbox sotto controllo"
 fi
 
-# --- Cartella fonti (23/10/2026): una cartella per lavoro, con _IN, _fonti e _OUT (CLAUDE.md, «Binari su disco») ---
-# Solo avvisi. Si guardano i file sciolti nella radice e le cartelle dei lavori aperti (fonte-primaria degli stati non
-# archiviati, dentro la cartella fonti): le cartelle che il cliente aveva prima di Metis non si giudicano.
-sec "Cartella fonti"
+# --- Cartelle dei documenti (23/10/2026): una cartella per lavoro, con _IN, _fonti e _OUT (CLAUDE.md, «una cartella per lavoro») ---
+# Solo avvisi. Si guardano i file sciolti nelle radici e le cartelle dei lavori aperti (fonte-primaria degli stati non
+# archiviati): le cartelle che il cliente aveva prima di Metis non si giudicano.
+# Con i documenti accanto alle note (default) le radici sono le cartelle dei progetti, delle aree e delle risorse del vault;
+# lì le note (.md) nella radice non contano come sciolte (indici, note di cartella): contano i documenti. Con
+# METIS_DOCUMENTI=separati la radice è la cartella fonti fuori dal vault, e conta ogni file.
 FONTI="${METIS_FONTI%/}"
-if [ ! -d "$FONTI" ]; then
-  add info "Cartella fonti non ancora creata ($FONTI)"
+if [ "${METIS_DOCUMENTI:-accanto}" = separati ]; then
+  sec "Cartella fonti"
+  RADICI_DOC=("$FONTI"); NOME_RADICE="della cartella fonti"; SOLO_DOC=0
 else
-  NSCIOLTI=$(find "$FONTI" -maxdepth 1 -type f ! -name ".*" 2>/dev/null | conta)
+  sec "Cartelle dei documenti"
+  RADICI_DOC=("$FONTI"); NOME_RADICE="di $METIS_RUOLO_PROGETTI"; SOLO_DOC=1
+  for r in AREE RISORSE; do d=$(metis_ruolo "$r"); [ -n "$d" ] && [ -d "$d" ] && [ "$d" != "$FONTI" ] && RADICI_DOC+=("$d"); done
+  [ "${#RADICI_DOC[@]}" -gt 1 ] && NOME_RADICE="delle cartelle dei progetti, delle aree e delle risorse"
+fi
+sciolti() {  # file sciolti nelle radici: nome della radice relativo al vault, poi il file
+  for r in "${RADICI_DOC[@]}"; do
+    [ -d "$r" ] || continue
+    if [ "$SOLO_DOC" = 1 ]; then find "$r" -maxdepth 1 -type f ! -name ".*" ! -name "*.md" 2>/dev/null
+    else find "$r" -maxdepth 1 -type f ! -name ".*" 2>/dev/null; fi
+  done
+}
+if [ ! -d "$FONTI" ]; then
+  if [ "$SOLO_DOC" = 1 ]; then add info "Cartella dei progetti non ancora creata ($FONTI)"
+  else add info "Cartella fonti non ancora creata ($FONTI)"; fi
+else
+  NSCIOLTI=$(sciolti | conta)
   if [ "$NSCIOLTI" -gt 0 ]; then
-    add warn "$NSCIOLTI file sciolti nella radice della cartella fonti, da portare nella cartella del loro lavoro o in _Risorse/<tema>/: $(find "$FONTI" -maxdepth 1 -type f ! -name ".*" 2>/dev/null | sed 's#.*/##' | sort | head -3 | tr '\n' ';')"
-  else add ok "Nessun file sciolto nella radice della cartella fonti"; fi
+    if [ "$SOLO_DOC" = 1 ]; then DEST="nella cartella del loro lavoro o della loro area, o nelle risorse per tema"
+    else DEST="nella cartella del loro lavoro o in _Risorse/<tema>/"; fi
+    add warn "$NSCIOLTI file sciolti nella radice $NOME_RADICE, da portare $DEST: $(sciolti | sed 's#.*/##' | sort | head -3 | tr '\n' ';')"
+  else add ok "Nessun file sciolto nella radice $NOME_RADICE"; fi
   SENZA=""; NLAV=0
   for s in "$CL"/stati/*.md; do
     case "$(basename "$s")" in _*) continue ;; esac
     [ -f "$s" ] || continue
     fp=$(awk 'NR==1 && /^---$/ {f=1; next} f && /^---$/ {exit} f && /^fonte-primaria:/ {sub(/^fonte-primaria:[[:space:]]*/, ""); sub(/[[:space:]]+#.*$/, ""); print}' "$s" | tr -d "'\"")
     [ -n "$fp" ] || continue
-    case "$fp" in /*) d="$fp" ;; "~"*) d="$HOME${fp#\~}" ;; *) d="$FONTI/$fp" ;; esac
+    case "$fp" in /*) d="$fp" ;; "~"*) d="$HOME${fp#\~}" ;; *) d="$FONTI/$fp"; [ "$SOLO_DOC" = 1 ] && [ ! -d "$d" ] && d="$METIS_VAULT/$fp" ;; esac
     d="${d%/}"
-    case "$d/" in "$FONTI"/?*) ;; *) continue ;; esac   # fuori dalla cartella fonti: non si giudica
+    dentro=""; base=""
+    for r in "${RADICI_DOC[@]}"; do case "$d/" in "$r"/?*) dentro=1; base="$r"; break ;; esac; done
+    [ -n "$dentro" ] || continue                        # fuori dalle radici dei documenti: non si giudica
+    [ -n "$base" ] && [ "$base" = "$(metis_ruolo RISORSE)" ] && continue   # un tema delle risorse non è un lavoro
     [ -d "$d" ] || continue                             # cartella sparita: la segnala la mappa
     NLAV=$((NLAV+1)); manca=""
     for sub in _IN _fonti _OUT; do [ -d "$d/$sub" ] || manca="$manca $sub"; done
-    [ -n "$manca" ] && SENZA="$SENZA ${d#"$FONTI"/} (manca$manca);"
+    [ -n "$manca" ] && SENZA="$SENZA ${d#"$base"/} (manca$manca);"
   done
   if [ -n "$SENZA" ]; then add warn "Cartelle di lavoro senza la struttura _IN, _fonti, _OUT:$SENZA"
   elif [ "$NLAV" -gt 0 ]; then add ok "Cartelle dei lavori aperti con _IN, _fonti e _OUT ($NLAV)"; fi

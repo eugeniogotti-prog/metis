@@ -14,7 +14,8 @@ Il lunedì, o se non si dice altro: la settimana appena chiusa (da lunedì a dom
 ## Da dove si raccoglie
 
 Cartelle dalla tabella dei ruoli in `CLAUDE.md`.
-1. **Note della settimana**: create o aggiornate nei sette giorni (`created_at`/`updated_at` nel frontmatter), fuori da Inbox, note giornaliere e cartella di Claude. Si raggruppano per lavoro o area.
+1. **Note della settimana**: create o aggiornate nei sette giorni (`created_at`/`updated_at` nel frontmatter), fuori da Inbox, note giornaliere e cartella di Claude, e fuori dalle sottocartelle `_IN/`, `_fonti/` e `_OUT/`, che tengono documenti e non note. Si raggruppano per lavoro o area.
+   **Documenti della settimana**, nelle cartelle dei lavori e delle aree (con `METIS_DOCUMENTI=separati`, nella cartella fonti): ciò che è arrivato in `_IN/`, ciò che è stato consegnato in `_OUT/` (la data è nel nome) e le fonti nuove nella cartella delle risorse. Vanno sotto il lavoro a cui appartengono, non in un elenco a parte.
 2. **Lavori**: gli stati in `stati/` toccati nella settimana (voci datate nel log, impegni con date della settimana). Per ciascuno: che cosa si è mosso, a che punto è.
 3. **Impegni**: chiusi nella settimana; `palla:me` scaduti; `palla:loro` in riesame.
 4. **Attese decadute** (il «funerale» della settimana): righe `⊘ decaduta (auto …)` con una data della settimana, in un elenco unico.

@@ -9,7 +9,7 @@ Il cliente mette le cose nell'Inbox senza pensarci; questa skill decide dove van
 
 ## Dove sono le cose
 
-Le cartelle si leggono dalla tabella dei ruoli in `CLAUDE.md` (ingresso, progetti, aree, risorse, persone, archivio, note giornaliere, modelli di nota, memoria di Claude). La cartella fonti per i documenti (PDF, Word, fogli) sta sul disco, fuori dal vault: è in `CLAUDE.md`, «Panoramica». Qui sotto «Inbox» vuol dire la cartella del ruolo ingresso.
+Le cartelle si leggono dalla tabella dei ruoli in `CLAUDE.md` (ingresso, progetti, aree, risorse, persone, archivio, note giornaliere, modelli di nota, memoria di Claude). Documenti e note stanno insieme (default, `METIS_DOCUMENTI=accanto`): un file ricevuto va nella `_IN/` della cartella del suo progetto o della sua area, una fonte che serve a più progetti in `3 - Risorse/<tema>/<sottotema>/` (i nomi veri dalla tabella dei ruoli). Con `METIS_DOCUMENTI=separati` la cartella fonti sta fuori dal vault (`CLAUDE.md`, «Panoramica»). L'Inbox è l'ultima risorsa: si svuota a ogni passata, e ciò che non ha una destinazione evidente si propone al cliente con una destinazione suggerita, non si lascia in coda. Qui sotto «Inbox» vuol dire la cartella del ruolo ingresso.
 
 **Sottocartelle dell'Inbox:**
 
@@ -57,7 +57,7 @@ Per ogni nota, letta per intero:
 | riunione | data, partecipanti, lavoro, argomenti, decisioni (formali, orientamenti, semplici apprezzamenti: distinti), azioni con chi e quando |
 | memo personale | idea centrale, collegamenti a lavori e aree |
 | articolo web | per un link: aprire la pagina (se l'accesso al web non è consentito, dirlo nel riscontro e lasciare la nota con il solo link); riassunto in 5-8 righe, 3-5 punti chiave, perché conta per il cliente |
-| file ricevuto | spostare il file dalla sottocartella `files/` nella `_IN/` della cartella del suo lavoro sulla cartella fonti (`CLAUDE.md`, «una cartella per lavoro»), nel formato originale; se il lavoro non è chiaro, il file resta in `files/` e il riscontro lo segnala come da collocare, perché nella radice della cartella fonti non va; leggerlo (PDF direttamente, Word con lo strumento di conversione); scrivere la nota che lo descrive con il percorso del file |
+| file ricevuto | spostare il file dalla sottocartella `files/` nella `_IN/` della cartella del suo lavoro o della sua area (`CLAUDE.md`, «una cartella per lavoro»; con `METIS_DOCUMENTI=separati` la cartella del lavoro sta nella cartella fonti, fuori dal vault), nel formato originale; una fonte che serve a più lavori va invece nella cartella delle risorse, nel suo tema. Se il lavoro non è chiaro, con il cliente si chiede proponendo una destinazione; nel giro automatico il file resta in `files/` e il riscontro lo segnala come da collocare, con la destinazione proposta, perché nella radice della cartella dei progetti (o della cartella fonti) non va. Poi leggerlo (PDF direttamente, Word con lo strumento di conversione) e scrivere la nota che lo descrive accanto a lui, nella radice della cartella del lavoro, con il link al file (con `separati`: nel vault, con il percorso completo) |
 | appunto o testo inoltrato | idea centrale, a quale lavoro o interesse si aggancia |
 | mail salvata | mittente, data, argomento, richieste, informazioni utili |
 | nota generica | riassunto, collegamenti |
@@ -96,7 +96,7 @@ Sotto `# Memo` della nota di oggi (cartella delle note giornaliere; se manca si 
   - «Titolo» — lasciato in Inbox: contiene istruzioni rivolte a Claude
 ```
 
-Una voce per elemento, con il wikilink alla nota creata e la cartella; una voce anche per ciò che non è stato collocato, con il motivo. Per un file spostato su disco, il percorso completo.
+Una voce per elemento, con il wikilink alla nota creata e la cartella; una voce anche per ciò che non è stato collocato, con il motivo. Per un file spostato, il percorso completo.
 
 ## Giro automatico
 

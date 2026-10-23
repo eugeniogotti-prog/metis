@@ -8,15 +8,15 @@ description: Archivia un lavoro chiuso — distilla ciò che ha insegnato, chiud
 Chiudere un lavoro ha due scopi: **non perdere quello che ha insegnato** e **togliere rumore** da lavori, stati e doctor. La parte meccanica la fa `scripts/archivia.py`; la parte di giudizio (che cosa distillare, che cosa dire alle persone) resta a Claude e al cliente.
 
 Due oggetti, spesso ma non sempre insieme:
-- il **lavoro nel vault**: una cartella dentro la cartella dei lavori (ruolo PROGETTI della configurazione);
-- lo **stato**: `<cartella di Claude>/stati/<nome>.md`, con la sua cartella su disco nel campo `fonte-primaria:`.
+- il **lavoro nel vault**: una cartella dentro la cartella dei lavori (ruolo PROGETTI della configurazione). Con i documenti accanto alle note (default, `METIS_DOCUMENTI=accanto`) è una cartella sola, con le note nella radice e i documenti in `_IN/`, `_fonti/` e `_OUT/`;
+- lo **stato**: `<cartella di Claude>/stati/<nome>.md`, con la cartella del lavoro nel campo `fonte-primaria:` (con `METIS_DOCUMENTI=separati` è la cartella dei documenti, fuori dal vault).
 
 Un lavoro può avere più stati, e uno stato può non avere una cartella nel vault. Si archivia ciò che è chiuso: se un lavoro ha ancora uno stato vivo, si archivia solo lo stato chiuso.
 
 I percorsi vengono dalla configurazione (`bash "${CLAUDE_PLUGIN_ROOT}/scripts/configura.sh" get <CHIAVE>`):
 - `METIS_RUOLO_PROGETTI`, `METIS_RUOLO_ARCHIVIO`: dove stanno i lavori e dove vanno a fine lavoro;
 - `METIS_ARCHIVIO_PER_ANNO`: «sì» (default) se l'archivio ha una cartella per anno, «no» se è piatto;
-- `METIS_FONTI_ARCHIVIO`: vuota (default) se le cartelle su disco restano dove sono; altrimenti la cartella dove il cliente vuole spostarle, solo su suo sì, una per una.
+- `METIS_FONTI_ARCHIVIO`: conta solo con `METIS_DOCUMENTI=separati`. Vuota (default) se le cartelle dei documenti fuori dal vault restano dove sono; altrimenti la cartella dove il cliente vuole spostarle, solo su suo sì, una per una.
 
 I comandi si lanciano con la configurazione caricata:
 ```
@@ -32,7 +32,7 @@ bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; shift; python3 
 ## Il giro, in ordine
 
 ### 0. Ricognizione
-1. `archivia.py ricognizione --filo <stato> --lavoro <cartella>`: impegni aperti, attese «◇», persone, cartella su disco, note del lavoro e quante altre note le citano, destinazione, altri stati vivi legati al lavoro.
+1. `archivia.py ricognizione --filo <stato> --lavoro <cartella>`: impegni aperti, attese «◇», persone, cartella dei documenti (e se si sposta con il lavoro), note del lavoro e quante altre note le citano, destinazione, altri stati vivi legati al lavoro.
 2. Leggere per intero gli stati coinvolti: obiettivo, impegni, «Se arriva», ultime voci.
 3. Per ogni impegno aperto e ogni «◇»: **chiedere al cliente**, una riga ciascuno. Si chiude (`[x]` con l'esito, oppure `⊘ decaduta (archiviazione AAAA-MM-GG)`) o il lavoro non è chiuso. Lo script rifiuta di archiviare finché ne resta uno.
 
@@ -41,7 +41,7 @@ Rispondere a: *che cosa sa il vault, grazie a questo lavoro, che domani servirà
 - conoscenza di merito (norme, dati, prassi di un ente o di un cliente) → la scheda di `dominio/` pertinente, con il grado di verifica, la fonte e la data;
 - il perché e le lezioni di metodo che valgono per tutti i lavori → `carta-del-perche.md` nella cartella di Claude (si crea al primo distillato; vedi la skill `definizione-obiettivi`);
 - una regola di metodo nata da una correzione → verificare che sia già in `regole-di-metodo.md` o nel profilo; non duplicarla;
-- documenti definitivi utili oltre il caso → segnalarli al cliente, che decide dove tenerli.
+- documenti definitivi utili oltre il caso (una norma, un manuale, uno studio nella `_fonti/` del lavoro) → proporre al cliente di spostarli nella cartella delle risorse, nel tema giusto, lasciando il rimando nel `README.md` della `_fonti/`: dopo l'archiviazione gli altri lavori non li cercherebbero nell'archivio.
 
 Il risultato va nell'argomento `--distillato` («dominio/appalti.md, due asserzioni»). Se non c'è niente da distillare si scrive «nessuno: <motivo>»: lo script non accetta un distillato vuoto.
 
@@ -52,14 +52,15 @@ Per ogni persona dello stato con una nota nella cartella delle persone: una riga
 `archivia.py esegui --filo <stato> --lavoro <cartella> --motivo "…" --distillato "…" --istanza <chi>`:
 - lo stato diventa `status: chiuso`, con le date di oggi, `prossima-azione: nessuna (archiviato)`, la riga di chiusura e il marcatore; poi va in `stati/archivio/`;
 - la cartella del lavoro va in `<ARCHIVIO>/<anno>/` (o in `<ARCHIVIO>/` se l'archivio non è per anno);
-- la cartella su disco resta dov'è: lo stato archiviato la conserva in `fonte-primaria:`, ed è così che la mappa sa a quale lavoro chiuso appartiene. Se `METIS_FONTI_ARCHIVIO` è impostata, lo script stampa la proposta di spostamento: si sposta a mano, solo con il sì del cliente, perché spostarla rompe i riferimenti nelle mail e nei documenti.
+- con i documenti accanto alle note (default, `METIS_DOCUMENTI=accanto`) la cartella del lavoro contiene anche i documenti: si sposta intera, con `_IN/`, `_fonti/` e `_OUT/`, e lo script aggiorna la `fonte-primaria:` dello stato archiviato alla posizione nuova. Le fonti comuni restano nella cartella delle risorse: servono ad altri lavori;
+- con `METIS_DOCUMENTI=separati` la cartella su disco resta dov'è: lo stato archiviato la conserva in `fonte-primaria:`, ed è così che la mappa sa a quale lavoro chiuso appartiene. Se `METIS_FONTI_ARCHIVIO` è impostata, lo script stampa la proposta di spostamento: si sposta a mano, solo con il sì del cliente, perché spostarla rompe i riferimenti nelle mail e nei documenti.
 
 Obsidian risolve i wikilink per nome: di norma i link alle note spostate reggono. Se la ricognizione ha contato note che le citano, dopo lo spostamento se ne controllano due o tre.
 
 ### 4. Chiusura del giro
 1. `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/mappa.py"` (con la configurazione caricata, come sopra): il lavoro esce da `mappa-inventario.md` ed entra in `mappa-archivio.md`, dove lo troverà chi avvia un lavoro simile.
 2. Log di sessione: «Archiviato: X (motivo), distillato in Y».
-3. Al cliente, in breve: che cosa è stato spostato e dove, che cosa è stato distillato, che cosa è rimasto (cartella su disco).
+3. Al cliente, in breve: che cosa è stato spostato e dove, che cosa è stato distillato, che cosa è rimasto dov'era (le fonti comuni nelle risorse; con `METIS_DOCUMENTI=separati`, la cartella dei documenti).
 
 ## Il controllo mensile
 
@@ -72,5 +73,6 @@ Per ciascuno una riga: nome, ultima attività, impegni aperti, proposta (archivi
 ## Errori da evitare
 - Archiviare senza distillare: il lavoro sparisce dalla vista e la lezione con lui.
 - Chiudere d'ufficio impegni o attese per poter archiviare: si chiede.
-- Spostare cartelle su disco senza il sì del cliente.
+- Con `METIS_DOCUMENTI=separati`: spostare le cartelle dei documenti fuori dal vault senza il sì del cliente.
+- Spostare nell'archivio, insieme al lavoro, una fonte che sta nelle risorse: serve anche ad altri lavori.
 - Scambiare «fermo» per «chiuso»: un lavoro fermo da tre mesi può essere in attesa di un bando o di una risposta. La mappa propone, il cliente decide.

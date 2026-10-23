@@ -7,8 +7,9 @@ METIS_PRODOTTO=Metis
 # Radice del vault.
 METIS_VAULT=~/Documents/Vault
 
-# Cartella dei documenti su disco (PDF, Word, fogli): accanto al vault, fuori da esso.
-METIS_FONTI=~/Documents/Fonti
+# Cartella dei documenti: con «accanto» (default) è la cartella dei progetti del vault e non si scrive;
+# con METIS_DOCUMENTI=separati è una cartella fuori dal vault, per esempio:
+# METIS_FONTI=~/Documents/Fonti
 
 # Mappatura ruolo → cartella, relativa alla radice del vault. Vault nuovo: i valori sotto (PARA).
 # Vault esistente: la skill di installazione propone la mappatura sulle cartelle del cliente, senza spostare note.
@@ -44,6 +45,10 @@ METIS_TAG_PREFISSI=tipo argomento contenuto status
 METIS_ARCHIVIO_PER_ANNO=sì
 # Posta delle sessioni: «connettori» (default, connettore Gmail di claude.ai) o «locale» (server locale, google.sh posta).
 # METIS_POSTA=connettori
+
+# Documenti: «accanto» (default: una cartella per lavoro con note e documenti insieme, nella struttura PARA del vault;
+# la cartella fonti è quella dei progetti) o «separati» (vault di Obsidian con sole note, documenti in METIS_FONTI fuori).
+# METIS_DOCUMENTI=accanto
 
 # Cartella dove spostare a fine lavoro le cartelle su disco; vuota = restano dove sono (consigliato).
 METIS_FONTI_ARCHIVIO=
