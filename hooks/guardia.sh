@@ -1,5 +1,5 @@
 #!/bin/bash
-# guardia.sh — hook PreToolUse di Metis. Tre protezioni, solo dentro il vault configurato:
+# guardia.sh — hook PreToolUse di Metis. Tre protezioni (più l'instradamento della posta), solo dentro il vault configurato:
 #   1. cartella riservata: ogni strumento che la tocca viene bloccato (deny);
 #   2. azioni irreversibili: cancellazioni ricorsive, cestino di Obsidian, push, reset, scaricamento dei LaunchAgent → conferma (ask);
 #   3. invii verso l'esterno: strumenti di posta e messaggistica che mandano, inoltrano o rispondono; eventi di calendario
@@ -145,6 +145,27 @@ if [ "$TOOL" = "Bash" ] && [ -n "$CMD" ]; then
   printf '%s' "$C" | grep -Eq 'git[[:space:]]+(push|reset[[:space:]]+--hard|clean[[:space:]]+-[a-z]*f)' && decidi ask "Operazione git che pubblica o cancella: serve la conferma del cliente."
   printf '%s' "$C" | grep -Eq 'launchctl[[:space:]]+(bootout|unload|remove)' && decidi ask "Scaricare un'automazione la ferma: serve la conferma del cliente."
   printf '%s' "$C" | grep -Eq '(^|[[:space:];&|])sudo[[:space:]]' && decidi deny "Comandi con sudo: fuori da ciò che Claude fa sul Mac del cliente."
+fi
+
+# 2b. Posta dal server locale (METIS_POSTA=locale, modulo google «posta locale»): il connettore Gmail di claude.ai si
+# rifiuta e si rimanda al server, le cui regole stanno per nome nelle impostazioni del vault. Il connettore si riconosce
+# dal nome: mcp__claude_ai_Gmail__… in Claude Code, mcp__<identificativo UUID>__<azione del connettore> nell'app.
+# Calendar e Drive di claude.ai restano liberi (gli invii li ferma il punto 3).
+if [ "${METIS_POSTA:-connettori}" = locale ]; then
+  case "$TOOL" in
+    mcp__claude_ai_Gmail__*) CONN_GMAIL=1 ;;
+    mcp__*__*)
+      SRV=$(printf '%s' "$TOOL" | sed -n 's/^mcp__\(.*\)__[^_][^_]*.*$/\1/p' | sed 's/__.*//')
+      if printf '%s' "$SRV" | grep -Eq '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+        case "${TOOL##*__}" in
+          send_message|reply|forward|create_draft|update_draft|delete_draft|get_draft|list_drafts|search_threads|get_thread|get_message|\
+          list_labels|create_label|update_label|delete_label|label_message|label_thread|unlabel_message|unlabel_thread|update_message_labels|\
+          trash_message|trash_thread|untrash_message|untrash_thread|mark_message_spam|mark_thread_spam|unmark_message_spam|unmark_thread_spam|\
+          apply_sensitive_message_label|apply_sensitive_thread_label) CONN_GMAIL=1 ;;
+        esac
+      fi ;;
+  esac
+  [ -n "${CONN_GMAIL:-}" ] && decidi deny "La posta di questo vault passa dal server locale (strumenti mcp__gmail-locale__…: search_emails, read_email, download_attachment, draft_email; bozze con allegati: scripts/gmail-bozza.mjs del plugin), non dal connettore Gmail di claude.ai."
 fi
 
 # 3. Invii: strumenti MCP di posta e messaggistica che mandano, inoltrano o rispondono. Le bozze passano.

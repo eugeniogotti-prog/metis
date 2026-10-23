@@ -15,6 +15,17 @@
 #   google.sh credenziali <file>  [server locale] copia le credenziali OAuth scaricate da Google Cloud (600)
 #   google.sh account             [server locale] autorizzazione dell'account nel browser (la fa il cliente)
 #   google.sh server              [server locale] dichiara il server, in sola lettura, per le routine
+#
+# Strada «posta locale» (decisione del 23/10/2026): la posta delle sessioni passa dal server locale
+# @dguido/google-workspace-mcp (versione fissata, solo Gmail), non dal connettore Gmail di claude.ai: il connettore non
+# scarica né allega file, e nell'app i suoi nomi cambiano da un account all'altro, così che le regole per nome non lo
+# prendono. Lettura, allegati e bozze senza conferma; invii, etichette e filtri con conferma; cancellazioni vietate
+# (installa-permessi.sh con METIS_POSTA=locale); la guardia rifiuta il connettore Gmail. Calendar e Drive restano ai connettori.
+# Il pacchetto ha il repository archiviato (marzo 2026): si fissa la versione, provata dal 3/2026 nel sistema di riferimento.
+#   google.sh credenziali-posta <file>  copia le credenziali OAuth in ~/.config/google-workspace-mcp (600)
+#   google.sh account-posta             consenso del cliente nel browser (una volta; di nuovo solo se revocato)
+#   google.sh posta                     installa il server, lo dichiara nel vault, METIS_POSTA=locale, permessi
+#   google.sh token                     controlla l'autorizzazione senza avviare il server (che altrimenti apre il browser)
 
 set -uo pipefail
 METIS_ROOT="${METIS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -27,6 +38,10 @@ GDIR="${METIS_GOOGLE_DIR:-$HOME/.google-mcp}"
 NPX="${METIS_NPX:-$(command -v npx || ls /opt/homebrew/bin/npx /usr/local/bin/npx 2>/dev/null | head -1)}"
 CLAUDE="${METIS_CLAUDE:-claude}"
 MCP_ROUTINE="$CFG_DIR/mcp-routine.json"
+PACCHETTO_POSTA="@dguido/google-workspace-mcp@3.4.4"
+PDIR="${XDG_CONFIG_HOME:-$HOME/.config}/google-workspace-mcp"
+NPM="${METIS_NPM:-$(command -v npm || ls /opt/homebrew/bin/npm /usr/local/bin/npm 2>/dev/null | head -1)}"
+server_posta() { command -v google-workspace-mcp || ls /opt/homebrew/bin/google-workspace-mcp /usr/local/bin/google-workspace-mcp 2>/dev/null | head -1; }
 IMP="$METIS_ROOT/scripts/lib/impostazioni.py"
 
 # Strumenti dei connettori di claude.ai (nomi letti il 30/9/2026 dall'elenco degli strumenti di Claude Code).
@@ -82,20 +97,62 @@ PY
     "$NPX" -y "$PACCHETTO" accounts add principale ;;
   server)
     [ -n "$NPX" ] || { echo "google: manca node (brew install node)" >&2; exit 1; }
-    python3 "$IMP" mcp "$MCP_ROUTINE" google "{\"type\":\"stdio\",\"command\":\"$NPX\",\"args\":[\"-y\",\"$PACCHETTO\",\"serve\",\"--read-only\"],\"env\":{}}"
+    if [ "${METIS_POSTA:-connettori}" = locale ] && [ -n "$(server_posta)" ]; then
+      # con la posta locale le routine usano lo stesso server e la stessa autorizzazione, in sola lettura: un solo consenso
+      python3 "$IMP" mcp "$MCP_ROUTINE" google "{\"type\":\"stdio\",\"command\":\"$(server_posta)\",\"args\":[\"start\"],\"env\":{\"GOOGLE_WORKSPACE_READ_ONLY\":\"true\"}}"
+    else
+      python3 "$IMP" mcp "$MCP_ROUTINE" google "{\"type\":\"stdio\",\"command\":\"$NPX\",\"args\":[\"-y\",\"$PACCHETTO\",\"serve\",\"--read-only\"],\"env\":{}}"
+    fi
     chmod 600 "$MCP_ROUTINE"
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_ROUTINE_STRUMENTI "mcp__google"
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI google
     echo "google: server locale in sola lettura dichiarato per le routine ($MCP_ROUTINE); da provare con l'account del cliente" ;;
+  credenziali-posta)
+    F="${2:?manca il file delle credenziali scaricato da Google Cloud}"
+    python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if "installed" in d else 1)' "$F" 2>/dev/null \
+      || { echo "google: il file non è una credenziale OAuth per app desktop (manca «installed»)" >&2; exit 1; }
+    mkdir -p "$PDIR"; chmod 700 "$PDIR"
+    ( umask 077; cp "$F" "$PDIR/credentials.json" ); chmod 600 "$PDIR/credentials.json"
+    echo "google: credenziali copiate in $PDIR/credentials.json (600). Il file scaricato si può cancellare." ;;
+  account-posta)
+    [ -f "$PDIR/credentials.json" ] || { echo "google: prima le credenziali (google.sh credenziali-posta <file>)" >&2; exit 1; }
+    S=$(server_posta); [ -n "$S" ] || { echo "google: prima il server (google.sh posta)" >&2; exit 1; }
+    echo "google: si apre il browser; accedi con l'account Google del cliente e consenti l'accesso («app non verificata» → Avanzate)." >&2
+    "$S" auth && python3 "$METIS_ROOT/scripts/google-token.py" --dir "$PDIR" ;;
+  token)
+    python3 "$METIS_ROOT/scripts/google-token.py" --dir "$PDIR" ;;
+  posta)
+    [ -n "$NPM" ] || { echo "google: manca node (brew install node)" >&2; exit 1; }
+    S=$(server_posta)
+    if [ -z "$S" ] || ! "$S" version 2>/dev/null | grep -q '3\.4\.4'; then
+      "$NPM" install -g "$PACCHETTO_POSTA" >/dev/null || { echo "google: installazione di $PACCHETTO_POSTA non riuscita" >&2; exit 1; }
+      S=$(server_posta)
+    fi
+    [ -n "$S" ] || { echo "google: server installato ma non trovato nel PATH" >&2; exit 1; }
+    python3 "$IMP" mcp "$METIS_VAULT/.mcp.json" gmail-locale "{\"type\":\"stdio\",\"command\":\"$S\",\"args\":[\"start\"],\"env\":{\"GOOGLE_WORKSPACE_SERVICES\":\"gmail\"}}"
+    python3 "$IMP" lista "$METIS_VAULT/.claude/settings.json" enabledMcpjsonServers gmail-locale >/dev/null
+    bash "$METIS_ROOT/scripts/configura.sh" set METIS_POSTA locale
+    bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI google
+    bash "$METIS_ROOT/scripts/installa-permessi.sh"
+    echo "google: posta dal server locale ($S, solo Gmail) dichiarata nel vault; il connettore Gmail resta attivo per Cowork e le chat, ma nel vault la guardia lo rifiuta"
+    echo "google: poi google.sh credenziali-posta <file>, google.sh account-posta, google.sh controlla; sessione nuova del cliente" ;;
   controlla)
     ERR=0
     bash "$0" connettori || ERR=1
-    if grep -q '"google"' "$MCP_ROUTINE" 2>/dev/null; then   # server locale facoltativo: si controlla solo se dichiarato
+    if grep -q '"google"' "$MCP_ROUTINE" 2>/dev/null && ! grep -q 'GOOGLE_WORKSPACE_READ_ONLY' "$MCP_ROUTINE"; then   # server locale facoltativo (pacchetto delle routine): si controlla solo se dichiarato
       [ "$(stat -f %Lp "$GDIR/credentials.json" 2>/dev/null)" = 600 ] && echo "✅ server locale: credenziali OAuth presenti e protette" || { echo "❌ server locale: credenziali OAuth assenti o leggibili da altri ($GDIR/credentials.json)"; ERR=1; }
       S=$("$NPX" -y "$PACCHETTO" status 2>&1)   # «status» esce con 0 anche quando trova problemi: si legge il testo
       if printf '%s' "$S" | grep -qE 'issue\(s\) found|NOT found|No accounts'; then echo "❌ server locale non pronto: $(printf '%s' "$S" | grep -E '❌|⚠️' | tr '\n' ' ')"; ERR=1
       else echo "✅ server locale pronto"; fi
     fi
+    if [ "${METIS_POSTA:-connettori}" = locale ]; then   # posta locale: server, credenziali, autorizzazione (senza avviarlo)
+      S=$(server_posta)
+      if [ -n "$S" ] && "$S" version 2>/dev/null | grep -q '3\.4\.4'; then echo "✅ posta locale: server $S (3.4.4)"; else echo "❌ posta locale: server assente o di un'altra versione (google.sh posta)"; ERR=1; fi
+      [ "$(stat -f %Lp "$PDIR/credentials.json" 2>/dev/null)" = 600 ] && echo "✅ posta locale: credenziali OAuth presenti e protette" || { echo "❌ posta locale: credenziali assenti o leggibili da altri ($PDIR/credentials.json)"; ERR=1; }
+      python3 "$METIS_ROOT/scripts/google-token.py" --dir "$PDIR"; RT=$?
+      [ "$RT" = 0 ] || ERR=1
+      grep -q '"gmail-locale"' "$METIS_VAULT/.mcp.json" 2>/dev/null && echo "✅ posta locale: server dichiarato nel vault" || { echo "❌ posta locale: server non dichiarato in $METIS_VAULT/.mcp.json (google.sh posta)"; ERR=1; }
+    fi
     exit "$ERR" ;;
-  *) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

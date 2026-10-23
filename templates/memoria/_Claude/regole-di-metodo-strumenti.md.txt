@@ -22,6 +22,7 @@ Regole per il lavoro tecnico di Claude: comandi, script, automazioni, collaudi. 
 
 - Negli script shell, una variabile seguita da un carattere non ASCII (virgolette «», trattini lunghi, lettere accentate) si scrive con le graffe, `${var}»`: senza, bash può leggere il carattere come parte del nome e la variabile esce vuota.
 - Le cancellazioni si fanno con il percorso assoluto, verificato prima di lanciarle; mai su un percorso costruito da una variabile che potrebbe essere vuota.
+- Nessuno script lanciato dalla shell invia posta, risponde, inoltra o condivide file: passando dalla shell scavalcherebbe la conferma che le regole chiedono per gli strumenti di invio. Gli script di posta creano solo bozze; l'invio lo fa il cliente.
 - Su macOS `timeout` non esiste: al suo posto lo script `con-timeout.sh` del plugin. Un comando che non esiste dà un'uscita vuota, che non va letta come un risultato.
 - Per catturare una schermata si cattura la sola finestra che serve, mai lo schermo intero: lo schermo mostra anche ciò che non c'entra.
 

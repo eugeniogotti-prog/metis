@@ -42,6 +42,9 @@ METIS_TAG_PREFISSI=tipo argomento contenuto status
 # METIS_MAPPA_GIORNI_FERMO=90
 # Archivio del vault con una cartella per anno (sì) o piatto (no).
 METIS_ARCHIVIO_PER_ANNO=sì
+# Posta delle sessioni: «connettori» (default, connettore Gmail di claude.ai) o «locale» (server locale, google.sh posta).
+# METIS_POSTA=connettori
+
 # Cartella dove spostare a fine lavoro le cartelle su disco; vuota = restano dove sono (consigliato).
 METIS_FONTI_ARCHIVIO=
 

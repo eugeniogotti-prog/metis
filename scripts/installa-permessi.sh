@@ -68,15 +68,31 @@ if ris:
 # cartelle che Claude legge ma non modifica (METIS_SOLA_LETTURA, relative al vault, separate da «|»)
 for c in [x.strip() for x in env.get("METIS_SOLA_LETTURA", "").split("|") if x.strip()]:
     deny += [f"Edit({ass(vault)}/{c}/**)", f"Write({ass(vault)}/{c}/**)"]
+ask = []
+routine_deny = []
+# Posta dal server locale (google.sh posta, METIS_POSTA=locale; decisione del 23/10/2026). Il server parte con il solo
+# servizio Gmail e ha nomi stabili, quindi le regole per nome funzionano (con i connettori, nell'app, no).
+if env.get("METIS_POSTA", "connettori") == "locale":
+    g = lambda nomi: ["mcp__gmail-locale__" + n for n in nomi.split()]
+    legge = g("search_emails read_email download_attachment list_drafts list_labels list_filters get_status list_tools")
+    bozze = g("draft_email")
+    scrive = g("send_email modify_email update_label get_or_create_label create_filter")
+    cancella = g("delete_email delete_draft delete_label delete_filter")
+    allow += legge + bozze + [f"Bash(node {root}/scripts/gmail-bozza.mjs *)", f'Bash(node "{root}/scripts/gmail-bozza.mjs" *)',
+                              f"Bash(python3 {root}/scripts/google-token.py*)"]
+    ask += scrive        # invii ed etichette: conferma del cliente (la guardia chiede anche lei per gli invii)
+    deny += cancella     # cancellazioni: mai, in nessuna modalità
+    routine_deny = bozze + [f"Bash(node {root}/scripts/gmail-bozza.mjs *)", f'Bash(node "{root}/scripts/gmail-bozza.mjs" *)']  # un giro automatico legge e basta
 modo = "acceptEdits" if env.get("METIS_PERMESSI", "senza-richieste") == "con-richieste" else "bypassPermissions"
-metis = {"permissions": {"defaultMode": modo, "allow": allow, "deny": deny,
+metis = {"permissions": {"defaultMode": modo, "allow": allow, "ask": ask, "deny": deny,
                          "additionalDirectories": [fonti] if fonti else []}}
-routine = {"permissions": dict(metis["permissions"], defaultMode="acceptEdits")}
+routine = {"permissions": dict(metis["permissions"], defaultMode="acceptEdits", ask=[],
+                               allow=[a for a in allow if a not in routine_deny], deny=deny + ask + routine_deny)}
 
 def unisci(base, add):
     p = base.setdefault("permissions", {})
     p["defaultMode"] = add["permissions"]["defaultMode"]   # la modalità di Metis prevale (copia del file in .prima-di-metis)
-    for k in ("allow", "deny", "additionalDirectories"):
+    for k in ("allow", "ask", "deny", "additionalDirectories"):
         lista = p.setdefault(k, [])
         for v in add["permissions"][k]:
             if v not in lista: lista.append(v)
@@ -86,6 +102,6 @@ s = env["S"]
 base = json.load(open(s)) if os.path.exists(s) else {}
 json.dump(unisci(base, metis), open(s, "w"), indent=2, ensure_ascii=False)
 json.dump(routine, open(env["R"], "w"), indent=2, ensure_ascii=False)
-print(f"installa-permessi: modalità {modo}, {len(allow)} regole allow, {len(deny)} deny → {s}")
+print(f"installa-permessi: modalità {modo}, {len(allow)} regole allow, {len(ask)} ask, {len(deny)} deny → {s}")
 print(f"installa-permessi: copia per le routine → {env['R']}")
 PY
