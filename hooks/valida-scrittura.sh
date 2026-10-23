@@ -38,6 +38,7 @@ esac
 
 for e in "$METIS_CL" "$(metis_ruolo TEMPLATE)"; do [ -n "$e" ] && case "$F" in "$e"/*) exit 0 ;; esac; done
 case "$F" in "$METIS_VAULT"/CLAUDE.md|"$METIS_VAULT"/CLAUDE.local.md) exit 0 ;; esac
+case "$F" in */.obsidian/*|*/.trash/*|*/.claude/*) exit 0 ;; esac   # .claude: skill e comandi del progetto, non note
 
 NOME="${F#$METIS_VAULT/}"
 if [ "$(head -1 "$F")" != "---" ]; then

@@ -104,6 +104,7 @@ check "installazione con ruoli mappati: nessun segnaposto rimasto" 'installa "$V
 check "CLAUDE.md punta alla cartella di Claude mappata" 'grep -q "Sistema/Claude/regole-di-metodo.md" "$V2/CLAUDE.md"'
 mkdir -p "$V2/Clienti/Rossi"; printf -- '---\ncreated_at: 2026-09-29\ntags:\n- appunti\nup:\n- x\n---\nTesto\n' > "$V2/Clienti/Rossi/nota.md"
 printf 'Senza frontmatter\n' > "$V2/Clienti/Rossi/nuda.md"
+mkdir -p "$V2/.claude/skills/prova"; printf -- '---\nname: prova\ndescription: x\n---\n' > "$V2/.claude/skills/prova/SKILL.md"
 config "$T/c2" "$V2" "$M2" "METIS_RUOLO_CLAUDE=Sistema/Claude" "METIS_RUOLO_INBOX=00 Ingresso" "METIS_RUOLO_JOURNAL=Diario"
 export METIS_CONFIG="$T/c2"
 bash "$ROOT/scripts/doctor.sh" >/dev/null 2>"$T/d2.err"
@@ -111,6 +112,7 @@ check "doctor scrive nella cartella di Claude mappata" '[ -f "$V2/Sistema/Claude
 check "tetti letti anche con la cartella mappata" '[ "$(grep -cE "^- ✅ .*: [0-9]+ / [0-9]+$" "$V2/Sistema/Claude/doctor.md")" -eq 6 ]'
 check "Inbox mappata trovata" 'grep -q "Note in Inbox: 0" "$V2/Sistema/Claude/doctor.md"'
 check "nota senza frontmatter trovata" 'grep -q "nuda (senza frontmatter)" "$V2/Sistema/Claude/doctor.md"'
+check "skill del progetto in .claude: non segnalata dal doctor" '! grep -q "SKILL (manca" "$V2/Sistema/Claude/doctor.md"'
 check "tag senza prefisso trovato" 'grep -q "Tag senza prefisso in: nota" "$V2/Sistema/Claude/doctor.md"'
 check "stderr del doctor vuoto" '[ ! -s "$T/d2.err" ]'
 config "$T/c2b" "$V2" "$M2" "METIS_RUOLO_CLAUDE=Sistema/Claude" "METIS_RUOLO_INBOX=00 Ingresso" "METIS_TAG_PREFISSI="

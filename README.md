@@ -13,7 +13,7 @@ Funziona su Mac, con Claude Code e il tuo abbonamento Claude. Obsidian è consig
 - **Un diario** delle sessioni, con le decisioni e il loro perché.
 - **Ciò che Claude sa del tuo campo**, con la fonte e il grado di verifica di ogni affermazione.
 - **Una mappa** dei lavori in corso e di quelli chiusi, che a ogni controllo del sistema segnala le cartelle spostate o rinominate.
-- **Protezioni**: Claude lavora senza chiederti il permesso a ogni passo, ma mail e messaggi verso altri restano bozze finché non dici di inviarli; prima di cancellare cartelle o di operazioni delicate chiede; una cartella riservata, se la indichi, e le cartelle con le credenziali del Mac non vengono mai lette.
+- **Protezioni**: Claude lavora senza chiederti il permesso a ogni passo, ma mail e messaggi verso altri restano bozze finché non dici di inviarli, e lo stesso vale per gli inviti a un evento e per la condivisione di un file; prima di cancellare cartelle o di operazioni delicate chiede; una cartella riservata, se la indichi, e le cartelle con le credenziali del Mac non vengono mai lette.
 - **Moduli facoltativi**: posta e calendario (Google o Microsoft 365), lettura di PDF e documenti Office, consegna delle note come documenti Word, Telegram e note vocali, giri automatici (briefing del mattino, sistemazione degli arrivi, sintesi della sera, riepilogo della settimana).
 
 ## Che cosa ti serve

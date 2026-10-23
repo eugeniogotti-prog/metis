@@ -2,7 +2,8 @@
 # guardia.sh — hook PreToolUse di Metis. Tre protezioni, solo dentro il vault configurato:
 #   1. cartella riservata: ogni strumento che la tocca viene bloccato (deny);
 #   2. azioni irreversibili: cancellazioni ricorsive, cestino di Obsidian, push, reset, scaricamento dei LaunchAgent → conferma (ask);
-#   3. invii verso l'esterno: strumenti di posta e messaggistica che mandano, inoltrano o rispondono → conferma (ask).
+#   3. invii verso l'esterno: strumenti di posta e messaggistica che mandano, inoltrano o rispondono; eventi di calendario
+#      con invitati e risposte agli inviti; condivisioni di file e cartelle (Drive) → conferma (ask).
 # Le bozze restano libere. In una sessione non interattiva (claude -p) una richiesta di conferma equivale a un blocco:
 # è il comportamento voluto per i giri automatici (verificato con Claude Code 2.1.284).
 # Uscita: JSON hookSpecificOutput sullo stdout quando decide; niente output quando lascia passare.
@@ -24,6 +25,8 @@ print("TOOL=" + shlex.quote(d.get("tool_name", "")))
 print("CWD=" + shlex.quote(d.get("cwd", "")))
 print("CMD=" + shlex.quote(ti.get("command", "") if isinstance(ti, dict) else ""))
 print("TESTO=" + shlex.quote(json.dumps(ti, ensure_ascii=False)))
+inv = [ti.get(k) for k in ("attendees", "attendee", "invitees", "guests", "addAttendees")] if isinstance(ti, dict) else []
+print("INVITATI=" + ("1" if any(v for v in inv) else ""))
 ' 2>/dev/null)"
 
 metis_dentro_vault "${CWD:-${CLAUDE_PROJECT_DIR:-$PWD}}" || exit 0
@@ -133,6 +136,15 @@ case "$TOOL" in
       *draft*|*bozza*) exit 0 ;;
       send*|*_send|*send_*|forward*|*forward*|reply*|*_reply*|*post_message*|*send_message*)
         decidi ask "Invio verso l'esterno ($TOOL): parte solo con il via esplicito del cliente per questo messaggio e questo destinatario." ;;
+      # Un evento con invitati manda l'invito a ciascuno; rispondere a un invito avvisa chi l'ha mandato.
+      *create_event*|*update_event*|*insert_event*|*patch_event*)
+        [ -n "$INVITATI" ] && decidi ask "Evento con invitati ($TOOL): Google manda l'invito a ciascuno. Serve il via esplicito del cliente per questo evento e questi invitati." ;;
+      *respond_to_event*|*rsvp*)
+        decidi ask "Risposta a un invito ($TOOL): arriva a chi l'ha mandato. Serve il via esplicito del cliente." ;;
+      # Condividere un file dà accesso a un terzo (e di solito gli manda una mail). Leggere i permessi resta libero.
+      *get_sharing*|*list_permission*|*get_permission*|*remove_permission*) ;;
+      share*|*_share|*_share_*|*add_permission*|*create_permission*)
+        decidi ask "Condivisione verso l'esterno ($TOOL): dà accesso al file a un terzo. Serve il via esplicito del cliente per questo file e questo destinatario." ;;
     esac ;;
 esac
 exit 0

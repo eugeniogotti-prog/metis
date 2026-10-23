@@ -90,6 +90,14 @@ check "sudo: bloccato" 'g Bash "$V" "{\"command\":\"sudo ls\"}" | grep -q "\"den
 check "invio di posta: conferma" 'g mcp__claude_ai_Gmail__send_message "$V" "{\"to\":\"a@b.it\"}" | grep -q "\"ask\""'
 check "risposta in un thread: conferma" 'g mcp__claude_ai_Gmail__reply "$V" "{}" | grep -q "\"ask\""'
 check "bozza di posta: passa" '[ -z "$(g mcp__claude_ai_Gmail__create_draft "$V" "{}")" ]'
+check "evento con invitati: conferma" 'g mcp__claude_ai_Google_Calendar__create_event "$V" "{\"summary\":\"x\",\"attendees\":[\"a@b.it\"]}" | grep -q "\"ask\""'
+VUOTO="{\"summary\":\"x\",\"attendees\":[]}"
+check "evento senza invitati: passa" '[ -z "$(g mcp__claude_ai_Google_Calendar__create_event "$V" "$VUOTO")" ] && [ -z "$(g mcp__claude_ai_Google_Calendar__create_event "$V" "{\"summary\":\"x\"}")" ]'
+check "invitati aggiunti a un evento: conferma" 'g mcp__google-workspace-mcp__update_event "$V" "{\"attendees\":[{\"email\":\"a@b.it\"}]}" | grep -q "\"ask\""'
+check "risposta a un invito: conferma" 'g mcp__claude_ai_Google_Calendar__respond_to_event "$V" "{}" | grep -q "\"ask\""'
+check "condivisione di un file: conferma" 'g mcp__claude_ai_Google_Drive__share_file "$V" "{}" | grep -q "\"ask\""'
+check "condivisione multipla: conferma" 'g mcp__google-workspace-mcp__batch_share "$V" "{}" | grep -q "\"ask\""'
+check "lettura dei permessi di condivisione: passa" '[ -z "$(g mcp__google-workspace-mcp__get_sharing "$V" "{}")" ]'
 check "lettura normale: passa" '[ -z "$(g Read "$V" "{\"file_path\":\"$V/CLAUDE.md\"}")" ]'
 check "fuori dal vault: nessun intervento" '[ -z "$(g Bash "$T" "{\"command\":\"rm -rf x\"}")" ]'
 
@@ -122,6 +130,8 @@ check "tag senza prefisso: avviso" '[ "$(w "$V/1 - Progetti/tag.md")" = 2 ] && g
 check "nota a norma: nessun avviso" '[ "$(w "$V/1 - Progetti/buona.md")" = 0 ]'
 check "CLAUDE.md: ignorato" '[ "$(w "$V/CLAUDE.md")" = 0 ]'
 check "file nella cartella di Claude: ignorato" '[ "$(w "$V/_Claude/correzioni.md")" = 0 ]'
+mkdir -p "$V/.claude/skills/prova"; printf 'testo\n' > "$V/.claude/skills/prova/SKILL.md"
+check "skill del progetto in .claude: ignorata" '[ "$(w "$V/.claude/skills/prova/SKILL.md")" = 0 ]'
 
 echo "6b. Sola lettura, Inbox senza sottocartelle, tetto con CLAUDE.local.md"
 bash "$ROOT/scripts/configura.sh" set METIS_SOLA_LETTURA "Giurisprudenza|Studio/Modelli" >/dev/null

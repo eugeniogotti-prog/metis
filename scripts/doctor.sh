@@ -52,7 +52,7 @@ note_recenti() {
   find "$METIS_VAULT" -maxdepth 5 -name "*.md" -mtime -7 2>/dev/null | while IFS= read -r f; do
     salta=0
     for e in "${esclusi[@]}"; do [ -n "$e" ] && case "$f" in "$e"/*) salta=1 ;; esac; done
-    case "$f" in */.obsidian/*|*/.trash/*) salta=1 ;; esac
+    case "$f" in */.obsidian/*|*/.trash/*|*/.claude/*) salta=1 ;; esac   # .claude: skill e comandi del progetto, non note
     case "$f" in "$METIS_VAULT"/CLAUDE.md|"$METIS_VAULT"/CLAUDE.local.md) salta=1 ;; esac   # istruzioni, non note
     [ "$salta" -eq 0 ] && printf '%s\n' "$f"
   done
