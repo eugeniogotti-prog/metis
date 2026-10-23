@@ -17,6 +17,23 @@ source "$METIS_ROOT/scripts/lib/config.sh"
 INPUT=$(cat 2>/dev/null)
 metis_carica_config || exit 0
 
+# Senza python3 (su un macOS senza Command Line Tools c'è solo un rimando all'installazione) la guardia non sa leggere
+# l'evento. Invece di lasciar passare tutto in silenzio fallisce chiusa: chiede conferma per la shell e per ogni
+# strumento MCP, blocca ciò che nomina la cartella riservata e lascia passare il resto.
+if ! python3 -c '' >/dev/null 2>&1; then
+  campo() { printf '%s' "$INPUT" | tr '\n' ' ' | sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" | head -1; }
+  TOOL=$(campo tool_name); CWD=$(campo cwd)
+  metis_dentro_vault "${CWD:-${CLAUDE_PROJECT_DIR:-$PWD}}" || exit 0
+  chiuso() { printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' "$1" "$2"; exit 0; }
+  if [ -n "${METIS_RUOLO_RISERVATA:-}" ]; then
+    case "$INPUT" in *"${METIS_RUOLO_RISERVATA%/}"*) chiuso deny "Cartella riservata (${METIS_RUOLO_RISERVATA%/}): Claude non la legge, non la cerca e non la elenca." ;; esac
+  fi
+  case "$TOOL" in
+    Bash|mcp__*|"") chiuso ask "Manca python3, quindi la guardia non riesce a controllare ${TOOL:-questo strumento}: serve la conferma del cliente. Rimedio: xcode-select --install, poi riaprire Claude Code." ;;
+  esac
+  exit 0
+fi
+
 # Campi dell'evento: nome dello strumento, cartella di lavoro, tutto il tool_input come testo.
 eval "$(printf '%s' "$INPUT" | python3 -c '
 import sys, json, shlex

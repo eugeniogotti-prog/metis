@@ -1,6 +1,6 @@
 ---
 name: definizione-obiettivi
-description: Avvia un lavoro nuovo e ne fissa l'obiettivo e il «perché». Cerca prima i precedenti nell'archivio (mappa-archivio.md, note delle persone), poi propone al cliente una bozza della sezione «## Obiettivo e perché» in cima allo stato del lavoro (`<cartella di Claude>/stati/<lavoro>.md`), dove la skill `autorevisione` la legge come metro per «centra l'obiettivo?». Metodo bozza e reazione, una domanda alla volta. Da invocare all'avvio di un lavoro sostanziale nuovo, prima di immergersi, oppure su richiamo per un lavoro esistente. Trigger: «definizione-obiettivi», «iniziamo un lavoro nuovo», «nuovo incarico», «definisci gli obiettivi», «qual è il perché di», «obiettivo del lavoro», «rivediamo l'obiettivo», «carta del perché».
+description: Avvia un lavoro nuovo e ne fissa l'obiettivo e il «perché». Cerca prima i precedenti nell'archivio (mappa-archivio.md, note delle persone), poi propone al cliente una bozza della sezione «## Obiettivo e perché» in cima allo stato del lavoro (il file del lavoro nella cartella `stati/` di Claude), dove la skill `autorevisione` la legge come metro per «centra l'obiettivo?». Metodo bozza e reazione, una domanda alla volta. Da invocare all'avvio di un lavoro sostanziale nuovo, prima di immergersi, oppure su richiamo per un lavoro esistente. Trigger: «definizione-obiettivi», «iniziamo un lavoro nuovo», «nuovo incarico», «definisci gli obiettivi», «qual è il perché di», «obiettivo del lavoro», «rivediamo l'obiettivo», «carta del perché».
 ---
 
 # Definizione degli obiettivi

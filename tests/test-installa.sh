@@ -105,6 +105,17 @@ check "app: condivisione con il nome dell'app: conferma" 'g ${APP}__share_file "
 check "lettura normale: passa" '[ -z "$(g Read "$V" "{\"file_path\":\"$V/CLAUDE.md\"}")" ]'
 check "fuori dal vault: nessun intervento" '[ -z "$(g Bash "$T" "{\"command\":\"rm -rf x\"}")" ]'
 
+echo "5a. Guardia senza python3 (fallimento chiuso)"
+mkdir -p "$T/senzapy"; printf '#!/bin/sh\nexit 1\n' > "$T/senzapy/python3"; chmod +x "$T/senzapy/python3"   # come il rimando di macOS
+gs() { evento "$1" "$2" "$3" | PATH="$T/senzapy:$PATH" bash "$ROOT/hooks/guardia.sh"; }
+check "senza python3: invio di posta: conferma" 'gs mcp__claude_ai_Gmail__send_message "$V" "{\"to\":\"a@b.it\"}" | grep -q "\"ask\""'
+check "senza python3: condivisione con il nome dell'app: conferma" 'gs ${APP}__share_file "$V" "{}" | grep -q "\"ask\""'
+check "senza python3: shell: conferma" 'gs Bash "$V" "{\"command\":\"ls\"}" | grep -q "\"ask\""'
+check "senza python3: cartella riservata: bloccata" 'gs Read "$V" "{\"file_path\":\"$V/_Privato/diario.md\"}" | grep -q "\"deny\""'
+check "senza python3: risposta in JSON valido" 'gs Bash "$V" "{\"command\":\"ls\"}" | python3 -m json.tool >/dev/null'
+check "senza python3: lettura normale: passa" '[ -z "$(gs Read "$V" "{\"file_path\":\"$V/CLAUDE.md\"}")" ]'
+check "senza python3: fuori dal vault: nessun intervento" '[ -z "$(gs Bash "$T" "{\"command\":\"rm -rf x\"}")" ]'
+
 echo "5b. Guardia: ricerche nella shell e cartella riservata"
 r() { g Bash "$V" "$(python3 -c 'import json,sys; print(json.dumps({"command": sys.argv[1]}))' "$1")"; }
 check "grep -r su tutto il vault: bloccato" 'r "grep -r segreto ." | grep -q "\"deny\""'
@@ -187,6 +198,22 @@ unset METIS_CLAUDE_PROJECTS
 
 echo "8. Dotazione"
 check "verifica-dotazione: sintassi e modulo sconosciuto segnalato" '! bash "$ROOT/scripts/verifica-dotazione.sh" inesistente >/dev/null'
+
+echo "9. Intestazioni di skill, comandi e agenti"
+# L'app di Claude rifiuta il plugin se un'intestazione contiene parentesi angolari («description cannot contain XML tags»).
+ANGOLARI=$(python3 - "$ROOT" <<'PY2'
+import pathlib, re, sys
+root = pathlib.Path(sys.argv[1])
+for f in sorted(p for d in ("skills", "commands", "agents") for p in (root / d).rglob("*.md")):
+    t = f.read_text(encoding="utf-8")
+    if not t.startswith("---\n"): continue
+    for riga in t.split("\n---", 1)[0].splitlines()[1:]:
+        r = re.sub(r":\s*>[-+]?\s*$", ":", riga)   # «description: >» è un blocco YAML, non una parentesi
+        if "<" in r or ">" in r: print(f"{f.relative_to(root)}: {riga[:80]}")
+PY2
+)
+[ -n "$ANGOLARI" ] && printf '%s\n' "$ANGOLARI" | sed 's/^/     /'
+check "nessuna parentesi angolare nelle intestazioni (l'app rifiuterebbe il plugin)" '[ -z "$ANGOLARI" ]'
 
 echo ""
 echo "Esito: $PASS passati, $FAIL falliti"
