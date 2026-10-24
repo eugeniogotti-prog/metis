@@ -21,23 +21,15 @@ Funziona su Mac, con Claude Code e il tuo abbonamento Claude. Obsidian è consig
 - un Mac con macOS recente e i permessi di amministratore;
 - un abbonamento Claude (Pro o Max; con un abbonamento Team o Enterprise dell'organizzazione, i connettori di posta e calendario li abilita l'amministratore);
 - **Claude Code** installato (claude.com/claude-code) e collegato al tuo abbonamento;
-- un account **GitHub**, con l'invito al repository di Metis accettato (te lo manda chi ti segue nell'installazione);
+- una connessione a internet: Metis si scarica da GitHub, dove è pubblico, quindi non servono un account GitHub né un invito;
 - se vuoi posta e calendario aziendali Microsoft 365: il consenso, una volta, di un amministratore dell'IT;
 - **dieci minuti** per l'avvio: chi sei, quanta autonomia dai a Claude, dove stanno i tuoi file, un lavoro da cui partire.
 
 ## Installazione
 
-### 1. Collegare il Mac a GitHub (una volta)
+### 1. Installare il plugin
 
 Nel Terminale:
-```bash
-brew install gh
-gh auth login
-```
-Scegli GitHub.com e HTTPS, rispondi **sì** alla domanda «Authenticate Git with your GitHub credentials?» e completa il login nel browser. Se `brew` non c'è, prima installa Homebrew da brew.sh.
-
-### 2. Installare il plugin
-
 ```bash
 claude plugin marketplace add eugeniogotti-prog/metis
 claude plugin install metis@metis
@@ -45,7 +37,7 @@ claude plugin list
 ```
 L'ultimo comando deve mostrare `metis@metis` con «enabled».
 
-### 3. Lasciar condurre Claude
+### 2. Lasciar condurre Claude
 
 Entra nella cartella del tuo vault (o creane una vuota, per esempio `~/Documents/Vault`) e apri Claude Code:
 ```bash
@@ -91,7 +83,7 @@ Poi, in Claude Code nel vault: «aggiorna i permessi di Metis». Le regole conte
 
 | Che cosa vedi | Che cosa fare |
 |---|---|
-| `marketplace add` dice «Please make sure you have the correct access rights» | l'invito al repository non è stato accettato, oppure Git non è collegato a GitHub: rifai `gh auth login` e rispondi sì alla domanda su Git |
+| `marketplace add` non trova il catalogo | controlla la connessione e di aver scritto `eugeniogotti-prog/metis` esattamente così |
 | All'apertura non compare l'orientamento di Metis | riapri Claude Code dentro la cartella del vault; controlla con `claude plugin list` che il plugin sia attivo |
 | Le protezioni sembrano non valere | manca il sì alla finestra di fiducia: riapri Claude Code nella cartella del vault e accettala |
 | Il controllo del mattino è giallo o rosso | chiedi a Claude «che cosa dice il doctor?»: legge il report e ti propone il rimedio |

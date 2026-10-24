@@ -15,14 +15,10 @@ Chi fa che cosa: **chi installa** prepara e guida, **il cliente** usa tastiera e
    - Obsidian sì o no, e se ha già un vault;
    - **5-10 documenti ben fatti** suoi, di tipi diversi, senza dati riservati di terzi (servono al profilo); meglio ancora coppie «bozza → versione mandata»;
    - **un lavoro vivo** da usare come primo lavoro;
-   - Telegram sì o no;
-   - **il nome utente GitHub** (o crearne uno): serve per l'accesso al repository.
-2. **L'accesso al repository**: invitare il cliente in lettura e fargli accettare l'invito.
-   ```bash
-   gh api -X PUT repos/eugeniogotti-prog/metis/collaborators/<nome-utente> -f permission=pull
-   ```
-3. **Le schede di dominio di partenza**, se sono state preparate per questo cliente (file `<materia>.md.txt`, ripulite da nomi e casi di chi le ha scritte): su una chiavetta o in un file da mandargli.
-4. **La versione**: prima di una giornata le prove devono passare (`bash tests/test-installa.sh templates/memoria` e le altre in `tests/`).
+   - Telegram sì o no.
+   Il repository è pubblico: al cliente non servono un account GitHub né un invito.
+2. **Le schede di dominio di partenza**, se sono state preparate per questo cliente (file `<materia>.md.txt`, ripulite da nomi e casi di chi le ha scritte): su una chiavetta o in un file da mandargli.
+3. **La versione**: prima di una giornata le prove devono passare (`bash tests/test-installa.sh templates/memoria` e le altre in `tests/`).
 
 ### 0. Prerequisiti (dieci minuti)
 
@@ -32,14 +28,13 @@ Chi fa che cosa: **chi installa** prepara e guida, **il cliente** usa tastiera e
 
 ### A. Il plugin (il cliente al Terminale)
 
-1. `brew install gh`, poi `gh auth login`: GitHub.com → HTTPS → **sì** alla domanda «Authenticate Git with your GitHub credentials?» → login dal browser. Controllo: `gh auth status`.
-2. Il plugin:
+1. Il plugin (nessun login a GitHub: il repository è pubblico):
    ```bash
    claude plugin marketplace add eugeniogotti-prog/metis
    claude plugin install metis@metis
    claude plugin list
    ```
-   Atteso: `metis@metis` «enabled». Claude Code tiene una copia propria del plugin: sul Mac non resta nessuna cartella da conservare. Se il primo comando dice «Please make sure you have the correct access rights», manca l'invito accettato oppure Git non è collegato a GitHub.
+   Atteso: `metis@metis` «enabled». Claude Code tiene una copia propria del plugin: sul Mac non resta nessuna cartella da conservare. Se il primo comando non trova il catalogo, controllare la connessione e il nome `eugeniogotti-prog/metis`.
 
 **Ripiego senza GitHub**: copiare la cartella del plugin sul Mac (per esempio in `~/Metis`) e lasciarla lì; `claude plugin marketplace add ~/Metis` e `claude plugin install metis@metis`. Con un catalogo locale, tolta la cartella d'origine `claude plugin list` dà il plugin «failed to load» (provato il 3/10/2026).
 
@@ -101,7 +96,7 @@ Il profilo di partenza vale da subito, con le regole marcate `[di partenza]`: il
 | Problema | Che cosa fare |
 |---|---|
 | Manca Homebrew o un programma | la verifica dà il comando; il cliente lo esegue; si rilancia «installa» |
-| Il catalogo su GitHub non si aggiunge | invito non accettato, oppure Git non collegato: `gh auth login`, sì alla domanda su Git |
+| Il catalogo su GitHub non si aggiunge | connessione assente o nome del repository scritto male; in alternativa il ripiego senza GitHub (sezione A) |
 | La posta aziendale non si collega | si prosegue: testo per l'IT, e intanto le mail utili si salvano a mano |
 | L'orientamento non compare | riaprire Claude Code nel vault; controllare che il plugin risulti attivo (`claude plugin list`) |
 | Le regole sembrano non valere | manca la finestra di fiducia: riaprire Claude Code nel vault e accettarla |
