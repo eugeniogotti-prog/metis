@@ -72,6 +72,11 @@ In quest'ordine, sempre:
 
 **Il fatto chiude l'impegno nello stesso giro.** Chi registra un fatto in uno stato (una mail ricevuta o inviata, un messaggio, l'esito di una riunione, un documento arrivato) guarda la sezione `## Impegni` e si chiede se quel fatto chiude una riga. Se sì, la spunta subito, con la prova, prima di scrivere la voce datata. Lo sweep (§ 5) è la rete di sicurezza.
 
+La regola da sola non basta: la si dimentica proprio quando il fatto sembra ovvio. Perciò tre precisazioni, da eseguire e non da ricordare:
+1. **Il controllo è un comando, non una domanda.** Dopo ogni voce datata che registra un fatto, si elencano le righe aperte del lavoro (`grep -n '^- \[ \]' <cartella di Claude>/stati/<lavoro>.md`) e si rileggono **una per una** davanti al fatto appena scritto. Una voce chiusa senza questo giro non è finita.
+2. **Il perimetro è la riga, non le sue conseguenze.** «Aiutare Rossi a scrivere la mail» si chiude quando la mail è scritta e consegnata a Rossi, non quando Rossi la spedisce; «preparare le simulazioni» si chiude quando sono consegnate, non quando qualcuno le ha lette. Ciò che segue a carico di altri è un `◇` (§ 2), non un motivo per lasciare aperta la riga.
+3. **«Non ho verificato» non è un esito.** Se la prova è a portata di mano (la posta inviata, i log, lo stato stesso), la si cerca prima di lasciare aperta la riga; resta aperto solo ciò che, dopo la ricerca, non ha prova.
+
 ## 4. Come si chiude
 
 Tre esiti, e nessun altro:
