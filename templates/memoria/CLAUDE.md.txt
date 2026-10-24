@@ -1,4 +1,4 @@
-<!-- Installato da {{PRODOTTO}}. L'installazione sostituisce i segnaposto fra doppie graffe, tranne quelli che iniziano con COMPILARE: quelli li chiude l'onboarding. -->
+<!-- Installato da {{PRODOTTO}}. L'installazione sostituisce i segnaposto fra doppie graffe, tranne quelli che iniziano con COMPILARE: quelli si compilano nell'uso, quando servono (skill `onboarding`). -->
 
 # CLAUDE.md — vault di {{Nome}}
 
@@ -24,7 +24,7 @@ Istruzioni operative per Claude Code quando lavora su questo vault Obsidian.
 Una nota nuova va nella cartella del suo ruolo. Se il ruolo non basta a decidere, si guarda dove stanno le note simili.
 <!-- documenti:inizio (default «accanto»; variante «separati» in varianti/documenti-separati.md.txt, METIS_DOCUMENTI) -->
 - **Note e documenti nella stessa cartella: una cartella per lavoro.** La cartella dei progetti (`{{FONTI}}/`) tiene insieme note e documenti: ogni lavoro ha una sola cartella. La struttura è quella PARA anche per i file: progetti, aree, risorse, archivio. Mai file sciolti nella radice, mai lasciati nella cartella temporanea della sessione:
-  - **una cartella per lavoro**, chiamata con il committente o l'ente e il tema (per esempio `{{FONTI}}/Comune - bando biblioteche 2027/`). Prima di crearla si cerca se esiste già, con un `find` per l'ente e uno per il tema. La cartella è la `fonte-primaria:` dello stato del lavoro, scritta relativa alla cartella fonti (`'Comune - bando biblioteche 2027/'`);
+  - **una cartella per lavoro**, chiamata con il committente o l'ente e il tema (per esempio `{{FONTI}}/Rossi Srl - revisione contratti 2027/`). Prima di crearla si cerca se esiste già, con un `find` per l'ente e uno per il tema. La cartella è la `fonte-primaria:` dello stato del lavoro, scritta relativa alla cartella fonti (`'Rossi Srl - revisione contratti 2027/'`);
   - dentro: le **note** del lavoro (analisi, sintesi di riunioni, bozze), in markdown con il frontmatter, nella radice della cartella; **`_IN/`** per ciò che si riceve (allegati di mail, documenti mandati da altri), nel formato originale; **`_fonti/`** per ciò che si cerca e si usa per lavorare (norme, atti, studi), salvato nel momento in cui lo si scarica, con un nome che dice che cos'è e un `README.md` che dice che cosa ogni fonte serve a dimostrare; **`_OUT/`** per ciò che si consegna (Word e PDF), con la data nel nome. Nelle tre sottocartelle i file non hanno frontmatter: non sono note;
   - una responsabilità continuativa (non un lavoro con una fine) ha la sua cartella in `{{RUOLO_AREE}}/<area>/`, con la stessa struttura;
   - **le fonti che servono a più progetti stanno in `{{RUOLO_RISORSE}}/`, in sottocartelle per tema e sottotema** (per esempio `{{RUOLO_RISORSE}}/Norme/Appalti/`, `{{RUOLO_RISORSE}}/Studi/Demografia/`): leggi, regolamenti, manuali, studi. Prima di creare una sottocartella si guardano quelle che ci sono; ogni tema ha un `README.md` con le fonti, che cosa dimostra ciascuna e quali progetti la usano. La `_fonti/` del progetto tiene solo ciò che gli è proprio e rimanda alle risorse senza copiarle; una fonte nata in un progetto che poi serve a un altro si sposta in `{{RUOLO_RISORSE}}/` e lascia il rimando;
@@ -78,7 +78,7 @@ La memoria di Claude ha tre livelli. Il primo si carica a ogni avvio e ha un tet
 - Se l'hook segnala note con frontmatter incompleto, sistemarle per prime.
 - Se l'orientamento segnala una sessione chiusa senza «chiudi sessione», proporre a {{Nome}} di ricostruirne il log: leggere la trascrizione con il comando indicato, scrivere `{{RUOLO_CLAUDE}}/sessioni/YYYY-MM-DD.md` con quello che si ricava (dichiarando che è una ricostruzione) e aggiornare gli stati dei lavori toccati. La trascrizione non si copia nel vault.
 - Se il doctor segnala attese oltre la data di decadenza, chiuderle come `[x] ⊘ decaduta (auto YYYY-MM-DD)` (skill `impegni`): non si chiede, la resurrezione costa una parola di {{Nome}}.
-- Se nei file del nucleo restano commenti o segnaposto da compilare, proporre di riprendere l'onboarding con la skill `onboarding`.
+- Se il profilo ha ancora sezioni marcate AVVIO, proporre l'avvio (skill `onboarding`, dieci minuti). Le altre sezioni vuote e le regole [di partenza] non si propongono: si completano lavorando, quando un compito ne ha bisogno.
 
 ## Durante il lavoro
 
@@ -107,6 +107,7 @@ Quando {{Nome}} scrive **«chiudi sessione»** (prima di uscire da Claude Code c
 - Rastrello degli impegni (skill `impegni`): un solo elenco dei `palla:me` superati dai fatti, che {{Nome}} falcia in una riga.
 - Proporre a {{Nome}}, in una riga, la revisione delle tracce del mese chiuso (skill `revisione-mensile`): la decide lui; se dice no, `{{RUOLO_CLAUDE}}/revisioni/YYYY-MM/RINUNCIA.md` con la data.
 - Proporre a {{Nome}}, in un solo elenco, i lavori fermi da archiviare (skill `archiviazione`, «Il controllo mensile»).
+- Se nel profilo restano regole [di partenza]: un solo elenco, una riga per regola, che {{Nome}} falcia in una riga: le regole tenute perdono il marcatore, quelle tolte si cancellano.
 
 ## Convenzioni
 

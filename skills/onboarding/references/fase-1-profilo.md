@@ -1,8 +1,10 @@
 # Fase 1 — il profilo
 
+> Procedura da usare **solo se necessario**, quando la voce matura nell'uso o il cliente la chiede (`SKILL.md`, «Nell'uso, solo se necessario»). Non fa parte dell'avvio in dieci minuti.
+
 **Precondizioni:** modelli e hook installati; `profilo-nucleo.md` e `profilo-completo.md` presenti nella cartella di Claude.
 
-**Esito:** `profilo-nucleo.md` compilato, senza `COMPILARE` né `[da confermare]`, sotto il suo tetto; `profilo-completo.md` compilato tranne le sezioni 3 e 4, che completa la fase 2; il cliente conosce il gesto di correzione.
+**Esito:** le sezioni del profilo toccate sono compilate nella forma del cliente, sotto il tetto del nucleo; le regole `[di partenza]` che i documenti confermano o che il cliente riconosce perdono il marcatore. Se la procedura si usa per intero (affinamento con i documenti), il profilo esce senza `<!-- COMPILARE` né `[di partenza]`, tranne le sezioni 3 e 4 della pagina completa.
 
 ## 1. Apertura
 
@@ -49,7 +51,7 @@ Una regola entra nella bozza se si vede in almeno due documenti, o in una coppia
 
 ## 4. Le domande che i documenti non risolvono
 
-**Il profilo di partenza.** Il nucleo installato contiene già, marcate «[da confermare]», le proposte per Forme da evitare, Tono, In chat, Come lavoro con te, Sintesi per un esperto, Testi a mio nome e «Verso chi riceve il lavoro»: vengono dal profilo di un professionista che lavora con Claude da mesi (decisione del 2/10/2026). La sezione «Onestà epistemica» è del pacchetto e non si tocca: il cliente può aggiungere regole, non toglierle. Per le domande qui sotto la proposta è quella già scritta nel nucleo; Claude la confronta con i documenti letti e dice se la confermano, se la contraddicono (e propone la variante) o se non dicono nulla. Il rischio da evitare è il «sì» a blocco: la regola ereditata si presenta una per volta, con l'esempio, e se il cliente esita si toglie.
+**Il profilo di partenza.** Il nucleo installato contiene già, marcate «[di partenza]», le proposte per Forme da evitare, Tono, In chat, Come lavoro con te, Sintesi per un esperto, Testi a mio nome e «Verso chi riceve il lavoro»: vengono dal profilo di un professionista che lavora con Claude da mesi (decisione del 2/10/2026). La sezione «Onestà epistemica» è del pacchetto e non si tocca: il cliente può aggiungere regole, non toglierle. Per le domande qui sotto la proposta è quella già scritta nel nucleo; Claude la confronta con i documenti letti e dice se la confermano, se la contraddicono (e propone la variante) o se non dicono nulla. Il rischio da evitare è il «sì» a blocco: la regola ereditata si presenta una per volta, con l'esempio, e se il cliente esita si toglie.
 
 Ogni domanda con la sua proposta; dove ci sono due strade, due opzioni e una raccomandazione.
 - **Chi è** (nucleo e sezione 1): mestiere, domini in cui ne sa più delle fonti, per chi lavora (per categoria, senza nomi), attività personali che Claude potrebbe incontrare nel vault. Proposta: tre righe ricavate dai documenti.
@@ -66,7 +68,7 @@ Ogni domanda con la sua proposta; dove ci sono due strade, due opzioni e una rac
 
 ## 5. Le forme tipiche da proporre
 
-Queste forme ricorrono nelle correzioni da cui nasce il pacchetto. Le prime sei sono già nel nucleo come «[da confermare]»; la settima, se il cliente la tiene, va in «Lingua». Si propongono una per una, con l'esempio, e si tengono solo quelle in cui il cliente si riconosce. Se i documenti mostrano già la forma, o mostrano che il cliente la usa, lo si dice.
+Queste forme ricorrono nelle correzioni da cui nasce il pacchetto. Le prime sei sono già nel nucleo come «[di partenza]»; la settima, se il cliente la tiene, va in «Lingua». Si propongono una per una, con l'esempio, e si tengono solo quelle in cui il cliente si riconosce. Se i documenti mostrano già la forma, o mostrano che il cliente la usa, lo si dice.
 
 1. **Negazione seguita dall'affermazione**: «Non è una richiesta: è un atto dovuto» → «È un atto dovuto». Anche con la negazione in coda: «previsto come opzione, non come requisito» → «previsto come opzione».
 2. **Avverbi e aggettivi di rinforzo**: «risultati davvero notevoli» → «risultati notevoli».
@@ -103,10 +105,10 @@ Una sezione che non serve si cancella intera, e il log dello stato dice quale e 
 
 ## 7. La bozza e la reazione
 
-1. Si scrive la bozza completa del nucleo e della pagina completa, partendo dal nucleo installato. Le regole ricavate dai documenti sono affermazioni; le proposte del profilo di partenza e del punto 4 restano marcate «[da confermare]». Una regola di partenza che i documenti contraddicono si riscrive nella forma del cliente, sempre marcata.
+1. Si scrive la bozza completa del nucleo e della pagina completa, partendo dal nucleo installato. Le regole ricavate dai documenti sono affermazioni; le proposte del profilo di partenza e del punto 4 restano marcate «[di partenza]». Una regola di partenza che i documenti contraddicono si riscrive nella forma del cliente, sempre marcata.
 2. Si presentano al cliente prima le regole ricavate dai documenti, a blocchi, poi le domande singole, non più di dodici per sessione. In chat va il blocco, breve; il file intero è a disposizione se lo vuole leggere.
 3. Si recepisce ogni correzione nella forma in cui il cliente la dà. Se il cliente dice che una regola non gli appartiene, la regola si toglie senza difenderla.
-4. A sezione confermata: si scrive nel file, si cancella il suo commento `COMPILARE` e ogni «[da confermare]», si passa alla successiva. Una regola di partenza che il cliente non riconosce si cancella, senza difenderla; la sezione può restare vuota, e allora si cancella intera.
+4. A sezione confermata: si scrive nel file, si cancella il suo commento `COMPILARE` e ogni «[di partenza]», si passa alla successiva. Una regola di partenza che il cliente non riconosce si cancella, senza difenderla; la sezione può restare vuota, e allora si cancella intera.
 
 **Che cosa va nel nucleo e che cosa nella pagina completa.** Nel nucleo le regole che valgono in ogni testo e in ogni risposta. Nella pagina completa gli esempi estesi, i registri per tipo di documento, le distinzioni del dominio, gli errori che il cliente cerca quando rivede.
 
@@ -120,9 +122,9 @@ Ogni rilievo fatto con il gesto diventa un caso in `correzioni.md` e, se è di s
 
 ## 9. Controlli di fine fase
 
-- `grep -nE '<!-- COMPILARE|da confermare'` su `profilo-nucleo.md`: nessuna riga. Su `profilo-completo.md`: esattamente due righe, i commenti delle sezioni 3 e 4.
+- Dopo un affinamento completo: `grep -nE '<!-- COMPILARE|di partenza\]'` su `profilo-nucleo.md`: nessuna riga. Su `profilo-completo.md`: al massimo i commenti delle sezioni 3 e 4.
 - Dimensione del nucleo sotto il tetto di `_Claude.md`.
 - Nomi di terzi e cifre: si fa l'elenco dei nomi propri e delle cifre visti nei documenti d'esempio e lo si cerca nei due file del profilo: nessun risultato (il nome del cliente, in «Chi sono», è atteso).
 - Nessuna frase di più di dieci parole copiata da un documento.
 - Autorevisione, livello 1.
-- Stato `onboarding.md`: tappa 1 `fatto · YYYY-MM-DD`.
+- Stato `onboarding.md`: spuntata la voce «Stile dai documenti d'esempio» in «Da completare nell'uso», con la data; se le regole `[di partenza]` sono finite, anche la tappa 2.

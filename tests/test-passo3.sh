@@ -47,13 +47,14 @@ check "doctor.md scritto" '[ -f "$V1/_Claude/doctor.md" ]'
 check "stderr del doctor vuoto" '[ ! -s "$T/d1.err" ]'
 check "nessun «report parziale»" '! grep -q "report è parziale" "$V1/_Claude/doctor.md"'
 check "sei tetti misurati e rispettati" '[ "$(grep -cE "^- ✅ .*: [0-9]+ / [0-9]+$" "$V1/_Claude/doctor.md")" -eq 6 ]'
-check "onboarding segnalato come non finito" 'grep -q "Onboarding non finito" "$V1/_Claude/doctor.md"'
+check "avvio segnalato come non fatto" 'grep -q "Avvio non fatto: 2 sezioni AVVIO" "$V1/_Claude/doctor.md"'
+check "regole di partenza contate come informazione" 'grep -q "regole \[di partenza\] nel profilo: attive" "$V1/_Claude/doctor.md"'
 check "stati con il solo modello: nessun errore (difetto della riga 76 del kit)" 'grep -q "Nessuno stato in" "$V1/_Claude/doctor.md"'
 H=$(echo "{\"cwd\":\"$V1\",\"source\":\"startup\"}" | bash "$ROOT/hooks/session-orient.sh" 2>"$T/h1.err")
 check "hook: profilo iniettato" 'printf "%s" "$H" | grep -q "^# Profilo di Anna Rossi"'
 check "hook: stato attuale iniettato" 'printf "%s" "$H" | grep -q "^## Stato attuale"'
 check "hook: frontmatter del profilo tolto" '! printf "%s" "$H" | grep -q "^created_at:"'
-check "hook: onboarding proposto" 'printf "%s" "$H" | grep -q "Onboarding da completare"'
+check "hook: avvio proposto" 'printf "%s" "$H" | grep -q "Avvio da fare: 2 sezioni AVVIO"'
 check "hook: sunto del doctor" 'printf "%s" "$H" | grep -q "SALUTE DEL SISTEMA"'
 check "hook: stderr vuoto" '[ ! -s "$T/h1.err" ]'
 check "hook: CLAUDE.md non segnalato come nota senza frontmatter" '! printf "%s" "$H" | grep -q "CLAUDE (senza frontmatter)"'
@@ -63,23 +64,23 @@ check "hook fuori dal vault: nessun output" '[ -z "$H2" ]'
 H3=$(cd "$V1/_Claude/stati" && echo '{}' | CLAUDE_PROJECT_DIR="$V1" bash "$ROOT/hooks/session-orient.sh")
 check "hook senza cwd nel JSON: usa CLAUDE_PROJECT_DIR" 'printf "%s" "$H3" | grep -q "Stato attuale"'
 
-echo "1b. Onboarding finito: tolti i marcatori COMPILARE, nessun avviso"
-cp -R "$V1" "$T/vault-finito"; VF="$T/vault-finito"
-perl -0pi -e 's/<!-- COMPILARE.*?-->//gs; s/\{\{COMPILARE:[^}]*\}\}/temi/g; s/ ?\[da confermare\]//g' "$VF/CLAUDE.md" "$VF/_Claude/profilo-nucleo.md" "$VF/_Claude/profilo-completo.md"
+echo "1b. Avvio fatto: tolti i soli commenti AVVIO; COMPILARE e [di partenza] restano e non accendono avvisi"
+cp -R "$V1" "$T/vault-avvio"; VF="$T/vault-avvio"
+perl -0pi -e 's/<!-- AVVIO.*?-->//gs' "$VF/_Claude/profilo-nucleo.md" "$VF/_Claude/profilo-completo.md"
 config "$T/cf" "$VF" "$M1"
 METIS_CONFIG="$T/cf" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
-check "doctor: profilo compilato" 'grep -q "Profilo e CLAUDE.md compilati" "$VF/_Claude/doctor.md"'
+check "doctor: avvio fatto" 'grep -q "Avvio fatto: il resto del profilo si completa nell" "$VF/_Claude/doctor.md"'
+check "doctor: nessun avviso sull'onboarding" '! grep -q "Avvio non fatto\|Onboarding non finito" "$VF/_Claude/doctor.md"'
+check "restano sezioni COMPILARE da completare nell'uso" 'grep -q "<!-- COMPILARE" "$VF/_Claude/profilo-nucleo.md"'
 HF=$(echo "{\"cwd\":\"$VF\"}" | METIS_CONFIG="$T/cf" bash "$ROOT/hooks/session-orient.sh")
-check "hook: nessun invito all'onboarding" '! printf "%s" "$HF" | grep -q "Onboarding da completare"'
+check "hook: nessun invito all'avvio" '! printf "%s" "$HF" | grep -q "Avvio da fare"'
 export METIS_CONFIG="$T/c1"
 
-echo "1c. Profilo di partenza: COMPILARE tolti ma regole ancora [da confermare]"
-cp -R "$V1" "$T/vault-partenza"; VP="$T/vault-partenza"
-perl -0pi -e 's/<!-- COMPILARE.*?-->//gs; s/\{\{COMPILARE:[^}]*\}\}/temi/g' "$VP/CLAUDE.md" "$VP/_Claude/profilo-nucleo.md" "$VP/_Claude/profilo-completo.md"
-config "$T/cp" "$VP" "$M1"
-METIS_CONFIG="$T/cp" bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
-check "doctor: regole da confermare segnalate" 'grep -q "regole \[da confermare\]" "$VP/_Claude/doctor.md"'
-check "nucleo installato: sezione Onestà epistemica attiva" 'grep -q "^## Onestà epistemica" "$VP/_Claude/profilo-nucleo.md" && ! sed -n "/^## Onestà epistemica/,/^## /p" "$VP/_Claude/profilo-nucleo.md" | grep -q "da confermare"'
+echo "1c. Profilo di partenza: regole attive marcate [di partenza]"
+VP="$V1"
+check "nucleo installato: nessun [da confermare] rimasto" '! grep -q "da confermare\]" "$VP/_Claude/profilo-nucleo.md"'
+check "nucleo installato: sezione Onestà epistemica attiva" 'grep -q "^## Onestà epistemica" "$VP/_Claude/profilo-nucleo.md" && ! sed -n "/^## Onestà epistemica/,/^## /p" "$VP/_Claude/profilo-nucleo.md" | grep -q "di partenza\]"'
+check "nucleo installato: AVVIO solo su Chi sono e Come lavoro con te" '[ "$(grep -c "<!-- AVVIO" "$VP/_Claude/profilo-nucleo.md")" -eq 2 ] && grep -A1 "^## Chi sono" "$VP/_Claude/profilo-nucleo.md" | grep -q "<!-- AVVIO" && grep -A1 "^## Come lavoro con te" "$VP/_Claude/profilo-nucleo.md" | grep -q "<!-- AVVIO"'
 
 echo "2. Inizio mese: un caso del mese scorso ancora in correzioni.md"
 MP=$(date -v-1m +%Y-%m)

@@ -1,8 +1,10 @@
 # Fase 3 — il patto di collaborazione e il gesto di correzione
 
-**Precondizioni:** fasi 1 e 2 fatte; automazioni scelte installate, altrimenti il doctor resta giallo e lo si dice.
+> Procedura da usare **solo se necessario**, quando la voce matura nell'uso o il cliente la chiede (`SKILL.md`, «Nell'uso, solo se necessario»). Non fa parte dell'avvio in dieci minuti.
 
-**Esito:** il cliente conosce il patto; un caso in `correzioni.md` fatto da lui con il gesto, registrato durante questa fase; l'onboarding è chiuso.
+**Precondizioni:** avvio fatto; automazioni scelte installate, altrimenti il doctor resta giallo e lo si dice.
+
+**Esito:** il cliente conosce il patto; un caso in `correzioni.md` fatto da lui con il gesto, registrato durante questa fase.
 
 ## 1. Il patto, detto al cliente
 
@@ -48,6 +50,6 @@ Si dice al cliente, in breve:
 
 1. Routine di fine sessione (`routine-fine-sessione.md`, oppure «Chiusura sessione» di `CLAUDE.md`).
 2. Doctor: si lancia con il comando che l'installazione ha scritto in `_Claude.md` e si legge il semaforo con il cliente. Atteso verde, oppure giallo con motivi noti (per esempio un'automazione non ancora installata).
-3. In `_Claude.md`: la riga dell'onboarding in «Ultime sessioni» diventa «onboarding completato» con la data; contatori aggiornati.
-4. Lo stato `onboarding.md`: tappa 3 `fatto · YYYY-MM-DD · «## YYYY-MM-DD — titolo del caso fatto dal vivo»`, poi si archivia in `stati/archivio/`.
-5. Riga in `decisioni.md`: data, «onboarding completato», con le scelte rilevanti emerse (autonomia concessa, canali, lavoro pilota).
+3. In `_Claude.md`: contatori aggiornati.
+4. Lo stato `onboarding.md`: nel log, il titolo del caso fatto dal vivo («## YYYY-MM-DD — …»). Lo stato si archivia in `stati/archivio/` quando le sue due tappe sono fatte.
+5. Se sono emerse scelte rilevanti (autonomia, canali), una riga in `decisioni.md` con la data.

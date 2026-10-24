@@ -4,7 +4,7 @@
 #
 # Inietta il livello «nucleo» della memoria: il profilo (profilo-nucleo.md) e lo stato attuale
 # (_Claude.md, da «## Stato attuale» in fondo). CLAUDE.md e l'indice MEMORY.md li carica Claude Code da sé.
-# Poi pochi segnali calcolati: sunto del doctor, onboarding da completare, operazioni di inizio mese,
+# Poi pochi segnali calcolati: sunto del doctor, avvio dell'onboarding da fare, operazioni di inizio mese,
 # impegni scaduti, note con frontmatter incompleto, Inbox.
 # Il tetto del testo iniettato sta nella tabella «Tetti del contesto» di _Claude.md; il doctor lo misura.
 #
@@ -64,10 +64,10 @@ fi
 echo "--- DA FARE ALL'AVVIO ---"
 SEGNALI=0
 
-# 4. Onboarding non finito.
-NCOMP=$(metis_compilare_residui)
-if [ "${NCOMP:-0}" -gt 0 ]; then
-  echo "- Onboarding da completare: $NCOMP punti da compilare o regole [da confermare] nel profilo o in CLAUDE.md. Proporre di riprenderlo con la skill onboarding."
+# 4. Avvio dell'onboarding non fatto. Il resto del profilo si completa nell'uso e non si segnala (24/10/2026).
+NAVVIO=$(metis_avvio_residui)
+if [ "${NAVVIO:-0}" -gt 0 ]; then
+  echo "- Avvio da fare: $NAVVIO sezioni AVVIO nel profilo. Proporre l'avvio con la skill onboarding (dieci minuti)."
   SEGNALI=1
 fi
 

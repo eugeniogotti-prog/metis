@@ -136,6 +136,6 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 - In una mail a colleghi di un gruppo di lavoro si riportano esiti e fatti, senza assegnare compiti (nemmeno a sé) e senza autocritica sul lavoro comune; sul terreno degli altri si scrive con cautela.
 - Una risposta breve a un cliente ringrazia e dice che cosa arriva e quando.
 - Un documento per chi decide segue in ogni sezione l'ordine del lettore: testo, fonte, conseguenza, proposta. La fonte vincolante apre; l'atto ancora in bozza va in coda. Un testo contorto si riscrive con un filo unico per sezione: la rifinitura lascia il problema dov'è.
-- Il registro dipende dalla sede oltre che dalla firma: la stessa persona scrive asciutta in un articolo di giornale e con più respiro in un capitolo di un libro collettivo. Prima di applicare lo stile legato a una persona, controllare che la sede sia la stessa.
+- Il registro dipende dalla sede oltre che dalla firma: la stessa persona scrive asciutta in una mail o in una nota tecnica e con più respiro in una relazione o in un articolo di approfondimento. Prima di applicare lo stile legato a una persona, controllare che la sede sia la stessa.
 - A una mail di gruppo si risponde con il mittente in A e gli altri destinatari originali in Cc, salvo diversa indicazione dell'utente.
 - Se il perimetro dei destinatari è incerto («mandalo a tutti»), chiedere, oppure preparare la bozza con l'elenco largo da restringere: allargare dopo costa una bozza rifatta e una da cestinare a mano.

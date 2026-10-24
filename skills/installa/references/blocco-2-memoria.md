@@ -7,4 +7,4 @@
 3. Una cartella che contiene il vault, se ha un suo `CLAUDE.md`, viene caricata anche lei da Claude Code: lo si controlla (`ls "<vault>/.."/CLAUDE.md`) e lo si dice al cliente.
 4. Si crea lo stato `stati/installazione.md` (vedi `SKILL.md`) dal modello di stato, che lo script ha copiato in `stati/_template-stato.md`. `decisioni.md`, `routine-fine-sessione.md` e `protocollo-propagazione.md` entrano nei modelli del plugin quando saranno allineati alla memoria a tre livelli (vedi il README dei modelli).
 
-**Controllo:** lanciare il doctor; la sezione «Tetti del contesto» ha sei righe ✅. L'avviso «Onboarding non finito» è atteso: lo chiude il blocco 4.
+**Controllo:** lanciare il doctor; la sezione «Tetti del contesto» ha sei righe ✅. L'avviso «Avvio non fatto» è atteso: lo chiude il blocco 5, l'avvio.

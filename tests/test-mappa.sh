@@ -52,8 +52,8 @@ echo "2. Lavori, stati e cartelle su disco"
 nota() { mkdir -p "$(dirname "$1")"; printf -- '---\ncreated_at: %s\ntags:\n- tipo/appunti\nup:\n- x\n---\n# %s\n' "$2" "$(basename "$1" .md)" > "$1"; }
 nota "$V/Clienti/Rossi srl/Contratto Rossi.md" 2026-09-20
 nota "$V/Clienti/Rossi srl/Verbale avvio.md" 2026-09-25
-nota "$V/Clienti/Vigevano/Gara mensa.md" 2026-09-28
-nota "$V/Clienti/Vigevano/Capitolato.md" 2026-09-28
+nota "$V/Clienti/Castelvento/Gara mensa.md" 2026-09-28
+nota "$V/Clienti/Castelvento/Capitolato.md" 2026-09-28
 nota "$V/Clienti/Vecchio cliente/Parere finale.md" 2025-03-01
 nota "$V/Clienti/Vecchio cliente/Fattura.md" 2025-03-02
 nota "$V/Personale/segreto.md" 2026-09-01
@@ -80,12 +80,12 @@ check "cartella riservata mai fotografata né elencata" '! grep -rq "Personale\|
 
 echo "3. Fra un giro e l'altro: una rinomina sul disco, una nel vault, una cartella nuova"
 mv "$F/Rossi srl" "$F/Rossi S.r.l."
-mv "$V/Clienti/Vigevano" "$V/Clienti/Comune di Vigevano"
+mv "$V/Clienti/Castelvento" "$V/Clienti/Comune di Castelvento"
 mkdir -p "$F/Nuovo cliente"; echo x > "$F/Nuovo cliente/primo.pdf"
 doctor 2026-10-02
 check "doctor senza errori su stderr" '[ ! -s "$T/doctor.err" ]'
 check "rinomina sul disco riconosciuta" 'sezione | grep -q "Documenti lavoro/Rossi srl\` → \`.*Documenti lavoro/Rossi S.r.l.\`"'
-check "rinomina nel vault riconosciuta" 'sezione | grep -q "Clienti/Vigevano\` → \`Clienti/Comune di Vigevano\`"'
+check "rinomina nel vault riconosciuta" 'sezione | grep -q "Clienti/Castelvento\` → \`Clienti/Comune di Castelvento\`"'
 check "cartella nuova senza lavoro segnalata" 'sezione | grep -q "Nuovo cliente\` — nessun lavoro la segue"'
 check "avviso solo per il lavoro scollegato, con il percorso nuovo" '[ "$(sezione | grep -c "⚠️")" -eq 1 ] && sezione | grep -q "⚠️ Lavoro \[\[rossi-srl\]\].*forse ora è .*Rossi S.r.l."'
 

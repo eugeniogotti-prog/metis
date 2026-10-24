@@ -33,12 +33,10 @@ Gli script stanno nella cartella del plugin (`scripts/`); la configurazione in `
 | 1. Struttura del vault | `references/blocco-1-struttura.md` | `installa-struttura.sh controlla` esce con 0 |
 | 2. Memoria | `references/blocco-2-memoria.md` | doctor: sezione «Tetti del contesto» tutta ✅ |
 | 3. Hook e permessi | `references/blocco-3-hook-permessi.md` | alla sessione nuova compare l'orientamento; una lettura nella cartella riservata è bloccata |
-| 4. Profilo | skill `onboarding`, fase 1 | criteri della skill `onboarding` |
-| 5. Moduli scelti | `references/moduli.md` | il controllo di ciascun modulo |
-| 6. Primo lavoro | skill `onboarding`, fase 2 | criteri della skill `onboarding` |
-| 7. Patto e chiusura | skill `onboarding`, fase 3 | doctor verde, o giallo con motivi noti |
+| 4. Moduli scelti | `references/moduli.md` | il controllo di ciascun modulo |
+| 5. Avvio | skill `onboarding`, «L'avvio in dieci minuti» | nessuna sezione AVVIO nel profilo; uno stato di lavoro oltre a `onboarding.md`; doctor verde, o giallo con motivi noti |
 
-Le fondamenta (blocchi 0-3) vengono prima di tutto; il profilo prima dei connettori; i connettori prima della fase 2 dell'onboarding, che può partire dalla posta.
+Le fondamenta (blocchi 0-3) vengono prima di tutto; i moduli di posta e calendario prima dell'avvio, che ne fa la prova. Il resto dell'onboarding (stile dai documenti, schede di dominio, persone, temi) non è un blocco dell'installazione: si fa nell'uso, quando serve.
 
 ## Da dove riprendere
 

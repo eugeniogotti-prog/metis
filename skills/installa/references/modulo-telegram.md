@@ -2,7 +2,7 @@
 
 **Che cosa dà al cliente**, a livelli, e lui sceglie fin dove arrivare:
 1. **uscita**: il digest del mattino e gli avvisi arrivano sul telefono;
-2. **Inbox dal telefono**: ciò che manda al bot (un link, un testo che comincia con «nota», un messaggio inoltrato, un file, una foto) diventa una nota nell'Inbox, che l'inbox-processor colloca al giro successivo. Sostituisce i Messaggi Salvati, senza il login di Telethon;
+2. **Inbox dal telefono**: ciò che manda al bot (un link, un testo che comincia con «nota», un messaggio inoltrato, un file, una foto) diventa una nota nell'Inbox, che l'inbox-processor colloca al giro successivo;
 3. **conversazione**: un messaggio normale al bot riceve la risposta di Claude, che lavora nel vault con il profilo e gli stati. Ogni messaggio è un giro `claude -p`; la conversazione si riprende se l'ultimo messaggio è di meno di sei ore; «/nuova» ne comincia un'altra;
 4. **voce** (modulo `voce`): un vocale diventa testo. Se comincia con «nota» finisce in `voicenotes/` come nota; altrimenti è un messaggio di conversazione, e la risposta comincia con «Ho capito: …».
 

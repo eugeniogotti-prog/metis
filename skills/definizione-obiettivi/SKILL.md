@@ -78,7 +78,7 @@ Si presenta la bozza e si raccoglie la reazione. Il cliente corregge, Claude rec
 
 Al via del cliente:
 - **lavoro nuovo:** si crea `stati/<lavoro>.md` copiando il modello `stati/_template-stato.md`. Si compilano il frontmatter (`thread`, `name`, `status`, `ultima-mossa`, `prossima-azione`, `created_at`, `updated_at`) e in più:
-  - `fonte-primaria:` la cartella del lavoro, relativa alla cartella fonti (che con i documenti accanto alle note è la cartella dei progetti): per esempio `'Comune - bando biblioteche 2027/'`. Per un'area o una cartella altrove, il percorso assoluto;
+  - `fonte-primaria:` la cartella del lavoro, relativa alla cartella fonti (che con i documenti accanto alle note è la cartella dei progetti): per esempio `'Rossi Srl - revisione contratti 2027/'`. Per un'area o una cartella altrove, il percorso assoluto;
   - `persone:` i wikilink alle note delle persone coinvolte; se una persona entra nel lavoro e la nota manca, la si crea (regola «Persone» di `CLAUDE.md`);
   - `precedenti:` quanto trovato al passo 1.
   Poi la sezione `## Obiettivo e perché` confermata, «Dove siamo» e gli impegni nel formato del commento di `## Impegni` del modello, e la riga del marcatore in fondo.

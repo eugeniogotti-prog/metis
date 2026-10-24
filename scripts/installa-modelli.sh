@@ -9,7 +9,7 @@
 #   (fino alla migrazione nel repository i modelli stanno nel kit).
 #
 # Idempotente sui file del cliente: un file che esiste già nel vault non si sovrascrive, e lo si dice.
-# I segnaposto «{{COMPILARE: …}}» restano: li chiude l'onboarding.
+# I segnaposto «{{COMPILARE: …}}» restano: si compilano nell'uso (skill onboarding).
 
 set -uo pipefail
 METIS_ROOT="${METIS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"

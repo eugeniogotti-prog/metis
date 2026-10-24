@@ -1,7 +1,7 @@
 {
   "name": "metis",
   "description": "Memoria a tre livelli, onboarding e ciclo correzioni → regole per una cartella di lavoro con Claude Code, con o senza Obsidian.",
-  "version": "0.3.10",
+  "version": "0.4.0",
   "author": {
     "name": "Eugenio Gotti"
   }

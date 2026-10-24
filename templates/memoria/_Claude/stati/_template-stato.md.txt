@@ -16,7 +16,7 @@ tags:
 up:
 - '[[_Claude]]'
 ---
-<!-- derivato dalla struttura degli stati in PARA/_Claude/stati/ del vault di riferimento, spersonalizzato il 2026-09-18.
+<!-- derivato dalla struttura degli stati del vault di riferimento, spersonalizzato il 2026-09-18.
      Le sezioni sono in ordine fisso. «## Impegni» è UNA SOLA per file, dopo «Dove siamo»: le voci datate raccontano, non contengono impegni. -->
 
 # Stato — {{Nome leggibile del filo}}

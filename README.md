@@ -8,7 +8,7 @@ Funziona su Mac, con Claude Code e il tuo abbonamento Claude. Obsidian è consig
 
 ## Che cosa ottieni
 
-- **Un profilo**: le regole su come scrivi e come vuoi lavorare. Parte da un profilo di partenza, nato da mesi di correzioni, che rivedi regola per regola: restano solo quelle in cui ti riconosci.
+- **Un profilo**: le regole su come scrivi e come vuoi lavorare. Parte da un profilo di partenza, nato da mesi di correzioni, che vale da subito: quando una regola non ti somiglia la correggi lavorando, e dopo il primo mese decidi in un solo elenco quali tenere.
 - **I tuoi lavori in ordine**: per ogni lavoro un file con l'obiettivo e il perché, a che punto siamo, gli impegni (chi deve muoversi ed entro quando) e i lavori simili già chiusi.
 - **Un diario** delle sessioni, con le decisioni e il loro perché.
 - **Ciò che Claude sa del tuo campo**, con la fonte e il grado di verifica di ogni affermazione.
@@ -23,7 +23,7 @@ Funziona su Mac, con Claude Code e il tuo abbonamento Claude. Obsidian è consig
 - **Claude Code** installato (claude.com/claude-code) e collegato al tuo abbonamento;
 - un account **GitHub**, con l'invito al repository di Metis accettato (te lo manda chi ti segue nell'installazione);
 - se vuoi posta e calendario aziendali Microsoft 365: il consenso, una volta, di un amministratore dell'IT;
-- per il profilo: **5-10 tuoi documenti ben fatti**, di tipi diversi, senza dati riservati di altri.
+- **dieci minuti** per l'avvio: chi sei, quanta autonomia dai a Claude, dove stanno i tuoi file, un lavoro da cui partire.
 
 ## Installazione
 
@@ -57,9 +57,8 @@ Scrivi **«installa Metis»**. Claude conduce l'installazione un passo alla volt
 2. **le cartelle**: se hai già un vault, Claude propone il ruolo di ogni cartella (lavori, aree, risorse, persone, archivio, arrivi, diario) e **non sposta nessuna nota**; se parti da zero, propone una struttura. Note e documenti di lavoro stanno insieme, una cartella per lavoro con le note e le sottocartelle `_IN/` (ricevuto), `_fonti/` e `_OUT/` (consegnato); le fonti che servono a più lavori stanno nelle risorse, per tema. Se usi Obsidian e preferisci un vault di sole note, i documenti possono restare in una cartella del disco fuori dal vault (`METIS_DOCUMENTI=separati`);
 3. **la memoria**: profilo, regole, modelli delle note. Tieni **Obsidian chiuso** in questo passo;
 4. **le protezioni**: alla fine Claude ti chiederà di chiudere Claude Code, riaprirlo nella cartella del vault e **accettare la finestra che chiede se ti fidi della cartella** (ed eventualmente l'avviso sulla modalità senza richieste di permesso). Senza quel sì le protezioni non valgono;
-5. **il profilo**: Claude legge i tuoi documenti d'esempio, se acconsenti, e ti presenta il profilo di partenza regola per regola. Circa un'ora;
-6. **i moduli** che scegli, uno alla volta, anche in giorni diversi: «installa google», «installa microsoft», «installa markitdown», «installa docx», «installa telegram», «installa voce», «installa routine»;
-7. **il primo lavoro**: ne scegli uno vivo e Claude ne scrive obiettivo, perché e impegni, in bozza da correggere.
+5. **i moduli** che scegli, uno alla volta, anche in giorni diversi: «installa google», «installa microsoft», «installa markitdown», «installa docx», «installa telegram», «installa voce», «installa routine»;
+6. **l'avvio**, dieci minuti: Claude ti chiede chi sei, quanta autonomia vuoi dargli e dove stanno i tuoi file, prova posta e calendario e apre il primo lavoro. Il resto (lo stile dai tuoi documenti, le schede di merito, le persone) si fa lavorando, quando serve.
 
 ## Come si lavora: quattro gesti
 

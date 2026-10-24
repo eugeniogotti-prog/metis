@@ -62,17 +62,13 @@ Claude controlla il Mac (macOS, Claude Code, python3, git, jq, Homebrew, Obsidia
 - **Chiudere Obsidian**: si copiano anche i modelli della nota del giorno e della settimana, che Templater potrebbe alterare appena compaiono (da verificare la prima volta).
 - Se ci sono le schede di partenza, copiarle prima sul Mac e dare a Claude il percorso: vanno in `dominio/`.
 - Claude installa profilo di partenza, stato attuale, regole di metodo, correzioni, decisioni, routine di fine sessione, protocollo di propagazione, `CLAUDE.md`. Se il cliente ha già un suo `CLAUDE.md`, resta com'è e il nucleo di Metis va in `CLAUDE.local.md`.
-- Controllo: il doctor ha i tetti in verde; l'avviso «Onboarding non finito» è atteso.
+- Controllo: il doctor ha i tetti in verde; l'avviso «Avvio non fatto» è atteso.
 
 ### F. Blocco 3: hook e permessi
 
 Claude installa protezioni e regole: sessioni **senza richieste di permesso** (`bypassPermissions`, decisione del 6/10/2026), con i divieti e la guardia che restano attivi. Poi **il cliente chiude Claude Code, lo riapre nel vault e accetta la finestra che chiede se si fida della cartella**: senza quel sì le regole non valgono. Tre prove: all'apertura compare l'orientamento; una lettura nella cartella riservata viene bloccata; una nota senza intestazione produce un avviso.
 
-### G. Profilo (onboarding, fase 1; circa un'ora)
-
-«Riprendi l'onboarding». Claude chiede il consenso a leggere i documenti d'esempio, li legge uno per uno e presenta il **profilo di partenza regola per regola**, dicendo se i documenti la confermano o la contraddicono. Restano solo le regole in cui il cliente si riconosce. Poi le domande che i documenti non risolvono (quanta autonomia, come vuole le risposte), al massimo dodici. Prova finale: Claude scrive un testo breve vero e il cliente lo corregge con il gesto.
-
-### H. Moduli (ciascuno facoltativo: «installa <modulo>»)
+### G. Moduli (ciascuno facoltativo: «installa <modulo>»)
 
 - **Posta e calendario.** Google: su claude.ai → Impostazioni → Connettori si attivano Gmail, Calendar e Drive; prova «che cosa ho in calendario domani?»; poi `installa google` mette le routine in sola lettura. Microsoft 365: il connettore di claude.ai, con il consenso di un amministratore dell'IT una volta (testo per l'IT in `skills/installa/references/procedura-m365.md`); poi `installa microsoft`.
 - **Documenti Office e PDF**: `installa markitdown`.
@@ -80,19 +76,21 @@ Claude installa protezioni e regole: sessioni **senza richieste di permesso** (`
 - **Telefono**: `installa telegram`. Il cliente crea il bot con @BotFather (Claude lo guida a parole) e incolla il token nel comando che Claude gli indica: il token non compare a schermo e non passa dalla chat. Scrive «ciao» al bot; Claude trova la chat e manda una prova. Se vuole, l'ascoltatore: ciò che manda al bot finisce nell'Inbox e può parlare con Claude. Voce: `installa voce`, con una chiave creata dal cliente su console.groq.com.
 - **Giri automatici**: `installa routine`, con gli orari del cliente. Controllo: un briefing di prova scrive la sua riga nella nota del giorno. Costi da dire: Mac acceso agli orari, quota dell'abbonamento.
 
-### I. Primo lavoro (fase 2)
+### H. Avvio dell'onboarding (dieci minuti del cliente)
 
-Il cliente sceglie il lavoro vivo. Claude (skill `definizione-obiettivi`) cerca i precedenti (al primo giorno non ce ne sono, e lo dice), scrive lo stato con obiettivo e perché in bozza da correggere, gli impegni, le note delle persone coinvolte, i temi per i tag.
+Dopo i moduli di posta e calendario, il cliente scrive «avvio» (skill `onboarding`). Sei passi, una domanda alla volta con la proposta già scritta:
+1. come funziona, in tre righe: Claude prepara e il cliente decide; il gesto «questo non va perché…, d'ora in poi…»; «chiudi sessione» prima di uscire;
+2. chi è: nome, mestiere, materie, per chi lavora (per categoria), lingua;
+3. quanta autonomia: A (procedi, chiedi solo per le scelte irreversibili) o B (chiedi prima di ogni modifica ai miei file);
+4. dove stanno i suoi file oggi: non si sposta niente;
+5. prova di posta e calendario: «che cosa ho domani?» e la ricerca di una mail;
+6. il primo lavoro: cartella e stato minimo.
 
-### J. Patto e chiusura (fase 3)
-
-- Il patto: Claude è un **collaboratore junior** che si forma lavorando; quando sbaglia, gli si spiega perché e come migliorare il metodo, senza correggere il file a mano.
-- Il cliente corregge un risultato della giornata con il gesto «questo non va perché…, d'ora in poi…»; Claude registra il caso e, se è di stile, la regola nel profilo.
-- Il cliente scrive **«chiudi sessione»**: Claude scrive il diario, lo stato dell'installazione e un riepilogo.
+Il profilo di partenza vale da subito, con le regole marcate `[di partenza]`: il cliente le corregge lavorando, e alla prima sessione del mese decide in un solo elenco quali tenere. Lo stile dai documenti d'esempio, le schede di dominio, le persone e i temi si fanno nell'uso, solo quando servono (decisione del 24/10/2026).
 
 ### Prima di andare via
 
-- [ ] doctor verde, o giallo con motivi noti (di solito: onboarding da completare);
+- [ ] avvio fatto e doctor verde, o giallo con motivi noti (di solito: un modulo non ancora installato);
 - [ ] plugin attivo (`claude plugin list`);
 - [ ] la guida per il cliente, [`guida-cliente.md`](guida-cliente.md), letta insieme;
 - [ ] `/usage` a fine giornata;

@@ -1,6 +1,8 @@
 # Fase 2 — lavori, domini, persone
 
-**Precondizioni:** fase 1 fatta; connettori di posta e calendario collegati, se il cliente li ha scelti.
+> Procedura da usare **solo se necessario**, quando la voce matura nell'uso o il cliente la chiede (`SKILL.md`, «Nell'uso, solo se necessario»). Non fa parte dell'avvio in dieci minuti.
+
+**Precondizioni:** avvio fatto; connettori di posta e calendario collegati, se il cliente li ha scelti.
 
 Esito: almeno uno stato in `stati/` con obiettivo e impegni a norma; una scheda in `dominio/`; le note delle persone del primo lavoro; i temi per i tag al posto del segnaposto `COMPILARE` in `CLAUDE.md`.
 
@@ -47,4 +49,4 @@ In `CLAUDE.md` il segnaposto `{{COMPILARE: i temi del lavoro}}` si sostituisce c
 - `grep -E '<!-- COMPILARE|\{\{COMPILARE'` su `CLAUDE.md` e su `profilo-completo.md`: nessun risultato.
 - Ogni asserzione della scheda di dominio ha fonte, grado di verifica e data.
 - Autorevisione, livello 1.
-- Stato `onboarding.md`: tappa 2 `fatto · YYYY-MM-DD`; «Lavori attivi» e contatori di `_Claude.md` aggiornati.
+- Stato `onboarding.md`: spuntate in «Da completare nell'uso» le voci fatte (scheda di dominio, temi), con la data; «Lavori attivi» e contatori di `_Claude.md` aggiornati.

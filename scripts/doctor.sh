@@ -2,7 +2,7 @@
 # doctor.sh — controllo giornaliero di Metis: scrive <cartella di Claude>/doctor.md con un semaforo.
 # L'hook di avvio ne mostra il sunto. Fa anche da test di conformità dopo un'installazione o un aggiornamento.
 #
-# Controlli: tetti del contesto (letti dalla tabella di _Claude.md), onboarding, operazioni di inizio mese,
+# Controlli: tetti del contesto (letti dalla tabella di _Claude.md), avvio dell'onboarding, operazioni di inizio mese,
 # frontmatter e tag, stati e impegni, mappa delle cartelle, cartelle dei documenti, log di sessione, Inbox, automazioni, log grandi, affidabilità del report.
 # Percorsi e ruoli dalla configurazione (scripts/lib/config.sh): nessun percorso scritto qui.
 #
@@ -75,9 +75,11 @@ fi
 
 # --- Onboarding ---
 sec "Onboarding"
-NCOMP=$(metis_compilare_residui)
-if [ "${NCOMP:-0}" -gt 0 ]; then add warn "Onboarding non finito: $NCOMP punti da compilare o regole [da confermare] nel profilo o in CLAUDE.md (skill onboarding)"
-else add ok "Profilo e CLAUDE.md compilati"; fi
+NAVVIO=$(metis_avvio_residui)
+if [ "${NAVVIO:-0}" -gt 0 ]; then add warn "Avvio non fatto: $NAVVIO sezioni AVVIO nel profilo (skill onboarding, dieci minuti)"
+else add ok "Avvio fatto: il resto del profilo si completa nell'uso"; fi
+NPART=$(metis_regole_di_partenza)
+if [ "${NPART:-0}" -gt 0 ]; then add info "$NPART regole [di partenza] nel profilo: attive, si rivedono in un solo elenco alla prima sessione del mese"; fi
 
 # --- Operazioni di inizio mese (dal giorno 4) ---
 sec "Inizio mese"

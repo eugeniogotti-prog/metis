@@ -24,8 +24,6 @@ Scrivi `AAAA-MM Revisione mensile delle tracce.md` nella cartella `revisioni/AAA
 created_at: AAAA-MM-GG
 tags:
 - tipo/analisi
-- argomento/PKM
-- argomento/AI
 up:
 - '[[_Claude]]'
 updated_at: null

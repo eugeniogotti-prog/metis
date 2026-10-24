@@ -10,7 +10,7 @@ updated_at: null
 # Profilo di {{Nome}} — chi sono e come parlarmi
 
 <!-- COMPILARE. La versione estesa del profilo. Claude la apre prima di ogni testo destinato ad altri e quando lavora su un registro particolare; il nucleo (`profilo-nucleo.md`) contiene solo le regole che valgono sempre e rimanda qui.
-La compila la skill `onboarding` (fase 1), con il metodo «bozza e reazione». Poi cresce con le tue correzioni: quando correggi un testo su qualcosa che vale in generale, la regola arriva qui o nel nucleo.
+Si compila lavorando: una sezione alla volta, quando un compito ne ha bisogno (skill `onboarding`, «Nell'uso, solo se necessario»), oppure tutta insieme se chiedi di affinare il profilo con i tuoi documenti. Poi cresce con le tue correzioni: quando correggi un testo su qualcosa che vale in generale, la regola arriva qui o nel nucleo.
 Il blocco fra le righe ``` si può incollare nel campo «Istruzioni» di un progetto dell'app Claude, quando non restano commenti COMPILARE: così anche l'app ti conosce, pur senza imparare dalle correzioni. È scritto da te e rivolto a Claude («come parlarmi»). Per questo ripete alcune regole che nel vault stanno altrove (le quattro domande di revisione, le bozze verso l'esterno): l'app non vede il vault.
 Quando una sezione è compilata, cancella il suo commento. Una sezione che non ti serve si cancella intera. -->
 

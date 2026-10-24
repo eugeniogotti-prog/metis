@@ -69,4 +69,4 @@ Ciò che si carica all'avvio ha un tetto: oltre, Claude lavora peggio e costa di
 |---|---|---|
 
 ### Ultime sessioni
-- **{{YYYY-MM-DD}}** — installazione di {{PRODOTTO}}; onboarding da fare.
+- **{{YYYY-MM-DD}}** — installazione di {{PRODOTTO}}; avvio dell'onboarding da fare (dieci minuti).
