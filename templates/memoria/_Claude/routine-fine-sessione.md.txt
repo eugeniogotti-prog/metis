@@ -33,6 +33,8 @@ Prima di aggiungere una voce datata a uno stato:
 3. aggiornare le righe esistenti invece di riformularle altrove;
 4. solo allora aggiungere gli impegni nuovi, nella stessa sezione.
 
+**Alla chiusura dell'ultima sessione della giornata: il giro della sera** (skill `impegni`, § 3). Per ogni lavoro toccato oggi, le righe aperte della sezione `## Impegni` si rileggono una per una davanti alle voci datate, al log di oggi e alle fonti (posta inviata, messaggi): si chiude ciò che è fatto, con la prova. Una riga si chiude quando è fatto ciò che dice, non quando ne seguono le conseguenze a carico di altri. Di giorno basta la regola leggera: se scrivendo una voce si vede una riga che il fatto chiude, la si spunta.
+
 **Prima di scrivere un impegno**, la domanda: c'è un'azione che deve compiere {{Nome}} o Claude? Se il passo dipende da altri, è al massimo un `◇` in «Se arriva»; se non dipende da nessuno (una scadenza altrui, un evento atteso), non si scrive.
 
 **Prima di lasciare un «da verificare»**: se la verifica è a una ricerca di distanza (una mail nella posta inviata, un documento nella cartella del lavoro), si fa adesso. Un «da verificare» che si scioglie in dieci secondi sposta su {{Nome}} un controllo che tocca a Claude.

@@ -70,12 +70,11 @@ In quest'ordine, sempre:
 5. chiudere i `◇` di «Se arriva» soddisfatti da ciò che è arrivato: `◇` diventa `◆`, con una riga nel log;
 6. scrivere la voce datata nel log, poi il marcatore in fondo al file: `<!-- aggiornato da <istanza> AAAA-MM-GG -->`, dove l'istanza è `cli` per la sessione nel terminale (o il nome che il cliente dà alla sessione, se ne usa più d'una).
 
-**Il fatto chiude l'impegno nello stesso giro.** Chi registra un fatto in uno stato (una mail ricevuta o inviata, un messaggio, l'esito di una riunione, un documento arrivato) guarda la sezione `## Impegni` e si chiede se quel fatto chiude una riga. Se sì, la spunta subito, con la prova, prima di scrivere la voce datata. Lo sweep (§ 5) è la rete di sicurezza.
+**Il fatto chiude l'impegno: di giorno la regola leggera, la sera il giro.** Durante la giornata niente controlli sistematici: chi registra un fatto in uno stato (una mail ricevuta o inviata, un messaggio, l'esito di una riunione, un documento arrivato) e vede nella stessa pagina una riga che quel fatto chiude, la spunta subito, con la prova. La verifica sistematica è **un solo giro la sera**, alla chiusura dell'ultima sessione della giornata o quando il cliente lo chiede: per ogni lavoro toccato nel giorno si elencano le righe aperte (`grep -n '^- \[ \]' <cartella di Claude>/stati/<lavoro>.md`) e si rileggono **una per una** davanti alle voci datate dello stato, al log di sessione del giorno e alle fonti (posta inviata, messaggi, documenti arrivati). Lo sweep settimanale (§ 5) resta la rete di sicurezza per tutti gli stati.
 
-La regola da sola non basta: la si dimentica proprio quando il fatto sembra ovvio. Perciò tre precisazioni, da eseguire e non da ricordare:
-1. **Il controllo è un comando, non una domanda.** Dopo ogni voce datata che registra un fatto, si elencano le righe aperte del lavoro (`grep -n '^- \[ \]' <cartella di Claude>/stati/<lavoro>.md`) e si rileggono **una per una** davanti al fatto appena scritto. Una voce chiusa senza questo giro non è finita.
-2. **Il perimetro è la riga, non le sue conseguenze.** «Aiutare Rossi a scrivere la mail» si chiude quando la mail è scritta e consegnata a Rossi, non quando Rossi la spedisce; «preparare le simulazioni» si chiude quando sono consegnate, non quando qualcuno le ha lette. Ciò che segue a carico di altri è un `◇` (§ 2), non un motivo per lasciare aperta la riga.
-3. **«Non ho verificato» non è un esito.** Se la prova è a portata di mano (la posta inviata, i log, lo stato stesso), la si cerca prima di lasciare aperta la riga; resta aperto solo ciò che, dopo la ricerca, non ha prova.
+Nel giro della sera e nella regola leggera valgono due precisazioni:
+1. **Il perimetro è la riga, non le sue conseguenze.** «Aiutare Rossi a scrivere la mail» si chiude quando la mail è scritta e consegnata a Rossi, non quando Rossi la spedisce; «preparare le simulazioni» si chiude quando sono consegnate, non quando qualcuno le ha lette. Ciò che segue a carico di altri è un `◇` (§ 2), non un motivo per lasciare aperta la riga.
+2. **«Non ho verificato» non è un esito.** Se la prova è a portata di mano (la posta inviata, i log, lo stato stesso), la si cerca prima di lasciare aperta la riga; resta aperto solo ciò che, dopo la ricerca, non ha prova.
 
 ## 4. Come si chiude
 

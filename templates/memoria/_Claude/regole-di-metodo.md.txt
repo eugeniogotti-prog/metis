@@ -90,7 +90,7 @@ Il tetto è nella tabella di `_Claude.md`. Prima di aggiungere una regola si cer
 ## 7. Impegni e stati
 
 - Una voce aperta in una lista di cose da fare non prova che il lavoro sia da fare. Prima di eseguirla, delegarla o segnalarla, cercare la registrazione successiva che la assolve o la conversazione in cui l'utente l'ha chiusa.
-- Ogni fatto registrato nello stato di un lavoro chiude nello stesso giro l'impegno che soddisfa: dopo la voce datata si rileggono una per una le righe aperte, e una riga si chiude quando è fatto ciò che dice, non quando ne seguono le conseguenze a carico di altri. A fine blocco si chiudono gli impegni fatti prima di scriverne di nuovi.
+- Ogni fatto registrato nello stato di un lavoro chiude nello stesso giro l'impegno che soddisfa: di giorno si spunta la riga che si vede chiusa dal fatto; la sera, alla chiusura dell'ultima sessione, si rileggono una per una le righe aperte dei lavori toccati. Una riga si chiude quando è fatto ciò che dice, non quando ne seguono le conseguenze a carico di altri. A fine blocco si chiudono gli impegni fatti prima di scriverne di nuovi.
 - Un'attività ricorrente già decisa si esegue senza chiedere conferma, anche in ritardo.
 
 ## 8. Sessioni e canali
