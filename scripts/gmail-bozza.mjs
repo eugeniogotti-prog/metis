@@ -1,23 +1,37 @@
 #!/usr/bin/env node
-// gmail-bozza.mjs — crea o aggiorna una bozza Gmail con allegati presi dal disco, attraverso il server locale
-// google-workspace-mcp (@dguido/google-workspace-mcp 3.4.4, modulo google, strada «posta locale»).
+// gmail-bozza.mjs — crea una bozza Gmail con allegati presi dal disco, rilegge una bozza esistente o la sostituisce
+// con una nuova, attraverso il server locale google-workspace-mcp (@dguido/google-workspace-mcp 3.4.4, modulo google,
+// strada «posta locale»).
 //
 // Perché esiste: lo strumento draft_email del server accetta gli allegati solo come base64 dentro la chiamata, che
 // Claude non può copiare a mano senza rischiare di corrompere il file. Lo script legge i file e li passa lui.
 //
-// SOLO BOZZE. Lo script chiama soltanto draft_email (più read_email e download_attachment per la verifica) e avvia il
-// server con il solo servizio Gmail. Non invia mai: passando da Bash scavalcherebbe la conferma che le regole del
+// SOLO BOZZE. Lo script chiama soltanto draft_email, list_drafts, read_email, download_attachment e delete_draft, e avvia
+// il server con il solo servizio Gmail. Non invia mai: passando da Bash scavalcherebbe la conferma che le regole del
 // vault chiedono per send_email. L'invio lo fa il cliente da Gmail. Non aggiungere strumenti a STRUMENTI.
+// delete_draft si usa solo con --sostituisce, sulla bozza indicata, dopo che la nuova è salvata e verificata.
+//
+// Una bozza non si riscrive mai (drafts.update): con Gmail aperto nel browser il cliente vedrebbe la copia vecchia,
+// senza gli allegati nuovi. Per correggerla: --leggi, si parte dal testo letto, poi --sostituisce.
 //
 // Uso:
 //   node gmail-bozza.mjs --to a@x.it [--to b@y.it] [--cc ...] [--bcc ...] --subject "Oggetto" \
 //        (--body "testo" | --body-file testo.txt) [--html-file corpo.html] [--attach file.pdf ...] \
-//        [--thread-id 1a2b] [--draft-id r-123 (--thread-id 1a2b | --senza-thread)]
-//   --draft-id riscrive la bozza per intero: destinatari, oggetto, testo e allegati vanno ripassati tutti, e va detto
-//   se resta nel thread (--thread-id) o no (--senza-thread): senza, Gmail la sposta fuori dal thread.
+//        [--thread-id 1a2b] [--sostituisce r-123 --se-messaggio 19a2b (--thread-id 1a2b | --senza-thread)]
+//   node gmail-bozza.mjs --leggi r-123 [--salva-in cartella]
+//
+//   --leggi riporta la bozza com'è adesso in Gmail: destinatari, oggetto, testo, allegati, e messageId. Con --salva-in
+//   scrive nella cartella corpo.txt, corpo.html (se c'è) e gli allegati, con il loro hash: le modifiche fatte dal
+//   cliente in Gmail sono il punto di partenza della bozza nuova.
+//   --sostituisce crea una bozza nuova completa (destinatari, oggetto, testo e allegati si ripassano tutti) e, solo se
+//   è salvata e gli allegati tornano, cancella la vecchia. --se-messaggio è il messageId riportato da --leggi: se la
+//   bozza è cambiata dopo la lettura (il cliente l'ha toccata), lo script si ferma prima di creare la nuova.
+//   Thread: --thread-id per restare nella conversazione, --senza-thread per una bozza a sé. Il server non scrive
+//   In-Reply-To né References nelle bozze: in Gmail la risposta sta nel thread, nei programmi di chi la riceve
+//   potrebbe comparire come conversazione nuova.
 //   Server: variabile METIS_GMAIL_SERVER, altrimenti google-workspace-mcp nel PATH, /opt/homebrew/bin, /usr/local/bin.
 //
-// Dopo il salvataggio riscarica ogni allegato dalla bozza e ne confronta l'hash con l'originale.
+// Dopo il salvataggio riscarica ogni allegato dalla bozza e ne confronta l'hash SHA-256 con l'originale.
 // Uscita: una riga JSON su stdout; codice 0 se bozza salvata e allegati verificati, 1 altrimenti.
 // Se la bozza è stata salvata ma qualcosa dopo fallisce, l'uscita riporta comunque draftId: la bozza esiste.
 
@@ -48,7 +62,7 @@ function esci(ok, dati) {
 
 // --- argomenti ---
 const multipli = new Set(['to', 'cc', 'bcc', 'attach']);
-const conValore = new Set([...multipli, 'subject', 'body', 'body-file', 'html-file', 'draft-id', 'thread-id']);
+const conValore = new Set([...multipli, 'subject', 'body', 'body-file', 'html-file', 'draft-id', 'thread-id', 'leggi', 'salva-in', 'sostituisce', 'se-messaggio']);
 const senzaValore = new Set(['senza-thread']);
 const opz = { to: [], cc: [], bcc: [], attach: [] };
 const argv = process.argv.slice(2);
@@ -60,13 +74,25 @@ for (let i = 0; i < argv.length; i++) {
   if (v === undefined) esci(false, { errore: `manca il valore di --${k}` });
   if (multipli.has(k)) opz[k].push(v); else opz[k] = v;
 }
-if (!opz.to.length) esci(false, { errore: 'manca --to' });
-if (!opz.subject) esci(false, { errore: 'manca --subject' });
-if (opz.body === undefined && !opz['body-file']) esci(false, { errore: 'manca --body o --body-file' });
-if (opz['draft-id'] && !opz['thread-id'] && !opz['senza-thread'])
-  esci(false, { errore: 'con --draft-id serve --thread-id (resta nel thread) o --senza-thread: la bozza viene riscritta per intero' });
+const LETTURA = !!opz.leggi;
+if (opz['draft-id'])
+  esci(false, { errore: '--draft-id non c\'è più: una bozza non si riscrive. Usa --leggi, poi --sostituisce con una bozza nuova' });
+if (LETTURA) {
+  if (opz.to.length || opz.subject || opz.attach.length || opz.sostituisce) esci(false, { errore: '--leggi va da solo (con --salva-in)' });
+} else {
+  if (opz['salva-in']) esci(false, { errore: '--salva-in vale solo con --leggi' });
+  if (!opz.to.length) esci(false, { errore: 'manca --to' });
+  if (!opz.subject) esci(false, { errore: 'manca --subject' });
+  if (opz.body === undefined && !opz['body-file']) esci(false, { errore: 'manca --body o --body-file' });
+  if (opz.sostituisce && !opz['se-messaggio'])
+    esci(false, { errore: 'con --sostituisce serve --se-messaggio <messageId riportato da --leggi>: si sostituisce solo la bozza che si è letta' });
+  if (opz.sostituisce && !opz['thread-id'] && !opz['senza-thread'])
+    esci(false, { errore: 'con --sostituisce serve --thread-id (resta nel thread) o --senza-thread' });
+  if (opz['se-messaggio'] && !opz.sostituisce) esci(false, { errore: '--se-messaggio vale solo con --sostituisce' });
+}
 const leggi = f => { try { return fs.readFileSync(f, 'utf8'); } catch (e) { esci(false, { errore: `file non leggibile: ${f} (${e.code})` }); } };
-const corpo = opz['body-file'] ? leggi(opz['body-file']) : opz.body;
+const corpo = LETTURA ? '' : opz['body-file'] ? leggi(opz['body-file']) : opz.body;
+const sha256 = b => createHash('sha256').update(b).digest('hex');
 
 const allegati = [];
 let codificato = 0;
@@ -81,7 +107,7 @@ for (const f of opz.attach) {
   nomi.add(nome);
   const dati = fs.readFileSync(p);
   codificato += Math.ceil(dati.length / 3) * 4;
-  allegati.push({ percorso: p, nome, byte: dati.length, sha1: createHash('sha1').update(dati).digest('hex'), b64: dati.toString('base64') });
+  allegati.push({ percorso: p, nome, byte: dati.length, sha256: sha256(dati), b64: dati.toString('base64') });
 }
 if (codificato > MAX_CODIFICATO)
   esci(false, { errore: `allegati troppo grandi: ${(codificato / 1048576).toFixed(1)} MB una volta codificati, oltre il limite di Gmail (25 MB). Usa un link a Drive.` });
@@ -90,7 +116,6 @@ const args = { to: opz.to, subject: opz.subject, body: corpo };
 if (opz['html-file']) args.html = leggi(opz['html-file']);
 if (opz.cc.length) args.cc = opz.cc;
 if (opz.bcc.length) args.bcc = opz.bcc;
-if (opz['draft-id']) args.draftId = opz['draft-id'];
 if (opz['thread-id']) args.threadId = opz['thread-id'];
 if (allegati.length) args.attachments = allegati.map(a => ({ filename: a.nome, content: a.b64 }));
 
@@ -145,7 +170,7 @@ srv.stdout.on('data', d => {
 const scrivi = m => srv.stdin.write(JSON.stringify(m) + '\n');
 const richiesta = (method, params) => new Promise(ok => { const id = prossimo++; attese.set(id, ok); scrivi({ jsonrpc: '2.0', id, method, params }); });
 
-const STRUMENTI = new Set(['draft_email', 'read_email', 'download_attachment']); // recinto: niente invii
+const STRUMENTI = new Set(['draft_email', 'list_drafts', 'read_email', 'download_attachment', 'delete_draft']); // recinto: niente invii
 async function chiama(name, a) {
   if (!STRUMENTI.has(name)) throw new Error(`strumento non ammesso: ${name}`);
   const r = await richiesta('tools/call', { name, arguments: a });
@@ -155,10 +180,60 @@ async function chiama(name, a) {
   try { return JSON.parse(r.result.content[0].text); } catch { throw new Error(`${name}: risposta non leggibile`); }
 }
 
+// La bozza e il suo messaggio: il server non ha get_draft, quindi si cerca il draftId nell'elenco delle bozze.
+async function trovaBozza(draftId) {
+  let pageToken;
+  for (let pagina = 0; pagina < 20; pagina++) {
+    const r = await chiama('list_drafts', { maxResults: 500, ...(pageToken && { pageToken }) });
+    const d = (r.drafts || []).find(x => x.draftId === draftId);
+    if (d) return d;
+    if (!(pageToken = r.nextPageToken)) return null;
+  }
+  return null;
+}
+
+async function leggiBozza(draftId, cartella) {
+  const d = await trovaBozza(draftId);
+  if (!d) return [false, { errore: `bozza non trovata: ${draftId}` }];
+  const m = await chiama('read_email', { id: d.id, contentFormat: 'full' });
+  const h = m.headers || {};
+  const out = { draftId, messageId: m.id, threadId: m.threadId, to: h.to || '', cc: h.cc || '', bcc: h.bcc || '',
+    subject: h.subject || '', testo: m.body?.text || '', html: !!m.body?.html, troncato: !!m.truncated,
+    allegati: (m.attachments || []).map(a => ({ nome: a.filename, byte: a.size })) };
+  if (cartella) {
+    const dir = path.resolve(cartella);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'corpo.txt'), out.testo);
+    if (m.body?.html) fs.writeFileSync(path.join(dir, 'corpo.html'), m.body.html);
+    fs.mkdirSync(path.join(dir, 'allegati'), { recursive: true });
+    const usati = new Set();
+    for (const [n, a] of (m.attachments || []).entries()) {
+      // il nome viene dalla bozza: niente percorsi, e due allegati omonimi non si sovrascrivono
+      let nome = path.basename(String(a.filename).replace(/[\\/\x00-\x1f]/g, '_'));
+      if (!nome || nome === '.' || nome === '..') nome = `allegato-${n}`;
+      if (usati.has(nome)) nome = `${n}-${nome}`;
+      usati.add(nome);
+      const sc = await chiama('download_attachment', { id: m.id, attachmentId: a.id, outputPath: path.join(dir, 'allegati'), filename: nome });
+      Object.assign(out.allegati[n], { file: sc.path, sha256: sha256(fs.readFileSync(sc.path)) });
+    }
+    out.cartella = dir;
+  }
+  return [!out.troncato, out.troncato ? { ...out, errore: 'testo troncato dal server: non usarlo come base senza controllarlo in Gmail' } : out];
+}
+
 try {
   const init = await richiesta('initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'gmail-bozza', version: '2' } });
   if (init.error) throw new Error(`initialize: ${init.error.message}`);
   scrivi({ jsonrpc: '2.0', method: 'notifications/initialized' });
+
+  if (LETTURA) esci(...await leggiBozza(opz.leggi, opz['salva-in']));
+
+  if (opz.sostituisce) {
+    const vecchia = await trovaBozza(opz.sostituisce);
+    if (!vecchia) throw new Error(`bozza da sostituire non trovata: ${opz.sostituisce}. Nessuna bozza creata`);
+    if (vecchia.id !== opz['se-messaggio'])
+      throw new Error(`la bozza ${opz.sostituisce} è cambiata dopo la lettura (messaggio ${vecchia.id}, letto ${opz['se-messaggio']}): rileggila con --leggi e riparti da quel testo. Nessuna bozza creata`);
+  }
 
   const bozza = await chiama('draft_email', args);
   Object.assign(stato, { draftId: bozza.draftId, messageId: bozza.id, threadId: bozza.threadId });
@@ -172,11 +247,19 @@ try {
       const remoto = (msg.attachments || []).find(x => x.filename === a.nome);
       if (!remoto) { verifica.push({ file: a.nome, ok: false, motivo: 'assente nella bozza' }); continue; }
       const sc = await chiama('download_attachment', { id: bozza.id, attachmentId: remoto.id, outputPath: tmp, filename: `v${n}${path.extname(a.nome)}` });
-      const sha1 = createHash('sha1').update(fs.readFileSync(sc.path)).digest('hex');
-      verifica.push({ file: a.nome, byte: a.byte, ok: sha1 === a.sha1, ...(sha1 !== a.sha1 && { motivo: 'hash diverso' }) });
+      const h = sha256(fs.readFileSync(sc.path));
+      verifica.push({ file: a.nome, byte: a.byte, sha256: a.sha256, ok: h === a.sha256, ...(h !== a.sha256 && { motivo: 'hash diverso' }) });
     }
   }
-  esci(verifica.every(v => v.ok), { allegati: verifica, secondi: +((Date.now() - t0) / 1000).toFixed(1) });
+  const tuttoOk = verifica.every(v => v.ok);
+  const dati = { allegati: verifica };
+  if (opz.sostituisce) {
+    if (tuttoOk) {
+      await chiama('delete_draft', { id: opz.sostituisce });
+      dati.sostituita = opz.sostituisce;
+    } else dati.avviso = `la bozza vecchia ${opz.sostituisce} NON è stata cancellata: gli allegati della nuova non tornano`;
+  }
+  esci(tuttoOk, { ...dati, secondi: +((Date.now() - t0) / 1000).toFixed(1) });
 } catch (e) {
   esci(false, { errore: e.message, log: coda() });
 }
