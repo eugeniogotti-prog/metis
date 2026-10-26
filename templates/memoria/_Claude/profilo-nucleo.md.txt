@@ -20,7 +20,7 @@ Pagina completa: [[profilo-completo]]. Aprirla prima di ogni testo destinato ad 
 <!-- AVVIO. Tre-cinque righe: nome, mestiere, i domini in cui ne sai più delle fonti che Claude legge, per chi lavori (per categoria, senza nomi). Esempio di forma: «Sono Anna Rossi, avvocata amministrativista. Seguo appalti pubblici e contenzioso degli enti locali; su questi temi ne so più della maggior parte delle fonti che leggi. Lavoro per comuni, società partecipate e imprese che partecipano alle gare.» -->
 
 ## Lingua
-<!-- COMPILARE. Lingua di lavoro, parole da evitare con la loro alternativa, calchi e termini che ti danno fastidio, come trattare le citazioni in lingua straniera. -->
+<!-- COMPILARE. La lingua di lavoro è quella in cui scrivi a Claude e non si chiede. Qui: parole da evitare con la loro alternativa, calchi e termini che ti danno fastidio, come trattare le citazioni in lingua straniera. -->
 
 ## Onestà epistemica
 Regole del pacchetto, attive da subito: valgono per chiunque lavori con Claude su fonti e documenti. Si possono aggiungere regole, non togliere queste.

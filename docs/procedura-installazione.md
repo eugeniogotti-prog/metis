@@ -75,7 +75,7 @@ Claude installa protezioni e regole: sessioni **senza richieste di permesso** (`
 
 Dopo i moduli di posta e calendario, il cliente scrive «avvio» (skill `onboarding`). Sei passi, una domanda alla volta con la proposta già scritta:
 1. come funziona, in tre righe: Claude prepara e il cliente decide; il gesto «questo non va perché…, d'ora in poi…»; «chiudi sessione» prima di uscire;
-2. chi è: nome, mestiere, materie, per chi lavora (per categoria), lingua;
+2. chi è: nome, mestiere, materie, per chi lavora (per categoria);
 3. quanta autonomia: A (procedi, chiedi solo per le scelte irreversibili) o B (chiedi prima di ogni modifica ai miei file);
 4. dove stanno i suoi file oggi: non si sposta niente;
 5. prova di posta e calendario: «che cosa ho domani?» e la ricerca di una mail;
