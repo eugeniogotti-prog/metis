@@ -45,6 +45,7 @@ Il cliente può aver già messo mano alla bozza in Gmail. Le sue modifiche si co
         --attach … --sostituisce <draftId> --se-messaggio <messageId letto> (--thread-id <thread> | --senza-thread)
    ```
    Lo script si ferma se la bozza è cambiata dopo la lettura, e cancella la vecchia solo se la nuova è salvata e gli allegati tornano. Gli allegati che restano si ripassano tutti (quelli salvati al punto 1, o i file aggiornati).
+   I destinatari si ripassano come li ha riportati il punto 1: Gmail li scrive «Nome <indirizzo>», lo script tiene l'indirizzo (gli elenchi nudi sono anche in `indirizzi`). Limite noto: nella bozza nuova il nome visualizzato del destinatario si perde.
 
 La stessa regola vale per un testo in un file che il cliente ha corretto: si rilegge il file e si parte da lì.
 

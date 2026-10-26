@@ -20,12 +20,15 @@
 //        [--thread-id 1a2b] [--sostituisce r-123 --se-messaggio 19a2b (--thread-id 1a2b | --senza-thread)]
 //   node gmail-bozza.mjs --leggi r-123 [--salva-in cartella]
 //
-//   --leggi riporta la bozza com'è adesso in Gmail: destinatari, oggetto, testo, allegati, e messageId. Con --salva-in
+//   --leggi riporta la bozza com'è adesso in Gmail: destinatari (come li scrive Gmail, e in «indirizzi» come elenchi
+//   di indirizzi nudi), oggetto, testo, allegati, e messageId. Con --salva-in
 //   scrive nella cartella corpo.txt, corpo.html (se c'è) e gli allegati, con il loro hash: le modifiche fatte dal
 //   cliente in Gmail sono il punto di partenza della bozza nuova.
 //   --sostituisce crea una bozza nuova completa (destinatari, oggetto, testo e allegati si ripassano tutti) e, solo se
 //   è salvata e gli allegati tornano, cancella la vecchia. --se-messaggio è il messageId riportato da --leggi: se la
 //   bozza è cambiata dopo la lettura (il cliente l'ha toccata), lo script si ferma prima di creare la nuova.
+//   --to, --cc e --bcc accettano anche «Nome <indirizzo>» e più indirizzi separati da virgole: al server passa solo
+//   l'indirizzo, e nella bozza nuova il nome visualizzato si perde (limite noto).
 //   Thread: --thread-id per restare nella conversazione, --senza-thread per una bozza a sé. Il server non scrive
 //   In-Reply-To né References nelle bozze: in Gmail la risposta sta nel thread, nei programmi di chi la riceve
 //   potrebbe comparire come conversazione nuova.
@@ -112,10 +115,32 @@ for (const f of opz.attach) {
 if (codificato > MAX_CODIFICATO)
   esci(false, { errore: `allegati troppo grandi: ${(codificato / 1048576).toFixed(1)} MB una volta codificati, oltre il limite di Gmail (25 MB). Usa un link a Drive.` });
 
-const args = { to: opz.to, subject: opz.subject, body: corpo };
+// Destinatari: il server accetta solo indirizzi nudi. Gmail web scrive «Nome <indirizzo>» e --leggi li riporta così:
+// qui si tiene l'indirizzo e si perde il nome visualizzato (limite noto). Una voce può contenerne più d'uno, con le virgole.
+function indirizzi(voci) {
+  const fuori = [];
+  for (const voce of voci) {
+    let pezzo = '', virgolette = false, angolo = false;
+    const pezzi = [];
+    for (const c of voce) {
+      if (c === '"' && !angolo) virgolette = !virgolette;
+      else if (c === '<' && !virgolette) angolo = true;
+      else if (c === '>' && !virgolette) angolo = false;
+      if (c === ',' && !virgolette && !angolo) { pezzi.push(pezzo); pezzo = ''; } else pezzo += c;
+    }
+    pezzi.push(pezzo);
+    for (const p of pezzi.map(x => x.trim()).filter(Boolean)) {
+      const a = (p.match(/<([^<>]*)>\s*$/)?.[1] ?? p).trim();
+      if (!/^[^\s@<>",]+@[^\s@<>",]+$/.test(a)) esci(false, { errore: `destinatario non valido: ${p}` });
+      fuori.push(a);
+    }
+  }
+  return fuori;
+}
+const args = { to: LETTURA ? [] : indirizzi(opz.to), subject: opz.subject, body: corpo };
 if (opz['html-file']) args.html = leggi(opz['html-file']);
-if (opz.cc.length) args.cc = opz.cc;
-if (opz.bcc.length) args.bcc = opz.bcc;
+if (opz.cc.length) args.cc = indirizzi(opz.cc);
+if (opz.bcc.length) args.bcc = indirizzi(opz.bcc);
 if (opz['thread-id']) args.threadId = opz['thread-id'];
 if (allegati.length) args.attachments = allegati.map(a => ({ filename: a.nome, content: a.b64 }));
 
@@ -198,6 +223,7 @@ async function leggiBozza(draftId, cartella) {
   const m = await chiama('read_email', { id: d.id, contentFormat: 'full' });
   const h = m.headers || {};
   const out = { draftId, messageId: m.id, threadId: m.threadId, to: h.to || '', cc: h.cc || '', bcc: h.bcc || '',
+    indirizzi: { to: indirizzi([h.to || '']), cc: indirizzi([h.cc || '']), bcc: indirizzi([h.bcc || '']) },
     subject: h.subject || '', testo: m.body?.text || '', html: !!m.body?.html, troncato: !!m.truncated,
     allegati: (m.attachments || []).map(a => ({ nome: a.filename, byte: a.size })) };
   if (cartella) {

@@ -87,16 +87,23 @@ if command -v node >/dev/null; then
   D1=$(echo "$R" | j 'd["draftId"]')
   # il cliente corregge la bozza in Gmail: cambia il testo, e Gmail cambia l'id del messaggio
   python3 - "$F/bozze.json" <<'PY'
-import json,sys; p=sys.argv[1]; d=json.load(open(p)); b=d["bozze"][0]; b["text"]="Testo corretto dal cliente"; b["id"]="msg-cliente"; json.dump(d,open(p,"w"))
+import json,sys; p=sys.argv[1]; d=json.load(open(p)); b=d["bozze"][0]; b["text"]="Testo corretto dal cliente"; b["id"]="msg-cliente"
+b["to"]='Cliente Uno <a@b.it>, "Gare, ufficio" <m@r.it>'; b["cc"]="Segreteria <u@x.it>"  # come li scrive Gmail web
+json.dump(d,open(p,"w"))
 PY
   L=$(fg --leggi "$D1" --salva-in letta)
   check "--leggi riporta il testo com'è in Gmail" '[ "$(cat letta/corpo.txt)" = "Testo corretto dal cliente" ]'
   check "--leggi salva gli allegati della bozza, identici" 'cmp -s letta/allegati/verbale.pdf verbale.pdf'
   check "--leggi riporta il messageId attuale" '[ "$(echo "$L" | j "d[\"messageId\"]")" = msg-cliente ]'
+  IND=$(echo "$L" | j '",".join(d["indirizzi"]["to"]+d["indirizzi"]["cc"])')
+  check "--leggi riporta gli indirizzi nudi" '[ "$IND" = "a@b.it,m@r.it,u@x.it" ]'
+  TO=$(echo "$L" | j 'd["to"]'); CC=$(echo "$L" | j 'd["cc"]')
+  check "un destinatario senza indirizzo è rifiutato prima del server" 'fg --to "Cliente Uno" --subject s --body b | grep -q "destinatario non valido"'
   R2=$(fg --to a@b.it --subject "Verbale" --body-file letta/corpo.txt --attach letta/allegati/verbale.pdf --attach tabella.xlsx --sostituisce "$D1" --se-messaggio msg-vecchio --thread-id thr9)
   check "--sostituisce si ferma se la bozza è cambiata dopo la lettura" 'echo "$R2" | grep -q "cambiata dopo la lettura"'
   check "... e non crea nessuna bozza" '[ "$(python3 -c "import json; print(len(json.load(open(\"$F/bozze.json\"))[\"bozze\"]))")" = 1 ]'
-  R3=$(fg --to a@b.it --subject "Verbale" --body-file letta/corpo.txt --attach letta/allegati/verbale.pdf --attach tabella.xlsx --sostituisce "$D1" --se-messaggio msg-cliente --thread-id thr9)
+  R3=$(fg --to "$TO" --cc "$CC" --subject "Verbale" --body-file letta/corpo.txt --attach letta/allegati/verbale.pdf --attach tabella.xlsx --sostituisce "$D1" --se-messaggio msg-cliente --thread-id thr9)
+  check "destinatari letti da Gmail («Nome <indirizzo>») accettati e passati nudi" '[ "$(python3 -c "import json; b=json.load(open(\"$F/bozze.json\"))[\"bozze\"][-1]; print(b[\"to\"], b[\"cc\"])")" = "a@b.it, m@r.it u@x.it" ]'
   check "--sostituisce: bozza nuova verificata, vecchia cancellata" '[ "$(echo "$R3" | j "d[\"ok\"] and d[\"sostituita\"]")" = "$D1" ]'
   check "... resta una sola bozza, con il testo del cliente e due allegati" '[ "$(python3 -c "import json; b=json.load(open(\"$F/bozze.json\"))[\"bozze\"]; print(len(b), b[0][\"text\"], len(b[0][\"allegati\"]))")" = "1 Testo corretto dal cliente 2" ]'
   check "nessun update nella finta Gmail" '! grep -q "update non ammesso" "$F/chiamate.log" && ! grep -q "^draft_email \"r-" "$F/chiamate.log"'

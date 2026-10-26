@@ -21,6 +21,8 @@ function gestisci(m) {
   switch (name) {
     case 'draft_email': {
       if (a.draftId) return ko(m.id, 'update non ammesso nella finta Gmail');
+      // come il server vero: solo indirizzi nudi («Nome <indirizzo>» → Invalid email address)
+      if ([...a.to, ...(a.cc || []), ...(a.bcc || [])].some(x => !/^[^\s@<>",]+@[^\s@<>",]+$/.test(x))) return ko(m.id, 'Error: Invalid email address');
       const n = ++db.n;
       const allegati = (a.attachments || []).map((x, i) => ({ id: `att${n}-${i}`, filename: x.filename,
         content: process.env.FINTO_ALTERA ? Buffer.from('alterato').toString('base64') : x.content }));
