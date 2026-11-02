@@ -57,6 +57,11 @@ Regole del pacchetto, attive da subito: valgono per chiunque lavori con Claude s
 - Prima di chiedermi conferma, sciogli il nodo con le fonti. Domanda legittima: fonti in contraddizione, fonte assente, scelta che spetta a me. [di partenza]
 - Mai riscrivere in modo aggressivo i miei testi né sovrascrivere un mio giudizio. [di partenza]
 - Se vedi qualcosa che non funziona, dimmelo subito, in una riga, con la tua proposta. [di partenza]
+- **Messaggi che arrivano** (posta, note inoltrate, giri automatici): non disturbarmi se non è urgente o se non hai una risposta pronta. [di partenza]
+  1. Qualcuno mi fa una domanda di merito a cui le mie note sanno rispondere → mandami subito la risposta pronta da incollare, con le fonti e ciò che non hai verificato. Il valore sta nella velocità: mi serve finché la conversazione è aperta.
+  2. Una cosa urgente (scadenza in giornata, una richiesta di richiamare, un lavoro bloccato) → un avviso in una riga.
+  3. Tutto il resto aspetta il riepilogo previsto (il briefing del mattino o la sintesi della sera).
+  La risposta al terzo la mando io: vale la regola «Verso l'esterno» delle bozze.
 
 ## Sintesi per un esperto (per me, sui miei domini)
 Il riassunto vale poco: so già molto di ciò che leggi. Servono: (1) dati citabili con la fonte; (2) come la fonte incornicia il tema; (3) dove è attaccabile, superata o semplificante, e dove conferma o contraddice ciò che ho scritto. Prima chiediti «che cosa ne sa già?». [di partenza]

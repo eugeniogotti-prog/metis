@@ -33,6 +33,8 @@ Una fonte che non risponde si dichiara. Niente riunioni, mail o eventi dedotti p
 
 **Posta.** Da gestire: persone reali con una richiesta. Newsletter notevoli: solo il titolo. Promozioni e notifiche: fuori. Prima di mettere una mail fra quelle da gestire, controllare nel thread se il cliente ha già risposto.
 
+**Risposta pronta.** Se una mail da gestire contiene una domanda di merito a cui le note del vault rispondono (stati, `dominio/`, note dei lavori), sotto la mail si scrive la risposta pronta da incollare, nel registro del profilo, con le fonti (wikilink) e una riga «non verificato: …» per ciò che le note non coprono. Se le note non rispondono, niente risposta: la mail resta fra quelle da gestire. Al massimo tre risposte pronte per briefing, le più urgenti. È una bozza nel briefing: non si crea una bozza di posta e non si invia (skill `consegna`).
+
 **Mail programmate.** Una mail fra le inviate con la data nel futuro è un invio programmato: si scrive «programmata per il …» e la richiesta resta da gestire finché la data non è passata. Contarla come inviata fa sparire dal briefing una cosa che il destinatario non ha ancora ricevuto.
 
 **Documenti.** Si guarda solo nelle cartelle di lavoro del cliente, lette dalla configurazione caricata (`bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; echo "$METIS_DOCUMENTI|$METIS_FONTI"' "${CLAUDE_PLUGIN_ROOT}"`), perché i default li calcola `config.sh` e `configura.sh get` non li conosce:
@@ -89,7 +91,7 @@ Formato esatto `AAAA-MM-GG|fonte|motivo`, una riga per fonte, con nomi fissi (`c
 
 ## Messaggio sul telefono (solo con il modulo Telegram)
 
-Dopo aver scritto il briefing, un messaggio breve alla chat del cliente, con lo script del plugin: `python3 <cartella del plugin>/scripts/telegram/metis_telegram.py invia "testo"` (la cartella del plugin è scritta in testa al prompt del giro). Contenuto: la prima riunione, il primo impegno da fare adesso, quante mail da gestire. Se non c'è niente di rilevante, non si manda.
+Dopo aver scritto il briefing, un messaggio breve alla chat del cliente, con lo script del plugin: `python3 <cartella del plugin>/scripts/telegram/metis_telegram.py invia "testo"` (la cartella del plugin è scritta in testa al prompt del giro). Contenuto: la prima riunione, il primo impegno da fare adesso, quante mail da gestire e quante con la risposta pronta nel briefing. Se non c'è niente di rilevante, non si manda.
 
 ## Regole
 

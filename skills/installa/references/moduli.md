@@ -33,4 +33,4 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 
 Modulo `microsoft`, sul modello di Google: il connettore Microsoft 365 di claude.ai (Outlook posta e calendario, OneDrive, SharePoint, Teams), disponibile su tutti i piani Claude con un account Microsoft 365 aziendale. Serve l'IT una volta, per il consenso: testo e passi in `procedura-m365.md`.
 
-WhatsApp è fuori dalla v1.
+WhatsApp è fuori dalla v1. I messaggi stanno nel database privato dell'app sul Mac, che macOS protegge: un lettore lanciato dai giri automatici ha bisogno di permessi di accesso al disco che si rompono facilmente (in una prova Python lanciato da launchd ha ricevuto «Operation not permitted», e ha funzionato solo passando da bash); e leggerebbe le conversazioni con tutti i contatti del cliente, privati compresi. Si valuterà come modulo facoltativo dopo i piloti.

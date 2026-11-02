@@ -23,6 +23,7 @@ Il bot scrive soltanto alla chat del cliente e ascolta soltanto lei: i messaggi 
 - **Tempi.** Misurati il 29/9/2026 su un vault di prova: una domanda nuova circa 13 secondi, una domanda che riprende la conversazione circa 6 secondi, più il tempo di Telegram.
 - **Quota.** Ogni messaggio di conversazione è una sessione di Claude Code: consuma la quota dell'abbonamento del cliente. Sul vault di prova Claude Code ha dichiarato circa 0,31-0,35 dollari per scambio a tariffa API: con l'abbonamento non si paga a parte, ma una conversazione lunga dal telefono pesa sulla quota quanto una al Mac.
 - **Dove passano i dati.** I messaggi passano dai server di Telegram; l'audio dei vocali da Telegram e da Groq. Chi ha obblighi di riservatezza sceglie che cosa mandare.
+- **Quando Claude ti scrive.** Al mattino il briefing e la sera la sintesi, se c'è qualcosa; durante il giorno solo per una cosa urgente o per una risposta pronta da incollare, quando qualcuno ti fa una domanda a cui le tue note sanno rispondere. Il resto aspetta il riepilogo (regola «Messaggi che arrivano» del profilo, che puoi correggere).
 - **Che cosa Claude può fare dal telefono.** Le stesse cose che fa al Mac nei giri automatici, con le stesse regole: legge e scrive nel vault; non manda mail né messaggi a terzi (la guardia li ferma, e in un giro automatico una richiesta di conferma vale come un no).
 
 **Controllo:** `bash scripts/moduli/telegram.sh controlla` esce con 0; con il modulo voce, anche `bash scripts/moduli/voce.sh controlla`.

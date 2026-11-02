@@ -98,6 +98,17 @@ Sotto `# Memo` della nota di oggi (cartella delle note giornaliere; se manca si 
 
 Una voce per elemento, con il wikilink alla nota creata e la cartella; una voce anche per ciò che non è stato collocato, con il motivo. Per un file spostato, il percorso completo.
 
+## Messaggi di terzi: risposta pronta o avviso
+
+Vale per una mail salvata o un testo inoltrato in cui qualcuno chiede qualcosa al cliente (profilo, «Messaggi che arrivano»):
+- **domanda di merito a cui le note rispondono** → nel riscontro, sotto la voce, la risposta pronta da incollare, nel registro del profilo, con le fonti (wikilink) e una riga «non verificato: …» per ciò che le note non coprono. Se le note non rispondono, si scrive la richiesta e basta;
+- **urgente** (scadenza in giornata, richiesta di richiamare, un lavoro bloccato) → la voce comincia con 🔴;
+- tutto il resto si colloca come sempre, senza segnalazioni.
+
+La risposta al terzo la manda il cliente: nessuna bozza di posta e nessun invio dal giro (skill `consegna`).
+
+**Sul telefono** (solo con il modulo Telegram, giro automatico): un messaggio al cliente con lo script del plugin (`python3 <cartella del plugin>/scripts/telegram/metis_telegram.py invia "testo"`) solo se c'è una risposta pronta o una cosa urgente: per la risposta, chi chiede, la domanda in una riga e il testo da incollare; per l'urgenza, una riga. Altrimenti non si manda: il resto aspetta il briefing.
+
 ## Giro automatico
 
 Niente domande: si decide e si documenta nel riscontro. Il resoconto finale è di tre righe: quanti elementi, dove sono andati, che cosa resta da guardare.

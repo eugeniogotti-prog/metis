@@ -29,6 +29,8 @@ Metis fa lavorare Claude Code dentro il tuo vault con un metodo: Claude sa chi s
 
 Al mattino il controllo del sistema e il briefing della giornata; durante il giorno la sistemazione di ciò che arriva nell'Inbox; la sera la sintesi della giornata; il lunedì il riepilogo della settimana. Girano **solo con il Mac acceso** agli orari scelti: se il Mac dorme, partono al risveglio; se è spento, quel giro salta. L'esito di ogni giro è una riga sotto «Memo» nella nota del giorno.
 
+Con il telefono collegato, Claude ti scrive di giorno solo per due motivi: una cosa urgente, oppure qualcuno ti ha fatto una domanda a cui le tue note sanno rispondere, e allora ti manda la risposta pronta da incollare, con le fonti e ciò che non ha potuto verificare. La mandi tu. Il resto aspetta il briefing o la sintesi della sera.
+
 ## Una volta al mese
 
 Alla prima sessione del mese Claude ti propone tre elenchi brevi, a cui rispondi in una riga:
