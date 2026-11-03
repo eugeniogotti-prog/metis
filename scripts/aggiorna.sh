@@ -28,11 +28,6 @@ source "$METIS_ROOT/scripts/lib/config.sh"
 AZ="${1:-}"
 case "$AZ" in controlla|esegui|togli-terminale) ;; *) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;; esac
 
-metis_carica_config || { echo "aggiorna: ${METIS_ERRORE}. Nessuna installazione da aggiornare: per una nuova, skill installa." >&2; exit 2; }
-CFG="${METIS_CONFIG:-$HOME/.config/metis/config}"
-CFG_DIR="$(dirname "$CFG")"
-LA="${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}"
-PLUGINS_JSON="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/installed_plugins.json"
 versione() { sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$1/.claude-plugin/plugin.json" 2>/dev/null | head -1; }
 VERS="$(versione "$METIS_ROOT")"
 
@@ -44,6 +39,11 @@ case "$METIS_ROOT" in
   *) DOVE="cartella su disco" ;;
 esac
 
+metis_carica_config || { echo "Questa copia di ${METIS_PRODOTTO:-Metis}: versione ${VERS:-?}, $DOVE ($METIS_ROOT)."; echo "aggiorna: ${METIS_ERRORE}. Nessuna installazione da aggiornare: per una nuova, skill installa." >&2; exit 2; }
+CFG="${METIS_CONFIG:-$HOME/.config/metis/config}"
+CFG_DIR="$(dirname "$CFG")"
+LA="${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}"
+PLUGINS_JSON="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/installed_plugins.json"
 # File con i percorsi del plugin dentro. Le regole e i .mcp.json sono JSON; i LaunchAgent sono plist.
 FILE_JSON=("$METIS_VAULT/.claude/settings.json" "$METIS_VAULT/.claude/settings.local.json" "$METIS_VAULT/.mcp.json"
            "$CFG_DIR/permessi-routine.json" "$CFG_DIR/mcp-routine.json")
