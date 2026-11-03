@@ -16,7 +16,7 @@ Se l'app ti chiede se ti fidi della cartella, rispondi di sì: senza fiducia, le
 
 ## 3. Togli la versione installata dal Terminale
 
-Due copie di Metis non devono convivere: l'app non accetta lo zip se ne trova un'altra con lo stesso nome, e con due copie una parte delle protezioni non girerebbe. Nella sessione appena aperta scrivi:
+Due copie di Metis non devono convivere: l'app può rifiutare lo zip se ne trova un'altra con lo stesso nome, e con due copie una parte delle protezioni non girerebbe. Nella sessione appena aperta scrivi:
 
 > Togli Metis installato da terminale: lancia `claude plugin uninstall metis@metis` e poi `claude plugin marketplace remove metis`.
 
@@ -36,7 +36,7 @@ Claude fa una copia di sicurezza, rimette in ordine le regole e i giri automatic
 
 - Scrivi «che cosa dice il doctor?». Atteso: verde, oppure giallo con un motivo che Claude ti spiega.
 - Scrivi `/`: compaiono i comandi che cominciano con `metis:`.
-- In **Impostazioni → Plugin** Metis compare una volta sola.
+- Scrivi «controlla l'aggiornamento di Metis»: Claude ti conferma che i giri automatici usano la versione nuova e che non resta una copia installata dal Terminale.
 
 Quando il doctor è verde da qualche giorno, la cartella `Metis` nella tua cartella Inizio non serve più e si può cancellare.
 
@@ -47,4 +47,4 @@ Quando il doctor è verde da qualche giorno, la cartella `Metis` nella tua carte
 | All'avvio Claude non ti dà il profilo né l'orientamento | La sessione è in un'altra cartella: chiudila e riaprila sulla cartella del vault (passo 2) |
 | L'app rifiuta lo zip | Il passo 3 non è andato a buon fine: ripetilo, poi riprova il passo 4 |
 | Il doctor è rosso | Scrivi «che cosa dice il doctor?»: Claude legge il report e ti propone il rimedio |
-| Vuoi tornare a com'era | La copia di sicurezza sta nella cartella della configurazione, `backup/aggiorna-…`; il file `LEGGIMI.txt` lì dentro dice dove rimettere ogni file |
+| Vuoi tornare a com'era | Chiedilo a Claude: la copia di sicurezza fatta al passo 5 contiene un file `LEGGIMI.txt` che dice dove rimettere ogni file |

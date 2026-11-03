@@ -1,6 +1,6 @@
 ---
 name: installa
-description: Installa Metis sul Mac e nel vault del cliente, un blocco alla volta, con un controllo di riuscita alla fine di ogni blocco. Fondamenta (dotazione, struttura del vault, memoria, hook e permessi), poi il profilo con la skill onboarding, poi i moduli facoltativi (MarkItDown, Word, Google, Microsoft 365, Telegram, voce, routine), ciascuno rilanciabile da solo. Trigger: "installa", "installa Metis", "installa telegram", "installa google", "installa microsoft", "installa markitdown", "installa docx", "installa voce", "installa routine", "rifai il blocco", "controlla l'installazione", "aggiorna Metis", "aggiorna l'installazione", "passo all'app".
+description: Installa Metis sul Mac e nel vault del cliente, un blocco alla volta, con un controllo di riuscita alla fine di ogni blocco. Fondamenta (dotazione, struttura del vault, memoria, hook e permessi), poi il profilo con la skill onboarding, poi i moduli facoltativi (MarkItDown, Word, Google, Microsoft 365, Telegram, voce, routine), ciascuno rilanciabile da solo. Trigger: "installa", "installa Metis", "installa telegram", "installa google", "installa microsoft", "installa markitdown", "installa docx", "installa voce", "installa routine", "rifai il blocco", "controlla l'installazione", "aggiorna Metis", "aggiorna l'installazione", "controlla l'aggiornamento di Metis", "passo all'app".
 ---
 
 # Installa
