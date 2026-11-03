@@ -76,7 +76,9 @@ if [ "$LAVORO" = inbox-processor ]; then
   if [ "$N" = 0 ]; then echo "metis-agent: Inbox vuota, giro saltato"; exit 0; fi
 fi
 
-ARGS=(-p --output-format json --permission-mode acceptEdits)
+# Il giro usa le skill della stessa copia di cui esegue gli script (--plugin-dir prevale su ogni altra copia con lo stesso
+# nome): così non dipende da quale copia del plugin è installata o sincronizzata in quel momento (terminale, app).
+ARGS=(-p --output-format json --permission-mode acceptEdits --plugin-dir "$METIS_ROOT")
 [ -f "$CFG_DIR/permessi-routine.json" ] && ARGS+=(--settings "$CFG_DIR/permessi-routine.json")
 [ -f "$CFG_DIR/mcp-routine.json" ] && ARGS+=(--mcp-config "$CFG_DIR/mcp-routine.json")
 STRUMENTI="$(bash "$METIS_ROOT/scripts/configura.sh" get METIS_ROUTINE_STRUMENTI 2>/dev/null)"

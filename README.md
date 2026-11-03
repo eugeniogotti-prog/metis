@@ -77,7 +77,9 @@ Quando esce una versione nuova:
 claude plugin marketplace update metis
 claude plugin update metis@metis
 ```
-Poi, in Claude Code nel vault: «aggiorna i permessi di Metis». Le regole contengono il percorso del plugin, che cambia a ogni versione; se te ne dimentichi, il controllo del mattino lo segnala.
+Poi, in Claude Code nel vault: «aggiorna Metis». Le regole e i giri automatici contengono il percorso del plugin, che cambia a ogni versione: Claude fa una copia di sicurezza e li riallinea, senza toccare profilo, lavori e note. Se te ne dimentichi, l'orientamento all'avvio lo segnala.
+
+Per usare Metis dall'app di Claude (tab Code) invece che dal Terminale: `docs/guida-app.md`.
 
 ## Se qualcosa non va
 

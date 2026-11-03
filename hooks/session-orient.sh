@@ -22,7 +22,14 @@ metis_carica_config || exit 0
 # La sessione è nel vault? cwd dal JSON dell'evento, poi CLAUDE_PROJECT_DIR, poi la cartella corrente.
 CWD=$(printf '%s' "$INPUT" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
 DOVE="${CWD:-${CLAUDE_PROJECT_DIR:-$PWD}}"
-metis_dentro_vault "$DOVE" || exit 0
+if ! metis_dentro_vault "$DOVE"; then
+  # Sessione aperta in una cartella che contiene il vault (per esempio la cartella Documenti, scelta nel tab Code
+  # dell'app): una riga sola, per riaprirla nel posto giusto. Altrove l'hook tace: il plugin vale anche per altri progetti.
+  case "$METIS_VAULT/" in "${DOVE%/}"/*)
+    echo "${METIS_PRODOTTO}: questa sessione è in $DOVE, che contiene il vault di ${METIS_PRODOTTO}. Per lavorare con ${METIS_PRODOTTO} si apre la sessione nella cartella del vault: $METIS_VAULT" ;;
+  esac
+  exit 0
+fi
 
 CL="$METIS_CL"
 OGGI=$(date '+%Y-%m-%d')
@@ -63,6 +70,20 @@ fi
 
 echo "--- DA FARE ALL'AVVIO ---"
 SEGNALI=0
+
+# 4a. Copia del plugin cambiata (aggiornamento, passaggio dal terminale all'app): regole dei giri e LaunchAgent usano
+#     ancora una copia sparita o di un'altra versione. Lo stesso controllo, più completo, è aggiorna.sh controlla.
+VERS_ORA=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$METIS_ROOT/.claude-plugin/plugin.json" 2>/dev/null | head -1)
+ROOT_ORA=$(cd "$METIS_ROOT" 2>/dev/null && pwd -P)
+while IFS= read -r ALTRA; do
+  [ -n "$ALTRA" ] || continue
+  [ "$(cd "$ALTRA" 2>/dev/null && pwd -P)" = "$ROOT_ORA" ] && continue
+  VERS_ALTRA=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$ALTRA/.claude-plugin/plugin.json" 2>/dev/null | head -1)
+  [ -d "$ALTRA" ] && [ "$VERS_ALTRA" = "$VERS_ORA" ] && continue   # stessa versione in un'altra cartella (app e terminale): va bene
+  if [ -d "$ALTRA" ]; then COME="la versione ${VERS_ALTRA:-?} in $ALTRA"; else COME="$ALTRA, che non esiste più (giri automatici fermi)"; fi
+  echo "- Aggiornamento dell'installazione da fare: questa copia di ${METIS_PRODOTTO} è la ${VERS_ORA:-?}, ma regole e giri automatici usano $COME. Proporre l'aggiornamento (skill installa, «Aggiornare un'installazione»): bash \"$METIS_ROOT/scripts/aggiorna.sh\" controlla, poi esegui. Non tocca profilo, stati né note."
+  SEGNALI=1; break
+done < <(grep -ohE '/[^"*()<>]+/scripts/doctor\.sh' "$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/permessi-routine.json" "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL".*.plist 2>/dev/null | sed 's|/scripts/doctor\.sh$||' | sort -u)
 
 # 4. Avvio dell'onboarding non fatto. Il resto del profilo si completa nell'uso e non si segnala (24/10/2026).
 NAVVIO=$(metis_avvio_residui)

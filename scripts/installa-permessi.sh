@@ -74,6 +74,13 @@ for c in [x.strip() for x in env.get("METIS_SOLA_LETTURA", "").split("|") if x.s
     deny += [f"Edit({ass(vault)}/{c}/**)", f"Write({ass(vault)}/{c}/**)"]
 ask = []
 routine_deny = []
+# Ogni regola di uno script del plugin anche con il percorso fra virgolette: è la forma di un percorso con spazi, come
+# quello della copia caricata nell'app di Claude («Application Support»), e Claude spesso la usa anche senza spazi.
+import re
+_script = re.compile(re.escape(root) + r'(/scripts/[A-Za-z0-9_./-]+)')
+def con_virgolette(regole):
+    return [q for r in regole if r.startswith("Bash(") and (root + "/scripts/") in r and ('"' + root) not in r
+            for q in [_script.sub(lambda m: '"' + root + m.group(1) + '"', r)] if q not in regole]
 # Posta dal server locale (google.sh posta, METIS_POSTA=locale; decisione del 23/10/2026). Il server parte con il solo
 # servizio Gmail e ha nomi stabili, quindi le regole per nome funzionano (con i connettori, nell'app, no).
 if env.get("METIS_POSTA", "connettori") == "locale":
@@ -87,6 +94,8 @@ if env.get("METIS_POSTA", "connettori") == "locale":
     ask += scrive        # invii ed etichette: conferma del cliente (la guardia chiede anche lei per gli invii)
     deny += cancella     # cancellazioni: mai, in nessuna modalità
     routine_deny = bozze + [f"Bash(node {root}/scripts/gmail-bozza.mjs *)", f'Bash(node "{root}/scripts/gmail-bozza.mjs" *)']  # un giro automatico legge e basta
+allow += con_virgolette(allow)
+routine_deny += con_virgolette(routine_deny)
 modo = "acceptEdits" if env.get("METIS_PERMESSI", "senza-richieste") == "con-richieste" else "bypassPermissions"
 metis = {"permissions": {"defaultMode": modo, "allow": allow, "ask": ask, "deny": deny,
                          "additionalDirectories": [fonti] if fonti else []}}

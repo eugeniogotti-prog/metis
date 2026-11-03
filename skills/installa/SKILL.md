@@ -1,6 +1,6 @@
 ---
 name: installa
-description: Installa Metis sul Mac e nel vault del cliente, un blocco alla volta, con un controllo di riuscita alla fine di ogni blocco. Fondamenta (dotazione, struttura del vault, memoria, hook e permessi), poi il profilo con la skill onboarding, poi i moduli facoltativi (MarkItDown, Word, Google, Microsoft 365, Telegram, voce, routine), ciascuno rilanciabile da solo. Trigger: "installa", "installa Metis", "installa telegram", "installa google", "installa microsoft", "installa markitdown", "installa docx", "installa voce", "installa routine", "rifai il blocco", "controlla l'installazione".
+description: Installa Metis sul Mac e nel vault del cliente, un blocco alla volta, con un controllo di riuscita alla fine di ogni blocco. Fondamenta (dotazione, struttura del vault, memoria, hook e permessi), poi il profilo con la skill onboarding, poi i moduli facoltativi (MarkItDown, Word, Google, Microsoft 365, Telegram, voce, routine), ciascuno rilanciabile da solo. Trigger: "installa", "installa Metis", "installa telegram", "installa google", "installa microsoft", "installa markitdown", "installa docx", "installa voce", "installa routine", "rifai il blocco", "controlla l'installazione", "aggiorna Metis", "aggiorna l'installazione", "passo all'app".
 ---
 
 # Installa
@@ -24,6 +24,7 @@ Gli script stanno nella cartella del plugin (`scripts/`); la configurazione in `
 - `installa-modelli.sh <modelli> "<Nome>"` — i file della memoria.
 - `installa-permessi.sh` — le regole di Claude Code per il vault e per le routine.
 - `doctor.sh` — il controllo giornaliero, usato anche come controllo di riuscita.
+- `aggiorna.sh controlla|esegui|togli-terminale` — porta un'installazione esistente alla copia del plugin in uso (sotto, «Aggiornare un'installazione»).
 
 ## La sequenza
 
@@ -41,6 +42,18 @@ Le fondamenta (blocchi 0-3) vengono prima di tutto; i moduli di posta e calendar
 ## Da dove riprendere
 
 All'avvio si legge la configurazione (`configura.sh mostra`) e si eseguono i controlli dei blocchi in ordine, senza cambiare niente: il primo che non passa è il punto da cui si riprende. Si riporta al cliente in una riga per blocco. «Installa <modulo>» salta questa ricognizione e va al modulo, dopo aver controllato che le fondamenta passino.
+
+## Aggiornare un'installazione
+
+Quando l'installazione c'è già (configurazione presente e `profilo-nucleo.md` nella cartella di Claude) e cambia la copia del plugin in uso: una versione nuova, oppure il passaggio dal plugin installato da terminale a quello caricato nell'app di Claude, nel tab Code. L'orientamento all'avvio lo segnala («Aggiornamento dell'installazione da fare»). I blocchi non si rifanno e l'onboarding nemmeno: profilo, stati, correzioni, schede e note restano come sono.
+
+1. `bash "<cartella del plugin>/scripts/aggiorna.sh" controlla`: dice quale copia è in uso, a quale copia puntano ancora regole e giri automatici, e se c'è ancora una copia installata da terminale. Lo si riporta al cliente in due righe.
+2. Con il suo sì, `aggiorna.sh esegui`: copia di sicurezza nella cartella della configurazione (`backup/aggiorna-…`, con le istruzioni per tornare indietro), percorsi riallineati nelle regole e nei LaunchAgent, regole nuove della versione, cartelle dei ruoli che mancano, doctor. Si riporta il semaforo.
+3. Se resta una copia da terminale: `aggiorna.sh togli-terminale`. Con due copie con lo stesso nome il tab Code usa quella dell'app e il terminale quella installata a mano, e gli hook di una delle due non girano. Lo script non toglie la copia da cui sta girando.
+4. I file compilati all'installazione (`CLAUDE.md`, regole di metodo, modello di stato) non si aggiornano da soli: sono del cliente. Le regole nuove arrivano con le skill e gli hook. Se il cliente vuole le novità dei modelli, gliele si mostra una per una e si aggiungono solo quelle che conferma.
+5. Una riga in `decisioni.md` e nello stato `installazione.md` (se c'è): da quale copia a quale, con la data.
+
+Il passaggio dal terminale all'app, passo per passo per il cliente: `docs/guida-app.md`.
 
 ## Stato dell'installazione
 

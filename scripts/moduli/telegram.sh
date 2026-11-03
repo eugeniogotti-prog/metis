@@ -56,6 +56,7 @@ case "${1:-}" in
     R="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/permessi-routine.json"
     for F in "$METIS_VAULT/.claude/settings.json" "$R"; do
       python3 "$METIS_ROOT/scripts/lib/impostazioni.py" lista "$F" permissions.allow "Bash(python3 $METIS_ROOT/scripts/telegram/metis_telegram.py invia *)" >/dev/null
+      python3 "$METIS_ROOT/scripts/lib/impostazioni.py" lista "$F" permissions.allow "Bash(python3 \"$METIS_ROOT/scripts/telegram/metis_telegram.py\" invia *)" >/dev/null
     done
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI telegram
     echo "telegram: uscita pronta. Per l'Inbox dal telefono e la conversazione: telegram.sh ascoltatore" ;;

@@ -59,8 +59,11 @@ check "hook: sunto del doctor" 'printf "%s" "$H" | grep -q "SALUTE DEL SISTEMA"'
 check "hook: stderr vuoto" '[ ! -s "$T/h1.err" ]'
 check "hook: CLAUDE.md non segnalato come nota senza frontmatter" '! printf "%s" "$H" | grep -q "CLAUDE (senza frontmatter)"'
 check "doctor: CLAUDE.md non segnalato" '! grep -q "CLAUDE (senza frontmatter)" "$V1/_Claude/doctor.md"'
-H2=$(echo "{\"cwd\":\"$T\",\"source\":\"startup\"}" | bash "$ROOT/hooks/session-orient.sh")
+mkdir -p "$T/altro-progetto"
+H2=$(echo "{\"cwd\":\"$T/altro-progetto\",\"source\":\"startup\"}" | bash "$ROOT/hooks/session-orient.sh")
 check "hook fuori dal vault: nessun output" '[ -z "$H2" ]'
+H2b=$(echo "{\"cwd\":\"$T\",\"source\":\"startup\"}" | bash "$ROOT/hooks/session-orient.sh")
+check "hook nella cartella che contiene il vault: una riga con la cartella giusta" '[ "$(printf "%s\n" "$H2b" | wc -l | tr -d " ")" = 1 ] && printf "%s" "$H2b" | grep -q "cartella del vault"'
 H3=$(cd "$V1/_Claude/stati" && echo '{}' | CLAUDE_PROJECT_DIR="$V1" bash "$ROOT/hooks/session-orient.sh")
 check "hook senza cwd nel JSON: usa CLAUDE_PROJECT_DIR" 'printf "%s" "$H3" | grep -q "Stato attuale"'
 

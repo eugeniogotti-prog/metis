@@ -119,8 +119,20 @@ Chi mantiene il plugin alza la versione in `.claude-plugin/plugin.json` e pubbli
 claude plugin marketplace update metis
 claude plugin update metis@metis
 ```
-Poi `bash scripts/installa-permessi.sh` dalla cartella del plugin installato (lo fa Claude su «aggiorna i permessi di Metis»): le regole contengono il percorso del plugin, che cambia a ogni versione. Il doctor avvisa se le regole puntano a una versione vecchia.
+Poi, in una sessione nel vault, «aggiorna Metis»: `scripts/aggiorna.sh esegui` dalla copia nuova fa una copia di sicurezza (nella cartella della configurazione, `backup/aggiorna-…`) e riallinea al percorso nuovo le regole del vault, quelle dei giri automatici e i LaunchAgent, aggiunge le regole nuove della versione e lancia il doctor. Non tocca profilo, stati, correzioni, schede, `CLAUDE.md` né note; l'onboarding non si rifà. L'orientamento all'avvio segnala l'aggiornamento da fare quando regole e giri puntano a una copia sparita o di un'altra versione.
 Con il ripiego locale, prima si copia la versione nuova sopra la cartella del plugin.
+
+## Passare dal Terminale all'app di Claude (tab Code)
+
+Per un cliente che ha Metis installato da Terminale e vuole lavorare dall'app. Passi per il cliente: `docs/guida-app.md`. Che cosa c'è sotto:
+
+- **Un solo plugin, due modi di installarlo.** Lo zip per l'app si fa con `git archive` (manifest alla radice); l'app lo carica da Impostazioni → Plugin e lo tiene nella propria cartella dati (`~/Library/Application Support/Claude/…`, un percorso con uno spazio: le regole degli script esistono anche con il percorso fra virgolette). Lo stesso zip ricaricato sostituisce la copia allo stesso posto [dal codice dell'app, non provato con due versioni].
+- **Le sessioni del tab Code leggono le stesse impostazioni del Terminale** (`~/.claude/settings.json`, impostazioni del vault, plugin installati) [documentazione di Claude Code, pagina dei plugin]. Quindi la copia installata da Terminale è attiva anche nel tab Code.
+- **Due copie non convivono.** Al caricamento l'app controlla se un plugin installato da Terminale usa gli stessi nomi e, se sì, rifiuta lo zip [dal codice dell'app, non provato]. Con due copie, il tab Code usa quella dell'app e il Terminale quella installata a mano, e gli hook di una delle due non girano [documentazione, «Name conflicts»]. Per questo la copia da Terminale si toglie prima (`claude plugin uninstall metis@metis`, `claude plugin marketplace remove metis`, oppure `aggiorna.sh togli-terminale` dalla copia nuova).
+- **Giri automatici.** I LaunchAgent eseguono gli script della copia a cui puntano, e il giro di Claude usa le skill della stessa copia (`metis-agent.sh` passa `--plugin-dir`): non dipendono da quale copia è installata o sincronizzata. Dopo il passaggio puntano alla copia dell'app (`aggiorna.sh esegui`).
+- **Terminale dopo il passaggio.** Un plugin caricato sull'account arriva anche alle sessioni del Terminale come `metis@synced`, se il login è quello dell'account claude.ai [documentazione]; che lo zip caricato dall'app passi da lì non è stato provato.
+- **La cartella della sessione.** Il tab Code chiede la cartella in cui lavorare: va scelta quella del vault. Se si sceglie una cartella che lo contiene, l'orientamento all'avvio lo dice in una riga e indica quella giusta; da altre cartelle tace.
+- **Prova:** `tests/test-aggiorna.sh` costruisce un vault installato con la 0.3.2, con routine e Telegram, e lo aggiorna da una copia messa nella cartella dell'app: contenuto del cliente identico, nessun percorso vecchio, secondo giro senza cambiamenti.
 
 ## Che cosa c'è
 
