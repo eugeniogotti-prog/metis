@@ -4,7 +4,8 @@
 #   telegram.sh token          legge il token del bot dallo stdin (non si vede a schermo) e lo salva in ~/.config/metis/telegram (600)
 #   telegram.sh chat           dopo che il cliente ha scritto al bot: trova la sua chat privata e la salva
 #   telegram.sh prova          manda un messaggio di prova alla chat del cliente (unico destinatario ammesso)
-#   telegram.sh ascoltatore [--senza-caricare]   genera il LaunchAgent sempre acceso che ascolta il bot e lo carica
+#   telegram.sh ascoltatore [--senza-caricare]   genera l'automatismo sempre acceso che ascolta il bot e lo carica
+#                                                (LaunchAgent su Mac, servizio systemd su Linux: un solo ascoltatore per bot)
 #   telegram.sh installa       i passi sopra in fila, fermandosi a quello che manca
 #   telegram.sh controlla      token valido, chat salvata, file protetti, ascoltatore caricato
 # Il bot scrive solo alla chat del cliente e ascolta solo lei.
@@ -44,8 +45,8 @@ case "${1:-}" in
   prova)
     "${TG[@]}" invia "Messaggio di prova di $METIS_PRODOTTO: il bot funziona." && echo "telegram: messaggio di prova mandato" ;;
   ascoltatore)
-    bash "$METIS_ROOT/scripts/lib/launchd.sh" genera telegram sempre /usr/bin/python3 "$METIS_ROOT/scripts/telegram/metis_telegram.py" ascolta || exit 1
-    [ "${2:-}" = --senza-caricare ] || bash "$METIS_ROOT/scripts/lib/launchd.sh" carica telegram ;;
+    bash "$METIS_ROOT/scripts/lib/servizi.sh" genera telegram sempre /usr/bin/python3 "$METIS_ROOT/scripts/telegram/metis_telegram.py" ascolta || exit 1
+    [ "${2:-}" = --senza-caricare ] || bash "$METIS_ROOT/scripts/lib/servizi.sh" carica telegram ;;
   installa)
     V=$("${TG[@]}" verifica 2>&1)
     case "$V" in *"token assente"*) echo "telegram: manca il token → telegram.sh token"; exit 1 ;; esac
@@ -64,8 +65,8 @@ case "${1:-}" in
     ERR=0
     V=$("${TG[@]}" verifica 2>&1); RC=$?
     [ "$RC" = 0 ] && echo "✅ $(printf '%s' "$V" | head -1); chat del cliente salvata" || { echo "❌ $(printf '%s' "$V" | tr '\n' ' ')"; ERR=1; }
-    if [ -f "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL.telegram.plist" ]; then
-      bash "$METIS_ROOT/scripts/lib/launchd.sh" stato telegram >/dev/null && echo "✅ ascoltatore caricato" || { echo "❌ ascoltatore generato ma non caricato"; ERR=1; }
+    if bash "$METIS_ROOT/scripts/lib/servizi.sh" esiste telegram; then
+      bash "$METIS_ROOT/scripts/lib/servizi.sh" stato telegram >/dev/null && echo "✅ ascoltatore caricato" || { echo "❌ ascoltatore generato ma non caricato"; ERR=1; }
     else echo "ℹ️ ascoltatore non installato: il bot manda soltanto (livello 1)"; fi
     exit "$ERR" ;;
   *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;

@@ -68,7 +68,7 @@ La guida breve per tutti i giorni è in [docs/guida-cliente.md](docs/guida-clien
 - Claude Code usa il tuo abbonamento: la quota è una sola per claude.ai e Claude Code, e la consumano anche i giri automatici. `/usage` in Claude Code mostra quanto ne resta.
 - Posta e calendario passano dai connettori che attivi su claude.ai (Impostazioni → Connettori). Nei giri automatici Claude li legge e non invia niente.
 - Se il login scade, i giri automatici non leggono più posta e calendario e il controllo del mattino lo segnala: apri Claude Code e scrivi `/login`.
-- I giri automatici partono solo con il Mac acceso agli orari scelti.
+- I giri automatici partono solo con il Mac acceso agli orari scelti. Su un server Linux sempre acceso, invece, girano sempre: vedi «Metis su un server Linux» in `docs/procedura-installazione.md`.
 
 ## Aggiornare
 

@@ -144,7 +144,7 @@ if [ "$TOOL" = "Bash" ] && [ -n "$CMD" ]; then
   fi
   printf '%s' "$C" | grep -Eq 'obsidian[[:space:]]+delete' && decidi ask "obsidian delete manda una nota nel cestino: serve la conferma del cliente."
   printf '%s' "$C" | grep -Eq 'git[[:space:]]+(push|reset[[:space:]]+--hard|clean[[:space:]]+-[a-z]*f)' && decidi ask "Operazione git che pubblica o cancella: serve la conferma del cliente."
-  printf '%s' "$C" | grep -Eq 'launchctl[[:space:]]+(bootout|unload|remove)' && decidi ask "Scaricare un'automazione la ferma: serve la conferma del cliente."
+  printf '%s' "$C" | grep -Eq 'launchctl[[:space:]]+(bootout|unload|remove)|systemctl[[:space:]]+(--user[[:space:]]+)?(stop|disable|mask|kill)' && decidi ask "Scaricare un'automazione la ferma: serve la conferma del cliente."
   printf '%s' "$C" | grep -Eq '(^|[[:space:];&|])sudo[[:space:]]' && decidi deny "Comandi con sudo: fuori da ciò che Claude fa sul Mac del cliente."
 fi
 

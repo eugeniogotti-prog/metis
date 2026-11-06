@@ -10,6 +10,9 @@ T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 PASS=0; FAIL=0
 ok() { PASS=$((PASS+1)); echo "  ✅ $1"; }; ko() { FAIL=$((FAIL+1)); echo "  ❌ $1"; }
 check() { if eval "$2"; then ok "$1"; else ko "$1"; fi; }
+fa() { date -v-"$1"d "+$2" 2>/dev/null || date -d "$1 days ago" "+$2"; }   # fa <giorni> <formato>: Mac e Linux
+# Una cartella del disco fuori dal vault di prova (su Linux mktemp sta sotto /tmp, cioè intorno al vault)
+ALTRA=/usr/share
 evento() {  # evento <strumento> <cwd> <tool_input JSON>
   printf '{"hook_event_name":"PreToolUse","tool_name":"%s","cwd":"%s","tool_input":%s}' "$1" "$2" "$3"
 }
@@ -29,7 +32,7 @@ bash "$ROOT/scripts/configura.sh" aggiungi METIS_MODULI telegram >/dev/null; bas
 check "valore con spazi letto intero" '[ "$(bash "$ROOT/scripts/configura.sh" get METIS_VAULT)" = "$V" ]'
 check "voce di lista aggiunta una volta sola" '[ "$(bash "$ROOT/scripts/configura.sh" get METIS_MODULI)" = "telegram" ]'
 check "chiave non valida rifiutata" '! bash "$ROOT/scripts/configura.sh" set "METIS_A;B" x 2>/dev/null'
-check "file di configurazione con permessi 600" '[ "$(stat -f %Lp "$METIS_CONFIG")" = 600 ]'
+check "file di configurazione con permessi 600" '[ "$(stat -f %Lp "$METIS_CONFIG" 2>/dev/null | grep -x "[0-7]*" || stat -c %a "$METIS_CONFIG")" = 600 ]'
 
 echo "2. Struttura (vault esistente, non PARA)"
 mkdir -p "$T/esistente/Clienti/Rossi" "$T/esistente/.obsidian"; echo x > "$T/esistente/Clienti/Rossi/a.md"
@@ -73,6 +76,7 @@ check "lettura del plugin consentita" 'grep -q "Read(~/.claude/plugins/\*\*)" "$
 check "cartella riservata negata in lettura" 'grep -q "_Privato/\*\*)" "$P"'
 check "sessioni senza richieste di permesso (decisione del 6/10)" 'python3 -c "import json,sys; sys.exit(0 if json.load(open(\"$P\"))[\"permissions\"][\"defaultMode\"]==\"bypassPermissions\" else 1)"'
 check "divieti sulle cartelle delle credenziali" 'grep -q "Read(~/.ssh/\*\*)" "$P" && grep -q "Library/Keychains" "$P"'
+check "divieto sul login di Claude su Linux" 'grep -q "Read(~/.claude/.credentials.json)" "$P"'
 R_=$(dirname "$METIS_CONFIG")/permessi-routine.json
 check "routine sempre in acceptEdits" 'grep -q "\"defaultMode\": \"acceptEdits\"" "$R_"'
 check "copia per le routine scritta" 'python3 -m json.tool "$T/permessi-routine.json" >/dev/null'
@@ -86,6 +90,8 @@ check "rm -r in una catena: conferma" 'g Bash "$V" "{\"command\":\"cd x && rm -r
 check "rm semplice: passa" '[ -z "$(g Bash "$V" "{\"command\":\"rm file.tmp\"}")" ]'
 check "obsidian delete: conferma" 'g Bash "$V" "{\"command\":\"obsidian delete file=Nota\"}" | grep -q "\"ask\""'
 check "git push: conferma" 'g Bash "$V" "{\"command\":\"git push origin main\"}" | grep -q "\"ask\""'
+check "fermare un automatismo su Linux: conferma" 'g Bash "$V" "{\"command\":\"systemctl --user disable --now com.metis.daily-digest.timer\"}" | grep -q "\"ask\""'
+check "stato di un automatismo su Linux: passa" '[ -z "$(g Bash "$V" "{\"command\":\"systemctl --user status com.metis.daily-digest.timer\"}")" ]'
 check "sudo: bloccato" 'g Bash "$V" "{\"command\":\"sudo ls\"}" | grep -q "\"deny\""'
 check "invio di posta: conferma" 'g mcp__claude_ai_Gmail__send_message "$V" "{\"to\":\"a@b.it\"}" | grep -q "\"ask\""'
 check "risposta in un thread: conferma" 'g mcp__claude_ai_Gmail__reply "$V" "{}" | grep -q "\"ask\""'
@@ -128,12 +134,12 @@ check "grep -r con --exclude-dir della cartella: ammesso" '[ -z "$(r "grep -r --
 check "find con -not -path della cartella: ammesso" '[ -z "$(r "find . -not -path *_Privato* -name x.md")" ]'
 check "rg con -g !cartella: ammesso" '[ -z "$(r "rg -g !_Privato segreto")" ]'
 check "grep non ricorsivo in una pipe: ammesso" '[ -z "$(r "cat CLAUDE.md | grep Metis")" ]'
-check "find su un'altra cartella del disco: ammesso" '[ -z "$(r "find /tmp -name x")" ]'
-check "find -L su un'altra cartella del disco: ammesso (falso allarme del 6/10)" '[ -z "$(r "find -L /tmp -maxdepth 2 -type f")" ]'
+check "find su un'altra cartella del disco: ammesso" '[ -z "$(r "find $ALTRA -name x")" ]'
+check "find -L su un'altra cartella del disco: ammesso (falso allarme del 6/10)" '[ -z "$(r "find -L $ALTRA -maxdepth 2 -type f")" ]'
 check "find -L dalla radice del vault: bloccato" 'r "find -L . -type f" | grep -q "\"deny\""'
 check "find avvolto in con-timeout dalla radice: bloccato" 'r "bash /x/scripts/con-timeout.sh 90 find . -name x" | grep -q "\"deny\""'
 check "grep -r avvolto in con-timeout e env: bloccato" 'r "env LC_ALL=C bash /x/scripts/con-timeout.sh 30 grep -r segreto ." | grep -q "\"deny\""'
-check "find avvolto in con-timeout su un'altra cartella: ammesso" '[ -z "$(r "bash /x/scripts/con-timeout.sh 90 find -L /tmp -type f")" ]'
+check "find avvolto in con-timeout su un'altra cartella: ammesso" '[ -z "$(r "bash /x/scripts/con-timeout.sh 90 find -L $ALTRA -type f")" ]'
 
 echo "6. Validazione delle scritture"
 w() { printf '{"tool_name":"Write","tool_input":{"file_path":"%s"}}' "$1" | bash "$ROOT/hooks/valida-scrittura.sh" 2>"$T/w.err"; echo $?; }
@@ -177,11 +183,11 @@ check "modulo registrato nella configurazione" 'bash "$ROOT/scripts/configura.sh
 echo "7b. Sessioni chiuse senza «chiudi sessione»"
 PR="$T/progetti"; export METIS_CLAUDE_PROJECTS="$PR"
 PD="$PR/$(cd "$V" && pwd -P | sed 's/[^A-Za-z0-9]/-/g')"; mkdir -p "$PD"
-IERI=$(date -v-1d +%F); VECCHIO=$(date -v-10d +%F)
+IERI=$(fa 1 %F); VECCHIO=$(fa 10 %F)
 printf '%s\n' '{"type":"user","timestamp":"'"$IERI"'T09:00:00Z","message":{"content":"prepara la nota sul bando"}}' '{"type":"assistant","timestamp":"'"$IERI"'T09:00:05Z","message":{"content":[{"type":"text","text":"Nota scritta in Progetti."},{"type":"tool_use","name":"Write"}]}}' '{"type":"user","timestamp":"'"$IERI"'T09:01:00Z","message":{"content":"<system-reminder>interno</system-reminder>"}}' > "$PD/aaa-ieri.jsonl"
-touch -t "$(date -v-1d +%Y%m%d)1200" "$PD/aaa-ieri.jsonl"
-cp "$PD/aaa-ieri.jsonl" "$PD/bbb-vecchia.jsonl"; touch -t "$(date -v-10d +%Y%m%d)1200" "$PD/bbb-vecchia.jsonl"
-cp "$PD/aaa-ieri.jsonl" "$PD/ccc-corrente.jsonl"; touch -t "$(date -v-1d +%Y%m%d)1300" "$PD/ccc-corrente.jsonl"
+touch -t "$(fa 1 %Y%m%d)1200" "$PD/aaa-ieri.jsonl"
+cp "$PD/aaa-ieri.jsonl" "$PD/bbb-vecchia.jsonl"; touch -t "$(fa 10 %Y%m%d)1200" "$PD/bbb-vecchia.jsonl"
+cp "$PD/aaa-ieri.jsonl" "$PD/ccc-corrente.jsonl"; touch -t "$(fa 1 %Y%m%d)1300" "$PD/ccc-corrente.jsonl"
 H=$(printf '{"cwd":"%s","source":"startup","session_id":"ccc-corrente"}' "$V" | bash "$ROOT/hooks/session-orient.sh")
 check "sessione di ieri senza log: segnalata con il comando per ricostruirla" 'printf "%s" "$H" | grep -q "Sessione del $IERI chiusa senza «chiudi sessione»" && printf "%s" "$H" | grep -q "aaa-ieri.jsonl"'
 check "sessione corrente esclusa" '! printf "%s" "$H" | grep -q "ccc-corrente.jsonl"'

@@ -26,8 +26,16 @@ case "${1:-}" in
   controlla)
     [ -n "$UVX" ] || { echo "❌ markitdown: manca uv"; exit 1; }
     T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
-    printf 'Documento di prova di Metis\n\nConversione con accenti: perché così.\n' > "$T/p.txt"
-    textutil -convert docx "$T/p.txt" -output "$T/p.docx" >/dev/null 2>&1
+    # Documento Word minimo (un archivio zip con tre file XML), scritto qui: textutil c'è solo sul Mac.
+    python3 - "$T/p.docx" <<'PY'
+import sys, zipfile
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+par = lambda s: f'<w:p><w:r><w:t xml:space="preserve">{s}</w:t></w:r></w:p>'
+with zipfile.ZipFile(sys.argv[1], "w", zipfile.ZIP_DEFLATED) as z:
+    z.writestr("[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>')
+    z.writestr("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>')
+    z.writestr("word/document.xml", f'<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="{W}"><w:body>{par("Documento di prova di Metis")}{par("Conversione con accenti: perché così.")}</w:body></w:document>')
+PY
     OUT=$("$UVX" --from 'markitdown[all]' markitdown "$T/p.docx" 2>/dev/null)
     if printf '%s' "$OUT" | grep -q "perché così"; then echo "✅ markitdown: conversione di un documento Word riuscita"
     else echo "❌ markitdown: conversione non riuscita"; exit 1; fi

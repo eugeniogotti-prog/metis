@@ -86,7 +86,7 @@ check "nucleo installato: sezione Onestà epistemica attiva" 'grep -q "^## Onest
 check "nucleo installato: AVVIO solo su Chi sono e Come lavoro con te" '[ "$(grep -c "<!-- AVVIO" "$VP/_Claude/profilo-nucleo.md")" -eq 2 ] && grep -A1 "^## Chi sono" "$VP/_Claude/profilo-nucleo.md" | grep -q "<!-- AVVIO" && grep -A1 "^## Come lavoro con te" "$VP/_Claude/profilo-nucleo.md" | grep -q "<!-- AVVIO"'
 
 echo "2. Inizio mese: un caso del mese scorso ancora in correzioni.md"
-MP=$(date -v-1m +%Y-%m)
+MP=$(date -v-1m +%Y-%m 2>/dev/null || date -d "$(date +%Y-%m-15) -1 month" +%Y-%m)
 printf '\n## %s-15 — caso di prova\n\nTesto.\n' "$MP" >> "$V1/_Claude/correzioni.md"
 bash "$ROOT/scripts/doctor.sh" >/dev/null 2>&1
 if [ "$(date +%d | sed 's/^0//')" -ge 4 ]; then

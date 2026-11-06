@@ -23,12 +23,12 @@ L'esito va in una riga sotto «# Memo» nella nota del giorno: 🤖 se riuscito,
 ## Passi
 
 1. Scegliere i lavori: `bash scripts/configura.sh set METIS_JOBS "daily-digest inbox-processor"` (più `daily-sera` e `weekly-digest` se voluti).
-2. `bash scripts/moduli/routine.sh installa`: genera e carica i LaunchAgent (etichetta `METIS_LABEL`, log in `METIS_LOG_DIR`).
-3. **Controllo:** `bash scripts/moduli/routine.sh prova daily-digest` esegue subito un giro e scrive la riga nella nota del giorno; `bash scripts/moduli/routine.sh controlla` dice che tutti i LaunchAgent sono caricati.
+2. `bash scripts/moduli/routine.sh installa`: genera e carica gli automatismi: LaunchAgent sul Mac, servizi e timer di systemd su Linux (etichetta `METIS_LABEL`, log in `METIS_LOG_DIR`).
+3. **Controllo:** `bash scripts/moduli/routine.sh prova daily-digest` esegue subito un giro e scrive la riga nella nota del giorno; `bash scripts/moduli/routine.sh controlla` dice che tutti gli automatismi sono caricati.
 
 ## Da dire al cliente
 
-- **Mac acceso e sveglio agli orari.** Se a quell'ora il Mac dorme, macOS esegue il giro al risveglio; se è spento, il giro salta.
+- **Mac acceso e sveglio agli orari.** Se a quell'ora il Mac dorme, macOS esegue il giro al risveglio; se è spento, il giro salta. Su un server Linux i giri girano sempre, anche senza nessuno collegato, se c'è il linger (`sudo loginctl enable-linger <utente>`, una volta, all'allestimento); un giro saltato per un riavvio parte appena il server torna su.
 - **Quota.** Ogni giro di Claude consuma la quota dell'abbonamento: un digest del mattino sul vault di prova ha richiesto circa 25 secondi.
 - **Login.** I connettori di claude.ai nei giri automatici funzionano finché il login di Claude Code resta valido; se scade, i giri falliscono e il doctor lo segnala. Il rimedio è aprire Claude Code e rifare `/login`.
 

@@ -21,7 +21,7 @@ git -C "$ROOT" cat-file -e "$VECCHIA_REV^{commit}" 2>/dev/null || { echo "commit
 OLD="$T/casa/Metis"; NEW="$T/casa/Library/Application Support/Claude/local-agent-mode-sessions/a/b/cowork_plugins/marketplaces/local-desktop-app-uploads/metis"
 mkdir -p "$OLD" "$NEW"
 git -C "$ROOT" archive "$VECCHIA_REV" | tar -x -C "$OLD"
-( cd "$ROOT" && git ls-files | tar -cf - -T - ) | tar -x -C "$NEW"   # i file del repository come sono adesso
+( cd "$ROOT" && git ls-files --cached --others --exclude-standard | tar -cf - -T - ) | tar -x -C "$NEW"   # i file del repository come sono adesso
 cp "$ROOT/scripts/aggiorna.sh" "$NEW/scripts/aggiorna.sh"; cp "$ROOT/hooks/session-orient.sh" "$NEW/hooks/session-orient.sh"  # anche se non ancora in git
 check "copia vecchia 0.3.2" 'grep -q "\"0.3.2\"" "$OLD/.claude-plugin/plugin.json"'
 

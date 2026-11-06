@@ -21,7 +21,7 @@ Ogni modulo è facoltativo e si rilancia da solo («installa <modulo>»). Prima 
 
 ## Documenti Word (docx)
 
-1. `bash scripts/verifica-dotazione.sh docx`: se manca pandoc, il cliente lancia `brew install pandoc`.
+1. `bash scripts/verifica-dotazione.sh docx`: se manca pandoc, il cliente lancia `brew install pandoc` (su Linux: `sudo apt install pandoc`).
 2. `bash scripts/moduli/docx.sh installa`: crea l'ambiente Python del modulo con python-docx (serve la rete).
 3. Facoltativo: il modello Word del cliente, con i suoi stili e, se vuole la data nel piè di pagina, il segnaposto `§DATA§`: `bash scripts/configura.sh set METIS_DOCX_MODELLO "<percorso del .docx>"`.
 

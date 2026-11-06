@@ -3,9 +3,12 @@
 # Uso:
 #   launchd.sh genera <nome> sempre <comando> [argomenti...]        processo sempre acceso (KeepAlive), es. l'ascoltatore del bot
 #   launchd.sh genera <nome> orari "<HH:MM HH:MM ...>" <comando> [argomenti...]   giri ad orari fissi, ogni giorno
+#              (con un giorno davanti agli orari, «lun 07:30», solo quel giorno della settimana: lun mar mer gio ven sab dom)
 #   launchd.sh carica <nome>        carica (o ricarica) il LaunchAgent nella sessione dell'utente
 #   launchd.sh scarica <nome>       lo ferma e lo toglie dalla sessione (il file resta)
 #   launchd.sh stato <nome>         dice se è caricato
+#   launchd.sh esiste <nome>        esce con 0 se il LaunchAgent è stato generato
+# Di solito non si chiama direttamente: scripts/lib/servizi.sh sceglie fra questo (Mac) e systemd.sh (Linux).
 # Etichetta: $METIS_LABEL.<nome>; file in ~/Library/LaunchAgents (o in $METIS_LAUNCHAGENTS, per le prove).
 # Il PATH dei LaunchAgent non contiene Homebrew: si aggiunge qui. I log vanno in $METIS_LOG_DIR/<nome>.log.
 
@@ -16,7 +19,7 @@ source "$METIS_ROOT/scripts/lib/config.sh"
 metis_carica_config || { echo "launchd: ${METIS_ERRORE}" >&2; exit 2; }
 DIR="${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}"
 AZ="${1:-}"; NOME="${2:-}"
-[ -n "$NOME" ] && [[ "$NOME" =~ ^[a-z0-9-]+$ ]] || { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+[ -n "$NOME" ] && [[ "$NOME" =~ ^[a-z0-9-]+$ ]] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 ETICHETTA="$METIS_LABEL.$NOME"; PLIST="$DIR/$ETICHETTA.plist"
 
 case "$AZ" in
@@ -44,7 +47,13 @@ d = {
 if e["TIPO"] == "sempre":
     d["KeepAlive"] = True; d["RunAtLoad"] = True; d["ThrottleInterval"] = 30
 else:
-    d["StartCalendarInterval"] = [{"Hour": int(o.split(":")[0]), "Minute": int(o.split(":")[1])} for o in e["ORARI"].split()]
+    giorni = {"dom": 0, "lun": 1, "mar": 2, "mer": 3, "gio": 4, "ven": 5, "sab": 6}
+    parti = e["ORARI"].split()
+    gs = [giorni[x] for x in parti if x in giorni]
+    ore = [x for x in parti if x not in giorni]
+    if any(x.isalpha() for x in ore): sys.exit(f"launchd: giorno sconosciuto in «{e['ORARI']}»")
+    voci = [{"Hour": int(o.split(":")[0]), "Minute": int(o.split(":")[1])} for o in ore]
+    d["StartCalendarInterval"] = [dict(v, Weekday=g) for g in gs for v in voci] if gs else voci
 with open(e["PLIST"], "wb") as f:
     plistlib.dump(d, f)
 print(f"launchd: {e['PLIST']}")
@@ -61,5 +70,7 @@ PY
   stato)
     [ "${METIS_SENZA_CARICARE:-}" = 1 ] && { echo "non caricato (prova)"; exit 1; }
     if launchctl print "gui/$(id -u)/$ETICHETTA" >/dev/null 2>&1; then echo "caricato"; else echo "non caricato"; exit 1; fi ;;
-  *) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  esiste)
+    [ -f "$PLIST" ] ;;
+  *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

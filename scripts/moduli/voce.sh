@@ -25,7 +25,7 @@ case "${1:-}" in
   controlla)
     ERR=0
     command -v ffmpeg >/dev/null 2>&1 || [ -x /opt/homebrew/bin/ffmpeg ] && echo "✅ ffmpeg presente" || { echo "❌ manca ffmpeg (brew install ffmpeg)"; ERR=1; }
-    [ "$(stat -f %Lp "$SEG" 2>/dev/null)" = 600 ] && echo "✅ chiave di Groq protetta (600)" || { echo "❌ chiave di Groq assente o leggibile da altri: $SEG"; ERR=1; }
+    [ "$(metis_permessi "$SEG")" = 600 ] && echo "✅ chiave di Groq protetta (600)" || { echo "❌ chiave di Groq assente o leggibile da altri: $SEG"; ERR=1; }
     if [ "$ERR" = 0 ]; then
       OUT=$(python3 "$METIS_ROOT/scripts/telegram/metis_telegram.py" prova-trascrizione 2>&1) && echo "✅ $OUT" || { echo "❌ trascrizione non riuscita: $(printf '%s' "$OUT" | tail -1)"; ERR=1; }
     fi

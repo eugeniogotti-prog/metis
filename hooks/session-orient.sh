@@ -83,7 +83,7 @@ while IFS= read -r ALTRA; do
   if [ -d "$ALTRA" ]; then COME="la versione ${VERS_ALTRA:-?} in $ALTRA"; else COME="$ALTRA, che non esiste più (giri automatici fermi)"; fi
   echo "- Aggiornamento dell'installazione da fare: questa copia di ${METIS_PRODOTTO} è la ${VERS_ORA:-?}, ma regole e giri automatici usano $COME. Proporre l'aggiornamento (skill installa, «Aggiornare un'installazione»): bash \"$METIS_ROOT/scripts/aggiorna.sh\" controlla, poi esegui. Non tocca profilo, stati né note."
   SEGNALI=1; break
-done < <(grep -ohE '/[^"*()<>]+/scripts/doctor\.sh' "$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/permessi-routine.json" "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL".*.plist 2>/dev/null | sed 's|/scripts/doctor\.sh$||' | sort -u)
+done < <(grep -ohE '/[^"*()<>]+/scripts/doctor\.sh' "$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/permessi-routine.json" "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL".*.plist "${METIS_SYSTEMD_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user}/$METIS_LABEL".*.service 2>/dev/null | sed 's|/scripts/doctor\.sh$||' | sort -u)
 
 # 4. Avvio dell'onboarding non fatto. Il resto del profilo si completa nell'uso e non si segnala (24/10/2026).
 NAVVIO=$(metis_avvio_residui)
@@ -121,7 +121,7 @@ NONCHIUSE=$(for d in "$DOVE" "$METIS_VAULT"; do
     find "$dir" -maxdepth 1 -name '*.jsonl' -mtime -7 2>/dev/null
   done | while IFS= read -r f; do
     [ -n "$SESSIONE" ] && [ "$(basename "$f" .jsonl)" = "$SESSIONE" ] && continue
-    g=$(date -r "$(stat -f %m "$f")" '+%Y-%m-%d' 2>/dev/null)
+    g=$(metis_giorno_file "$f" 2>/dev/null)
     [ -n "$g" ] && [ "$g" != "$OGGI" ] && [ ! -f "$CL/sessioni/$g.md" ] && printf '%s\t%s\n' "$g" "$f"
   done | sort -r | head -3)
 if [ -n "$NONCHIUSE" ]; then

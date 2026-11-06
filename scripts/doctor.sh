@@ -185,7 +185,8 @@ esac
 # L'ascoltatore riscrive il suo file di stato a ogni ciclo (circa un minuto): la data del file è il battito. Se il Mac si
 # è svegliato da poco, un battito vecchio è normale (durante il sonno launchd sospende tutto) e non è un allarme.
 # Variabili per le prove: METIS_TELEGRAM_STATO, METIS_ASCOLTO_PROCESSO (1/0), METIS_WAKETIME (epoch).
-if [ -f "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL.telegram.plist" ]; then
+SRV="$METIS_ROOT/scripts/lib/servizi.sh"
+if bash "$SRV" esiste telegram 2>/dev/null; then
   sec "Ascolto del telefono"
   ST="${METIS_TELEGRAM_STATO:-$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/telegram-stato.json}"
   VIVO="${METIS_ASCOLTO_PROCESSO:-$(pgrep -f "metis_telegram.py ascolta" >/dev/null 2>&1 && echo 1 || echo 0)}"
@@ -193,11 +194,11 @@ if [ -f "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL.telegram
   if [ "$VIVO" != 1 ]; then add crit "L'ascoltatore del bot non gira: i messaggi dal telefono non arrivano nel vault (bash scripts/moduli/telegram.sh controlla)"
   elif [ ! -f "$ST" ]; then add warn "L'ascoltatore gira ma non ha ancora scritto il suo stato ($ST)"
   else
-    BATT=$(stat -f %m "$ST" 2>/dev/null || echo 0); ETA=$(( (NOW - BATT) / 60 ))
+    BATT=$(metis_mtime "$ST"); BATT=${BATT:-0}; ETA=$(( (NOW - BATT) / 60 ))
     if [ "$ETA" -le 15 ]; then add ok "Ascoltatore del bot attivo (battito $ETA min fa)"
     elif [ -n "$SVEGLIA" ] && [ "$BATT" -lt "$SVEGLIA" ] && [ $(( (NOW - SVEGLIA) / 60 )) -le 10 ]; then add info "Ascoltatore del bot: Mac svegliato da $(( (NOW - SVEGLIA) / 60 )) min, battito non ancora ripreso"
     elif [ "$ETA" -le 60 ]; then add warn "Ascoltatore del bot: ultimo battito $ETA min fa"
-    else add crit "Ascoltatore del bot fermo: ultimo battito $ETA min fa, il processo c'è ma non ascolta (ricaricarlo: bash scripts/lib/launchd.sh carica telegram)"; fi
+    else add crit "Ascoltatore del bot fermo: ultimo battito $ETA min fa, il processo c'è ma non ascolta (ricaricarlo: bash scripts/lib/servizi.sh carica telegram)"; fi
   fi
 fi
 
@@ -218,10 +219,17 @@ else add crit "Token o chiavi in chiaro in $(printf '%s\n' "$SEGR" | grep -c .) 
 sec "Portabilità macOS"
 PORT=$( { ls "$METIS_ROOT"/scripts/*.sh "$METIS_ROOT"/scripts/*/*.sh "$METIS_ROOT"/hooks/*.sh "$METIS_ROOT"/skills/*/SKILL.md "$METIS_VAULT/CLAUDE.md" "$METIS_VAULT/CLAUDE.local.md" "$CL/regole-di-metodo.md" "$CL/regole-di-metodo-strumenti.md" 2>/dev/null; } \
   | while IFS= read -r f; do grep -nHE '(^|[`;&|( ])(g?timeout [0-9]+|date -d |grep -[a-zA-Z]*P |readlink -f )' "$f" 2>/dev/null; done \
-  | grep -vE ':[0-9]+:[[:space:]]*#' | grep -vE 'con-timeout|grep -nHE|date -v|date -j' | sed "s|$METIS_ROOT/||; s|$METIS_VAULT/||" | cut -c1-110)
+  | grep -vE ':[0-9]+:[[:space:]]*#' | grep -vE 'con-timeout|grep -nHE|date -v|date -j|date -r' | sed "s|$METIS_ROOT/||; s|$METIS_VAULT/||" | cut -c1-110)
 if [ -n "$PORT" ]; then add warn "Comandi GNU assenti su macOS in $(printf '%s\n' "$PORT" | grep -c .) punti: $(printf '%s\n' "$PORT" | head -3 | tr '\n' ';')"
 else add ok "Nessun comando GNU assente su macOS (timeout, date con -d, grep -P, readlink -f) negli script e nelle istruzioni"; fi
 NOHB=""; NPL=0
+if [ "$(metis_sistema)" = Linux ]; then
+  # Su Linux gli automatismi sono servizi systemd dell'utente: girano a nessuno collegato solo con il linger.
+  if [ -n "$METIS_JOBS" ] || bash "$SRV" esiste telegram 2>/dev/null; then
+    if bash "$SRV" permanenza; then add ok "Automatismi attivi anche senza nessuno collegato (linger dell'utente)"
+    else add crit "Senza linger gli automatismi si fermano quando si chiude l'ultima sessione: sudo loginctl enable-linger $(id -un)"; fi
+  fi
+else
 for f in "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL".*.plist; do
   [ -f "$f" ] || continue; NPL=$((NPL+1))
   P=$(plutil -extract EnvironmentVariables.PATH raw "$f" 2>/dev/null) || { NOHB="$NOHB $(basename "$f" .plist)"; continue; }
@@ -230,6 +238,7 @@ done
 if [ -n "$NOHB" ]; then add warn "LaunchAgent di $METIS_PRODOTTO con PATH senza /opt/homebrew/bin (python3, ffmpeg, jq di Homebrew non trovati):$NOHB"
 elif [ "$NPL" -gt 0 ]; then add ok "I $NPL LaunchAgent di $METIS_PRODOTTO hanno /opt/homebrew/bin nel PATH"
 else add info "Nessun LaunchAgent di $METIS_PRODOTTO installato"; fi
+fi
 
 # --- Log di sessione: se ieri si è lavorato nel vault, il log di ieri deve esserci ---
 sec "Log di sessione"
@@ -316,8 +325,8 @@ if [ -z "$METIS_JOBS" ]; then
   add info "Nessuna automazione configurata"
 else
   for job in $METIS_JOBS; do
-    if launchctl list "$METIS_LABEL.$job" >/dev/null 2>&1; then add ok "LaunchAgent $METIS_LABEL.$job caricato"
-    else add warn "LaunchAgent $METIS_LABEL.$job non caricato"; fi
+    if bash "$SRV" stato "$job" >/dev/null 2>&1; then add ok "$(bash "$SRV" tipo) $METIS_LABEL.$job caricato"
+    else add warn "$(bash "$SRV" tipo) $METIS_LABEL.$job non caricato"; fi
   done
   JOURNAL=$(metis_ruolo JOURNAL)
   if [ -n "$JOURNAL" ] && [ -f "$JOURNAL/$IERI.md" ]; then
@@ -367,7 +376,7 @@ if [ -n "$MODULI_INST" ]; then
       voce)   # niente trascrizione ogni mattina: bastano ffmpeg e la chiave protetta
         CG="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")/groq"
         GF="$(bash "$METIS_ROOT/scripts/configura.sh" get METIS_GROQ_FILE 2>/dev/null)"; [ -n "$GF" ] && CG="${GF/#\~/$HOME}"
-        if { command -v ffmpeg >/dev/null 2>&1 || [ -x /opt/homebrew/bin/ffmpeg ]; } && [ "$(stat -f %Lp "$CG" 2>/dev/null)" = 600 ]; then add ok "voce: ffmpeg e chiave di Groq presenti"
+        if { command -v ffmpeg >/dev/null 2>&1 || [ -x /opt/homebrew/bin/ffmpeg ]; } && [ "$(metis_permessi "$CG")" = 600 ]; then add ok "voce: ffmpeg e chiave di Groq presenti"
         else add warn "voce: manca ffmpeg o la chiave di Groq (voce.sh controlla)"; fi ;;
       markitdown|google|microsoft|telegram|routine)
         R=$(bash "$METIS_ROOT/scripts/moduli/$m.sh" controlla 2>/dev/null); RC=$?
@@ -382,7 +391,7 @@ sec "Manutenzione"
 GRANDI=0
 for L in "$METIS_LOG_DIR"/*.log; do
   [ -f "$L" ] || continue
-  sz=$(stat -f %z "$L" 2>/dev/null || stat -c %s "$L" 2>/dev/null || echo 0)
+  sz=$(metis_dimensione "$L"); sz=${sz:-0}
   [ "$sz" -gt 1000000 ] && { add warn "Log grande: $(basename "$L") ($((sz/1024)) KB)"; GRANDI=1; }
 done
 [ "$GRANDI" -eq 0 ] && add ok "Nessun log oltre 1 MB"

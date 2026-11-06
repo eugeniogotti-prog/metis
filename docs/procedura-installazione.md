@@ -135,6 +135,18 @@ Per un cliente che ha Metis installato da Terminale e vuole lavorare dall'app. P
 - **La cartella della sessione.** Il tab Code chiede la cartella in cui lavorare: va scelta quella del vault. Se si sceglie una cartella che lo contiene, l'orientamento all'avvio lo dice in una riga e indica quella giusta; da altre cartelle tace.
 - **Prova:** `tests/test-aggiorna.sh` costruisce un vault installato con la 0.3.2, con routine e Telegram, e lo aggiorna da una copia messa nella cartella dell'app: contenuto del cliente identico, nessun percorso vecchio, secondo giro senza cambiamenti.
 
+## Metis su un server Linux
+
+Dalla 0.5.0 lo stesso plugin funziona anche su Linux (provato su Ubuntu 24.04 con systemd 255), per chi vuole vault, documenti e giri automatici su un server sempre acceso, e ci entra via SSH.
+
+- **Automatismi.** Al posto dei LaunchAgent, servizi e timer di systemd per l'utente, in `~/.config/systemd/user/` (`scripts/lib/servizi.sh` sceglie da sé; `systemd.sh` è la parte Linux). Un giro saltato per un riavvio parte appena il server torna su; l'ascoltatore di Telegram, se si ferma, viene rilanciato.
+- **Linger, una volta sola, da amministratore:** `sudo loginctl enable-linger <utente>`. Senza, systemd ferma gli automatismi quando si chiude l'ultima sessione SSH. Il controllo d'installazione e il doctor lo controllano.
+- **Login di Claude:** con l'account dell'abbonamento (`/login`), non con `ANTHROPIC_API_KEY` né con `claude setup-token`, che non carica i connettori di claude.ai. Il file del login (`~/.claude/.credentials.json`) è fra le letture vietate.
+- **Programmi:** `sudo apt install python3 jq git curl` più, per i moduli, `pandoc`, `ffmpeg`, `nodejs npm`; `uv` con il suo installatore (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Il controllo d'installazione dà i comandi per ciò che manca.
+- **Obsidian non gira sul server.** Claude scrive direttamente sui file e dice quando i collegamenti fra note non sono aggiornati; spostamenti e rinomine con l'aggiornamento dei collegamenti si fanno dal Mac.
+- **Un posto solo per automatismi e bot.** Con il vault allineato fra Mac e server, un giro che parte sui due scrive due volte; Telegram ammette un solo ascoltatore per bot. Nel passaggio: sul Mac `routine.sh togli <lavoro>` per ogni giro e `servizi.sh scarica telegram`; si allinea il vault; sul server `installa routine` e, per il bot già esistente, la copia di `telegram` e `telegram-stato.json` (modulo Telegram, «Un solo ascoltatore per bot») e `telegram.sh ascoltatore`.
+- **Prova:** `tests/test-linux.sh` (ovunque, con un systemctl finto) e `PROVA_VERA=1 bash tests/test-linux.sh` (su Linux, con il systemd vero: genera, carica, fa partire un giro e l'ascoltatore, poi toglie tutto).
+
 ## Che cosa c'è
 
 - `skills/` — installa, onboarding, definizione-obiettivi, impegni, autorevisione, archiviazione, daily-digest, weekly-digest, inbox-processor.

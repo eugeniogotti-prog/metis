@@ -44,11 +44,13 @@ CFG="${METIS_CONFIG:-$HOME/.config/metis/config}"
 CFG_DIR="$(dirname "$CFG")"
 LA="${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}"
 PLUGINS_JSON="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/installed_plugins.json"
-# File con i percorsi del plugin dentro. Le regole e i .mcp.json sono JSON; i LaunchAgent sono plist.
+# File con i percorsi del plugin dentro. Le regole e i .mcp.json sono JSON; gli automatismi sono plist (LaunchAgent, Mac)
+# o servizi e timer di systemd (Linux): li elenca servizi.sh.
 FILE_JSON=("$METIS_VAULT/.claude/settings.json" "$METIS_VAULT/.claude/settings.local.json" "$METIS_VAULT/.mcp.json"
            "$CFG_DIR/permessi-routine.json" "$CFG_DIR/mcp-routine.json")
 PLIST=()
-for p in "$LA/$METIS_LABEL".*.plist; do [ -f "$p" ] && PLIST+=("$p"); done
+elenca_automi() { PLIST=(); while IFS= read -r p; do [ -n "$p" ] && PLIST+=("$p"); done < <(bash "$METIS_ROOT/scripts/lib/servizi.sh" file 2>/dev/null); }
+elenca_automi
 
 # Le copie vecchie: le radici a cui puntano regole e LaunchAgent (la cartella che contiene scripts/ o hooks/), diverse
 # da questa. Una radice che non esiste più conta lo stesso: le automazioni che la usano sono ferme.
@@ -78,9 +80,14 @@ for f in js:
     except Exception: continue
     for s in stringhe(d): trovate.update(r for m in pat.finditer(s) if (r := metis(m)))
 for f in pl:
-    try: d = plistlib.load(open(f, "rb"))
-    except Exception: continue
-    for s in d.get("ProgramArguments", []): trovate.update(r for m in pat.finditer(s) if (r := metis(m)))
+    if f.endswith(".plist"):
+        try: d = plistlib.load(open(f, "rb"))
+        except Exception: continue
+        righe = d.get("ProgramArguments", [])
+    else:   # servizio systemd: gli argomenti stanno nella riga ExecStart, tra virgolette
+        try: righe = [r[len("ExecStart="):] for r in open(f).read().splitlines() if r.startswith("ExecStart=")]
+        except Exception: continue
+    for s in righe: trovate.update(r for m in pat.finditer(s) if (r := metis(m)))
 # Le copie di Metis (anche quelle che non esistono più) diverse da questa.
 for r in sorted(trovate):
     if os.path.realpath(r) == os.path.realpath(root): continue
@@ -156,7 +163,7 @@ esegui)
   done
   tar -czf "$B/cartella-di-claude.tgz" -C "$METIS_VAULT" "$METIS_RUOLO_CLAUDE" 2>/dev/null \
     && printf 'cartella-di-claude.tgz → %s/%s (estrarre con: tar -xzf cartella-di-claude.tgz -C "%s")\n' "$METIS_VAULT" "$METIS_RUOLO_CLAUDE" "$METIS_VAULT" >> "$B/LEGGIMI.txt"
-  { echo; echo "Per tornare a com'era: copiare ogni file al suo posto, poi ricaricare i LaunchAgent (launchctl bootout e bootstrap)."; } >> "$B/LEGGIMI.txt"
+  { echo; echo "Per tornare a com'era: copiare ogni file al suo posto, poi ricaricare gli automatismi (Mac: launchctl bootout e bootstrap; Linux: systemctl --user daemon-reload e restart)."; } >> "$B/LEGGIMI.txt"
   echo "Copia di sicurezza: $B"
 
   # 2. Percorsi: copia vecchia → questa copia, in ogni stringa delle regole e dei .mcp.json (la struttura resta com'è).
@@ -229,8 +236,29 @@ json.dump(d, open(f, "w"), indent=2, ensure_ascii=False)
 PY
   done
 
-  # 4. LaunchAgent di Metis: stessi giri e orari, con i percorsi di questa copia; si ricaricano.
+  # 4. Automatismi di Metis: stessi giri e orari, con i percorsi di questa copia; si ricaricano.
   for p in ${PLIST[@]+"${PLIST[@]}"}; do
+    case "$p" in
+      *.timer) continue ;;   # il timer non contiene percorsi; si ricarica con il suo servizio
+      *.service)
+        nome="$(basename "$p" .service)"; nome="${nome#"$METIS_LABEL".}"
+        if [ "${#VECCHIE[@]}" -gt 0 ]; then
+          python3 - "$p" "$METIS_ROOT" "${VECCHIE[@]}" <<'PY' || { ERR=1; continue; }
+import sys
+p, root, vecchie = sys.argv[1], sys.argv[2], sys.argv[3:]
+righe = open(p).read().splitlines(True); nuove = []
+for r in righe:
+    if r.startswith("ExecStart="):
+        for v in vecchie: r = r.replace(v + "/", root + "/")
+    nuove.append(r)
+if nuove != righe:
+    open(p, "w").write("".join(nuove))
+    print(f"✅ servizio riallineato: {p}")
+PY
+        fi
+        bash "$METIS_ROOT/scripts/lib/servizi.sh" carica "$nome" | sed 's/^/  /'
+        continue ;;
+    esac
     nome="$(basename "$p" .plist)"; nome="${nome#"$METIS_LABEL".}"
     if [ "${#VECCHIE[@]}" -gt 0 ]; then
       python3 - "$p" "$METIS_ROOT" "${VECCHIE[@]}" <<'PY' || { ERR=1; continue; }
@@ -249,11 +277,11 @@ if nuovi != args:
 PY
       plutil -lint "$p" >/dev/null || { echo "❌ plist non valido dopo la modifica: $p (l'originale è nella copia di sicurezza)"; ERR=1; continue; }
     fi
-    bash "$METIS_ROOT/scripts/lib/launchd.sh" carica "$nome" | sed 's/^/  /'
+    bash "$METIS_ROOT/scripts/lib/servizi.sh" carica "$nome" | sed 's/^/  /'
   done
 
   # 5. Verifica: nessuna regola né automazione punta più alla copia vecchia; poi il doctor.
-  PLIST=(); for p in "$LA/$METIS_LABEL".*.plist; do [ -f "$p" ] && PLIST+=("$p"); done
+  elenca_automi
   RESTANO="$(radici_vecchie)"
   if [ -n "$RESTANO" ]; then echo "❌ restano riferimenti a: $RESTANO"; ERR=1
   else echo "✅ regole e automazioni puntano a questa copia ($METIS_ROOT)"; fi

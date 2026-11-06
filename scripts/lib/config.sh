@@ -158,3 +158,15 @@ metis_data_rel() {  # metis_data_rel -1d  → YYYY-MM-DD
 }
 metis_mese_prec() { date -v-1m '+%Y-%m' 2>/dev/null || date -d '1 month ago' '+%Y-%m'; }
 metis_epoch() { date -j -f "%Y-%m-%d" "$1" +%s 2>/dev/null || date -d "$1" +%s 2>/dev/null || echo 0; }
+
+# Sistema: Darwin (Mac) o Linux. METIS_SISTEMA lo forza, per le prove.
+metis_sistema() { printf '%s' "${METIS_SISTEMA:-$(uname -s)}"; }
+# Data di modifica (secondi), permessi (es. 600) e dimensione di un file, con la sintassi giusta per ogni sistema:
+# su Linux «stat -f» legge il file system, non il file, e stampa altro senza errore.
+metis_mtime() { if [ "$(uname -s)" = Darwin ]; then stat -f %m "$1" 2>/dev/null; else stat -c %Y "$1" 2>/dev/null; fi; }
+metis_permessi() { if [ "$(uname -s)" = Darwin ]; then stat -f %Lp "$1" 2>/dev/null; else stat -c %a "$1" 2>/dev/null; fi; }
+metis_dimensione() { if [ "$(uname -s)" = Darwin ]; then stat -f %z "$1" 2>/dev/null; else stat -c %s "$1" 2>/dev/null; fi; }
+metis_giorno_file() {  # metis_giorno_file <file> → YYYY-MM-DD della modifica
+  local s; s=$(metis_mtime "$1") || return 1; [ -n "$s" ] || return 1
+  date -r "$s" '+%Y-%m-%d' 2>/dev/null || date -d "@$s" '+%Y-%m-%d'
+}

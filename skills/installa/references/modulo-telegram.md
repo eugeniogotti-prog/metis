@@ -14,12 +14,13 @@ Il bot scrive soltanto alla chat del cliente e ascolta soltanto lei: i messaggi 
 2. **Il token.** `bash scripts/moduli/telegram.sh token`: il cliente incolla il token, che non compare a schermo e va in `~/.config/metis/telegram` con permessi 600. Lo script verifica con Telegram che il token sia valido.
 3. **La chat.** Il cliente scrive «ciao» al suo bot dal telefono; poi `bash scripts/moduli/telegram.sh chat`.
 4. **Uscita e prova.** `bash scripts/moduli/telegram.sh installa`: manda un messaggio di prova. Il cliente conferma di averlo ricevuto.
-5. **Inbox e conversazione** (se li vuole). `bash scripts/moduli/telegram.sh ascoltatore`: genera e carica il LaunchAgent sempre acceso che ascolta il bot. Si prova dal telefono: un link (atteso: «Salvato nell'Inbox» e la nota in `<Inbox>/telegram`), poi una domanda sui suoi lavori (attesa: la risposta di Claude).
+5. **Inbox e conversazione** (se li vuole). `bash scripts/moduli/telegram.sh ascoltatore`: genera e carica l'automatismo sempre acceso che ascolta il bot (LaunchAgent sul Mac, servizio systemd su Linux). Si prova dal telefono: un link (atteso: «Salvato nell'Inbox» e la nota in `<Inbox>/telegram`), poi una domanda sui suoi lavori (attesa: la risposta di Claude).
 6. **Voce** (se la vuole). Il cliente crea un account su console.groq.com e una chiave API; `bash scripts/moduli/voce.sh chiave`; `bash scripts/moduli/voce.sh controlla`. Dal telefono: un vocale che comincia con «nota…».
 
 ## Da dire al cliente
 
-- **Mac acceso.** L'Inbox dal telefono e la conversazione funzionano solo mentre il Mac è acceso e sveglio; i messaggi mandati a Mac spento si lavorano alla riaccensione, nell'ordine in cui sono arrivati.
+- **Mac acceso.** L'Inbox dal telefono e la conversazione funzionano solo mentre il Mac è acceso e sveglio; i messaggi mandati a Mac spento si lavorano alla riaccensione, nell'ordine in cui sono arrivati. Su un server sono sempre attivi.
+- **Un solo ascoltatore per bot.** Telegram consegna i messaggi a un solo ascoltatore: se il bot passa dal Mac a un server, prima si ferma sul Mac (`bash scripts/lib/servizi.sh scarica telegram`), poi si copiano sul server `telegram` e `telegram-stato.json` della cartella della configurazione (token, chat e punto di lettura: lo stesso bot, senza rileggere i messaggi già smistati) e si accende lì.
 - **Tempi.** Misurati il 29/9/2026 su un vault di prova: una domanda nuova circa 13 secondi, una domanda che riprende la conversazione circa 6 secondi, più il tempo di Telegram.
 - **Quota.** Ogni messaggio di conversazione è una sessione di Claude Code: consuma la quota dell'abbonamento del cliente. Sul vault di prova Claude Code ha dichiarato circa 0,31-0,35 dollari per scambio a tariffa API: con l'abbonamento non si paga a parte, ma una conversazione lunga dal telefono pesa sulla quota quanto una al Mac.
 - **Dove passano i dati.** I messaggi passano dai server di Telegram; l'audio dei vocali da Telegram e da Groq. Chi ha obblighi di riservatezza sceglie che cosa mandare.

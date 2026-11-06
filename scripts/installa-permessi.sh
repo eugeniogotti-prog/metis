@@ -66,7 +66,7 @@ if fonti:
 deny = ["Bash(sudo *)", "Bash(rm -rf /*)", "Bash(rm -rf ~*)",
         # cartelle del Mac con chiavi e credenziali: Claude non le legge mai, in nessuna modalità
         "Read(~/.ssh/**)", "Read(~/.aws/**)", "Read(~/.gnupg/**)", "Read(~/Library/Keychains/**)",
-        "Read(~/.config/gh/**)", "Read(~/.netrc)", "Edit(~/.ssh/**)", "Edit(~/.aws/**)", "Edit(~/.gnupg/**)"]
+        "Read(~/.config/gh/**)", "Read(~/.netrc)", "Read(~/.claude/.credentials.json)", "Edit(~/.ssh/**)", "Edit(~/.aws/**)", "Edit(~/.gnupg/**)"]
 if ris:
     deny += [f"Read({ass(vault)}/{ris}/**)", f"Edit({ass(vault)}/{ris}/**)"]
 # cartelle che Claude legge ma non modifica (METIS_SOLA_LETTURA, relative al vault, separate da «|»)

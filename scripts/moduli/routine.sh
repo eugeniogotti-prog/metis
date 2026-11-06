@@ -1,9 +1,9 @@
 #!/bin/bash
-# routine.sh — modulo routine: i giri automatici ad orari fissi, a Mac acceso.
+# routine.sh — modulo routine: i giri automatici ad orari fissi, a computer acceso (su un server Linux: sempre).
 # Uso:
-#   routine.sh installa [--senza-caricare]   genera e carica i LaunchAgent dei lavori scelti (METIS_JOBS)
+#   routine.sh installa [--senza-caricare]   genera e carica gli automatismi dei lavori scelti (METIS_JOBS): LaunchAgent su Mac, timer di systemd su Linux
 #   routine.sh prova <lavoro>                esegue subito un giro (controllo di riuscita)
-#   routine.sh controlla                     LaunchAgent generati e caricati; ultimo giro riuscito
+#   routine.sh controlla                     automatismi generati e caricati
 #   routine.sh togli <lavoro>                ferma un lavoro (il file resta, si ricarica con installa)
 # Lavori e orari di default (si cambiano con METIS_ORARI_<LAVORO> nella configurazione, orari HH:MM separati da spazi):
 #   doctor 06:45 · daily-digest 07:00 · inbox-processor 09:00 13:00 17:00 · daily-sera 21:00 · weekly-digest (lunedì) 07:30
@@ -14,7 +14,7 @@ METIS_ROOT="${METIS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 export METIS_ROOT
 source "$METIS_ROOT/scripts/lib/config.sh"
 metis_carica_config || { echo "routine: ${METIS_ERRORE}" >&2; exit 2; }
-L="$METIS_ROOT/scripts/lib/launchd.sh"
+L="$METIS_ROOT/scripts/lib/servizi.sh"
 
 orari() {  # orari <lavoro>: dalla configurazione o i default
   local v="METIS_ORARI_$(printf '%s' "$1" | tr 'a-z-' 'A-Z_')"
@@ -31,11 +31,10 @@ case "${1:-}" in
       if [ "$j" = doctor ]; then
         bash "$L" genera doctor orari "$(orari doctor)" /bin/bash "$METIS_ROOT/scripts/doctor.sh" || exit 1
       else
-        bash "$L" genera "$j" orari "$(orari "$j")" /bin/bash "$METIS_ROOT/scripts/metis-agent.sh" "$j" || exit 1
+        # Il weekly gira solo il lunedì.
+        O="$(orari "$j")"; [ "$j" = weekly-digest ] && O="lun $O"
+        bash "$L" genera "$j" orari "$O" /bin/bash "$METIS_ROOT/scripts/metis-agent.sh" "$j" || exit 1
       fi
-      # Il weekly gira solo il lunedì: si aggiunge Weekday agli orari generati.
-      [ "$j" = weekly-digest ] && /usr/libexec/PlistBuddy -c "Add :StartCalendarInterval:0:Weekday integer 1" \
-        "${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL.weekly-digest.plist" >/dev/null
       [ "${2:-}" = --senza-caricare ] || bash "$L" carica "$j"
     done
     bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI routine ;;
@@ -45,8 +44,7 @@ case "${1:-}" in
   controlla)
     ERR=0
     for j in doctor $METIS_JOBS; do
-      P="${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}/$METIS_LABEL.$j.plist"
-      if [ ! -f "$P" ]; then echo "❌ $j: LaunchAgent non generato"; ERR=1; continue; fi
+      if ! bash "$L" esiste "$j"; then echo "❌ $j: $(bash "$L" tipo) non generato"; ERR=1; continue; fi
       if bash "$L" stato "$j" >/dev/null; then echo "✅ $j: caricato ($(orari "$j"))"; else echo "❌ $j: generato ma non caricato"; ERR=1; fi
     done
     exit "$ERR" ;;

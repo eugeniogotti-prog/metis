@@ -140,7 +140,7 @@ PY
     ERR=0
     bash "$0" connettori || ERR=1
     if grep -q '"google"' "$MCP_ROUTINE" 2>/dev/null && ! grep -q 'GOOGLE_WORKSPACE_READ_ONLY' "$MCP_ROUTINE"; then   # server locale facoltativo (pacchetto delle routine): si controlla solo se dichiarato
-      [ "$(stat -f %Lp "$GDIR/credentials.json" 2>/dev/null)" = 600 ] && echo "✅ server locale: credenziali OAuth presenti e protette" || { echo "❌ server locale: credenziali OAuth assenti o leggibili da altri ($GDIR/credentials.json)"; ERR=1; }
+      [ "$(metis_permessi "$GDIR/credentials.json")" = 600 ] && echo "✅ server locale: credenziali OAuth presenti e protette" || { echo "❌ server locale: credenziali OAuth assenti o leggibili da altri ($GDIR/credentials.json)"; ERR=1; }
       S=$("$NPX" -y "$PACCHETTO" status 2>&1)   # «status» esce con 0 anche quando trova problemi: si legge il testo
       if printf '%s' "$S" | grep -qE 'issue\(s\) found|NOT found|No accounts'; then echo "❌ server locale non pronto: $(printf '%s' "$S" | grep -E '❌|⚠️' | tr '\n' ' ')"; ERR=1
       else echo "✅ server locale pronto"; fi
@@ -148,7 +148,7 @@ PY
     if [ "${METIS_POSTA:-connettori}" = locale ]; then   # posta locale: server, credenziali, autorizzazione (senza avviarlo)
       S=$(server_posta)
       if [ -n "$S" ] && "$S" version 2>/dev/null | grep -q '3\.4\.4'; then echo "✅ posta locale: server $S (3.4.4)"; else echo "❌ posta locale: server assente o di un'altra versione (google.sh posta)"; ERR=1; fi
-      [ "$(stat -f %Lp "$PDIR/credentials.json" 2>/dev/null)" = 600 ] && echo "✅ posta locale: credenziali OAuth presenti e protette" || { echo "❌ posta locale: credenziali assenti o leggibili da altri ($PDIR/credentials.json)"; ERR=1; }
+      [ "$(metis_permessi "$PDIR/credentials.json")" = 600 ] && echo "✅ posta locale: credenziali OAuth presenti e protette" || { echo "❌ posta locale: credenziali assenti o leggibili da altri ($PDIR/credentials.json)"; ERR=1; }
       python3 "$METIS_ROOT/scripts/google-token.py" --dir "$PDIR"; RT=$?
       [ "$RT" = 0 ] || ERR=1
       grep -q '"gmail-locale"' "$METIS_VAULT/.mcp.json" 2>/dev/null && echo "✅ posta locale: server dichiarato nel vault" || { echo "❌ posta locale: server non dichiarato in $METIS_VAULT/.mcp.json (google.sh posta)"; ERR=1; }
