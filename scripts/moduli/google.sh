@@ -59,31 +59,21 @@ case "${1:-}" in
     echo "google: routine con i connettori di claude.ai in sola lettura ($(echo $LEGGE | wc -w | tr -d ' ') strumenti ammessi, $(echo $SCRIVE | wc -w | tr -d ' ') negati)"
     echo "google: controllo → google.sh connettori (i connettori si attivano su claude.ai → Impostazioni → Connettori)" ;;
   connettori)
-    # Una sessione minima nel vault; l'evento di avvio (stream-json) elenca i server MCP e il loro stato.
-    OUT=$(cd "$METIS_VAULT" && printf 'Rispondi solo: ok' | "$CLAUDE" -p --output-format stream-json --verbose 2>/dev/null | head -5)
-    python3 - "$OUT" <<'PY'
-import json, sys
-servers = []
-for riga in sys.argv[1].splitlines():
-    try: d = json.loads(riga)
-    except ValueError: continue
-    if d.get("type") == "system" and d.get("subtype") == "init":
-        servers = d.get("mcp_servers", [])
-        break
-cerca = {"Gmail": "posta", "Calendar": "calendario", "Drive": "Drive"}
-err = 0
-for chiave, nome in cerca.items():
-    # nell'evento di avvio i connettori si chiamano «claude.ai Gmail», «claude.ai Google Calendar», … (Claude Code 2.1.284)
-    s = [x for x in servers if x.get("name", "").startswith("claude.ai") and chiave.lower() in x.get("name", "").lower()]
-    if s and s[0].get("status") == "connected":
-        print(f"✅ connettore {nome}: collegato ({s[0]['name']})")
-    elif s:
-        print(f"❌ connettore {nome}: {s[0].get('status')} — va autorizzato su claude.ai → Impostazioni → Connettori"); err = 1
-    else:
-        print(f"❌ connettore {nome}: non attivo — claude.ai → Impostazioni → Connettori"); err = 1
-sys.exit(err)
-PY
-    ;;
+    # Stato dei connettori: `claude mcp list` (affidabile anche su Linux senza schermo) più l'evento di avvio di una
+    # sessione minima nel vault. Dettaglio in scripts/lib/connettori.py.
+    TMPC=$(mktemp -d); trap 'rm -rf "$TMPC"' EXIT
+    (cd "$METIS_VAULT" && "$CLAUDE" mcp list < /dev/null > "$TMPC/lista" 2>/dev/null)
+    (cd "$METIS_VAULT" && printf 'Rispondi solo: ok' | "$CLAUDE" -p --output-format stream-json --verbose > "$TMPC/avvio" 2>/dev/null)
+    err=0
+    while IFS=$'\t' read -r k st nome; do
+      case "$k" in gmail) n=posta ;; calendar) n=calendario ;; *) n=Drive ;; esac
+      case "$st" in
+        connected) echo "✅ connettore $n: collegato ($nome)" ;;
+        assente) echo "❌ connettore $n: non attivo — claude.ai → Impostazioni → Connettori"; err=1 ;;
+        *) echo "❌ connettore $n: $st — va autorizzato su claude.ai → Impostazioni → Connettori"; err=1 ;;
+      esac
+    done < <(python3 "$METIS_ROOT/scripts/lib/connettori.py" "$TMPC/lista" "$TMPC/avvio" gmail calendar drive)
+    exit "$err" ;;
   credenziali)
     F="${2:?manca il file delle credenziali scaricato da Google Cloud}"
     python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if "installed" in d else 1)' "$F" 2>/dev/null \

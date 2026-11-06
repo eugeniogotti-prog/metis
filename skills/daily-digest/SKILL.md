@@ -37,7 +37,7 @@ Una fonte che non risponde si dichiara. Niente riunioni, mail o eventi dedotti p
 
 **Mail programmate.** Una mail fra le inviate con la data nel futuro è un invio programmato: si scrive «programmata per il …» e la richiesta resta da gestire finché la data non è passata. Contarla come inviata fa sparire dal briefing una cosa che il destinatario non ha ancora ricevuto.
 
-**Documenti.** Si guarda solo nelle cartelle di lavoro del cliente, lette dalla configurazione caricata (`bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; echo "$METIS_DOCUMENTI|$METIS_FONTI"' "${CLAUDE_PLUGIN_ROOT}"`), perché i default li calcola `config.sh` e `configura.sh get` non li conosce:
+**Documenti.** Si guarda solo nelle cartelle di lavoro del cliente, lette dalla configurazione caricata (`bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config; echo "$METIS_DOCUMENTI|$METIS_FONTI"' "${CLAUDE_PLUGIN_ROOT}"`), perché i default li calcola `config.sh` e `configura.sh get` non li conosce. In un giro automatico i due valori sono già scritti in testa al prompt («Configurazione già letta»): si usano quelli, senza rileggerli.
 - con i documenti accanto alle note (`METIS_DOCUMENTI=accanto`, il default): le cartelle dei progetti e delle aree del vault (ruoli PROGETTI e AREE) e quella delle risorse; si cercano i file che non sono note (`-not -name '*.md'`), perché le note le coprono già le altre fonti del digest;
 - con `METIS_DOCUMENTI=separati`: `METIS_FONTI`, la cartella fonti fuori dal vault;
 - in entrambi i casi `METIS_MAPPA_RADICI`, se c'è: voci separate da «|»; si prendono quelle assolute fuori dal vault, saltando le cartelle d'archivio.

@@ -23,7 +23,16 @@ mkdir -p "$METIS_LOG_DIR" "$JOURNAL" "$METIS_CL/sessioni"
 
 # Regola in testa a ogni prompt: un giro non ha un dopo.
 RISERV=""; [ -n "${METIS_RUOLO_RISERVATA:-}" ] && RISERV=" Il vault ha una cartella riservata (${METIS_RUOLO_RISERVATA%/}): find e grep -r che partono dalla radice del vault vengono bloccati; cerca con Glob e Grep, che la escludono, o parti da una sottocartella."
-REGOLA="[Giro automatico di $METIS_PRODOTTO, senza nessuno davanti allo schermo. Cartella del plugin: $METIS_ROOT. Un giro non ha un dopo: niente attese, niente lavori in background, niente domande. Non mandare mail né messaggi a nessuno: prepara bozze. Al cliente scrivi sul telefono solo ciò che la skill prevede: un riepilogo, una cosa urgente o una risposta pronta da incollare; il resto aspetta il riepilogo. Comandi di shell semplici, uno per volta, senza variabili né catene con «;» o «&&»: quelli composti vengono rifiutati; per leggere e cercare file usa gli strumenti Read, Grep e Glob. La riga d'esito «🤖 HH:MM <giro>: …» nel «# Memo» la scrive il lanciatore: non scriverla tu; il contenuto del giro (per esempio il briefing) va dove dice la skill. Chiudi con un resoconto di tre righe al massimo: che cosa hai fatto, dove l'hai scritto, che cosa resta.$RISERV]"
+# La strada della posta e le cartelle dei documenti si dicono al giro: la regola condizionale del CLAUDE.md («posta dal
+# server locale, solo se installato») un giro senza nessuno la prendeva per buona e saltava la posta; e leggere la
+# configurazione con «bash -c» è un comando composto, che le regole delle routine rifiutano (prova sul server, 6/11/2026).
+if [ "${METIS_POSTA:-connettori}" = locale ]; then
+  POSTA=" Posta: dal server locale gmail-locale (strumenti mcp__gmail-locale__…)."
+else
+  POSTA=" Posta: dal connettore Gmail di claude.ai (strumenti mcp__claude_ai_Gmail__…, in sola lettura); il server locale gmail-locale qui non c'è e la regola del CLAUDE.md sulla posta locale non vale."
+fi
+CARTELLE=" Configurazione già letta: documenti $METIS_DOCUMENTI, cartella dei lavori $METIS_FONTI; non serve rileggerla."
+REGOLA="[Giro automatico di $METIS_PRODOTTO, senza nessuno davanti allo schermo. Cartella del plugin: $METIS_ROOT. Un giro non ha un dopo: niente attese, niente lavori in background, niente domande. Non mandare mail né messaggi a nessuno: prepara bozze. Al cliente scrivi sul telefono solo ciò che la skill prevede: un riepilogo, una cosa urgente o una risposta pronta da incollare; il resto aspetta il riepilogo. Comandi di shell semplici, uno per volta, senza variabili né catene con «;» o «&&»: quelli composti vengono rifiutati; per leggere e cercare file usa gli strumenti Read, Grep e Glob. La riga d'esito «🤖 HH:MM <giro>: …» nel «# Memo» la scrive il lanciatore: non scriverla tu; il contenuto del giro (per esempio il briefing) va dove dice la skill. Chiudi con un resoconto di tre righe al massimo: che cosa hai fatto, dove l'hai scritto, che cosa resta.$RISERV$POSTA$CARTELLE]"
 
 case "$LAVORO" in
   daily-digest)    SKILL=daily-digest;    COMPITO="Esegui la skill daily-digest in modalità mattino." ;;

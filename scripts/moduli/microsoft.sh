@@ -23,28 +23,20 @@ IMP="$METIS_ROOT/scripts/lib/impostazioni.py"
 R="$CFG_DIR/permessi-routine.json"
 
 avvio() {  # evento di avvio di una sessione minima nel vault (stream-json)
-  (cd "$METIS_VAULT" && printf 'Rispondi solo: ok' | "$CLAUDE" -p --output-format stream-json --verbose 2>/dev/null | head -5)
+  (cd "$METIS_VAULT" && printf 'Rispondi solo: ok' | "$CLAUDE" -p --output-format stream-json --verbose 2>/dev/null)   # tutto: prima dell'evento di avvio ci possono essere quelli degli hook
 }
 
 case "${1:-}" in
   connettore|controlla)
-    python3 - "$(avvio)" <<'PY2'
-import json, sys
-for riga in sys.argv[1].splitlines():
-    try:
-        d = json.loads(riga)
-    except ValueError:
-        continue
-    if d.get("type") == "system" and d.get("subtype") == "init":
-        s = [x for x in d.get("mcp_servers", []) if x.get("name", "").startswith("claude.ai") and "microsoft" in x.get("name", "").lower()]
-        if s and s[0].get("status") == "connected":
-            print("✅ connettore Microsoft 365: collegato (" + s[0]["name"] + ")"); sys.exit(0)
-        if s:
-            print("❌ connettore Microsoft 365: " + str(s[0].get("status")) + " — va autorizzato su claude.ai → Impostazioni → Connettori (e serve il consenso dell'IT)"); sys.exit(1)
-        print("❌ connettore Microsoft 365: non attivo — claude.ai → Impostazioni → Connettori"); sys.exit(1)
-print("❌ connettore Microsoft 365: sessione di controllo non riuscita"); sys.exit(1)
-PY2
-    ;;
+    TMPC=$(mktemp -d); trap 'rm -rf "$TMPC"' EXIT
+    (cd "$METIS_VAULT" && "$CLAUDE" mcp list < /dev/null > "$TMPC/lista" 2>/dev/null)
+    avvio > "$TMPC/avvio"
+    IFS=$'\t' read -r _ st nome < <(python3 "$METIS_ROOT/scripts/lib/connettori.py" "$TMPC/lista" "$TMPC/avvio" microsoft)
+    case "$st" in
+      connected) echo "✅ connettore Microsoft 365: collegato ($nome)" ;;
+      assente) echo "❌ connettore Microsoft 365: non attivo — claude.ai → Impostazioni → Connettori"; exit 1 ;;
+      *) echo "❌ connettore Microsoft 365: $st — va autorizzato su claude.ai → Impostazioni → Connettori (e serve il consenso dell'IT)"; exit 1 ;;
+    esac ;;
   installa)
     STRUMENTI=$(avvio | python3 -c '
 import json, re, sys

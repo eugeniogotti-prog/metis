@@ -18,6 +18,16 @@ echo '{}' > "$T/cfg/permessi-routine.json"
 cat > "$T/claude-finto" <<'EOF'
 #!/bin/bash
 cat > /dev/null; echo "$*" >> "$(dirname "$0")/claude-args.txt"
+case "$*" in "mcp list"*)   # come Claude Code 2.1.319; SOLO_LISTA=1: i connettori ci sono solo qui (Linux senza schermo)
+  st() { case "$1" in connected) echo "✔ Connected" ;; needs-auth) echo "! Needs authentication" ;; *) echo "✗ Failed to connect" ;; esac; }
+  S="${STATO_CONNETTORI:-connected}"
+  echo "Checking MCP server health…"; echo
+  echo "claude.ai Gmail: https://gmailmcp.googleapis.com/mcp/v1 - $(st "$S")"
+  echo "claude.ai Google Calendar: https://calendarmcp.googleapis.com/mcp/v1 - $(st "$S")"
+  echo "claude.ai Google Drive: https://drivemcp.googleapis.com/mcp/v1 - ✔ Connected"
+  echo "claude.ai Microsoft 365: https://microsoft365.mcp.claude.com/mcp - $(st "${STATO_M365:-connected}")"
+  exit 0 ;; esac
+[ -n "${SOLO_LISTA:-}" ] && case "$*" in *stream-json*) printf '{"type":"system","subtype":"hook_started"}\n{"type":"system","subtype":"init","mcp_servers":[],"tools":["Read"]}\n'; exit 0 ;; esac
 case "$*" in *stream-json*)   # evento di avvio con i connettori, come Claude Code 2.1.284
   S="${STATO_CONNETTORI:-connected}"
   printf '{"type":"system","subtype":"init","mcp_servers":[{"name":"claude.ai Gmail","status":"%s"},{"name":"claude.ai Google Calendar","status":"%s"},{"name":"claude.ai Google Drive","status":"connected"},{"name":"claude.ai Microsoft 365","status":"%s"}],"tools":["Read","mcp__claude_ai_Microsoft_365__outlook_email_search","mcp__claude_ai_Microsoft_365__read_resource","mcp__claude_ai_Microsoft_365__outlook_calendar_search","mcp__claude_ai_Microsoft_365__send_email","mcp__claude_ai_Microsoft_365__create_event","mcp__claude_ai_Gmail__search_threads"]}\n' "$S" "$S" "${STATO_M365:-connected}"
@@ -101,6 +111,7 @@ check "routine: bozze ed eventi negati" 'grep -q "mcp__claude_ai_Gmail__create_d
 check "routine: strumenti di lettura ammessi per nome" 'bash "$ROOT/scripts/configura.sh" get METIS_ROUTINE_STRUMENTI | grep -q "mcp__claude_ai_Gmail__search_threads" && ! bash "$ROOT/scripts/configura.sh" get METIS_ROUTINE_STRUMENTI | grep -q "send_message"'
 check "connettori collegati: controllo superato" '$G controlla | grep -q "✅ connettore posta: collegato"'
 check "connettori da autorizzare (login scaduto o consenso mancante): controllo fallito" '! STATO_CONNETTORI=needs-auth $G controlla >/dev/null'
+check "connettori solo in mcp list, non nell'evento di avvio (Linux): controllo superato" 'SOLO_LISTA=1 $G connettori | grep -q "✅ connettore calendario: collegato"'
 : > "$T/claude-args.txt"; bash "$ROOT/scripts/metis-agent.sh" daily-digest >/dev/null
 check "giro automatico con gli strumenti di lettura dei connettori" 'grep -q -- "--allowedTools .*mcp__claude_ai_Google_Calendar__list_events" "$T/claude-args.txt"'
 echo '{"web":{}}' > "$T/cred-web.json"; echo '{"installed":{"client_id":"x"}}' > "$T/cred.json"
