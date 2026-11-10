@@ -163,6 +163,14 @@ open(p, "w", encoding="utf-8").write(t)
 print("  ✅ sezione «Sul server» aggiornata")
 PY
 
+# I due strumenti dei file si usano anche nei giri e nel ripiego del bot, che chiedono il permesso: si ammettono per nome.
+for R in "$VAULT/.claude/settings.json" "$HOME/.config/metis/permessi-routine.json"; do
+  for X in link.py trova-file.py; do
+    python3 "$S/lib/impostazioni.py" lista "$R" permissions.allow "Bash(python3 $METIS_ROOT/scripts/server/$X:*)" >/dev/null
+  done
+done
+echo "  ✅ link.py e trova-file.py ammessi nelle regole del vault e dei giri"
+
 passo "Controllo"
 bash "$S/doctor.sh" 2>&1 | grep -E "^Doctor|🔴|🟡|🟢" | tail -2 | sed 's/^/  /'
 echo "  Manca ancora: Google (modulo google con il cliente)."

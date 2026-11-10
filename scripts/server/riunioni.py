@@ -86,7 +86,7 @@ def lavora(audio, titolo=""):
     cartella = os.path.join(cfg["inbox"], "voicenotes"); os.makedirs(cartella, exist_ok=True)
     nota = os.path.join(cartella, nome + ".md")
     with open(nota, "w", encoding="utf-8") as f:
-        f.write(f"---\ncreated_at: {quando:%Y-%m-%d}\ntags:\n- contenuto/riunione\nsource: riunione registrata\n"
+        f.write(f"---\ncreated_at: {quando:%Y-%m-%d}\ntags:\n- contenuto/riunione\nup:\n- '[[{os.path.basename(cfg['inbox'])}]]'\nsource: riunione registrata\n"
                 f"registrata: {quando:%Y-%m-%d %H:%M}\ndurata_minuti: {round(sec / 60)}\n---\n\n# {nome}\n\n"
                 f"Trascrizione automatica (Groq, whisper), {round(sec / 60)} minuti. I nomi propri possono essere storpiati.\n\n"
                 f"---\n\n{testo}\n")

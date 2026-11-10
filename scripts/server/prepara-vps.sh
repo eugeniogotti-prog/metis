@@ -202,7 +202,8 @@ else
 fi
 
 passo "rclone (sincronizzazione dei file)"
-if command -v rclone >/dev/null && rclone version 2>/dev/null | head -1 | grep -qE 'v1\.(6[6-9]|[7-9][0-9])'; then fatto "$(rclone version | head -1)"
+RV=$(rclone version 2>/dev/null) || RV=""   # in variabile: con pipefail, «| head -1» farebbe fallire la pipeline
+if printf '%s' "$RV" | grep -qE '^rclone v1\.(6[6-9]|[7-9][0-9])'; then fatto "$(printf '%s' "$RV" | sed -n 1p)"
 else curl -fsSL https://rclone.org/install.sh | bash >/dev/null 2>&1; command -v rclone >/dev/null && nuovo "$(rclone version | head -1)" || male "rclone non installato"; fi
 
 passo "Programmi del cliente ($CLIENTE): Claude Code e uv"
