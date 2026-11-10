@@ -20,6 +20,11 @@ def testo(s):
 
 
 def flusso(url, segreto):
+    uid = str(uuid.uuid4()).upper()
+    # La notifica mostra la risposta del server («Ricevuta…», oppure il motivo del rifiuto), non un testo fisso.
+    risposta = {"Value": {"string": "\ufffc", "attachmentsByRange": {"{0, 1}": {
+        "OutputUUID": uid, "Type": "ActionOutput", "OutputName": "Contenuto dell'URL"}}},
+        "WFSerializationType": "WFTextTokenString"}
     intestazioni = {"Value": {"WFDictionaryFieldValueItems": [
         {"WFItemType": 0, "WFKey": testo("X-Metis-Segreto"), "WFValue": testo(segreto)}]},
         "WFSerializationType": "WFDictionaryFieldValue"}
@@ -33,12 +38,12 @@ def flusso(url, segreto):
         "WFWorkflowImportQuestions": [],
         "WFWorkflowActions": [
             {"WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl", "WFWorkflowActionParameters": {
-                "UUID": str(uuid.uuid4()).upper(), "WFURL": url, "WFHTTPMethod": "POST", "ShowHeaders": True,
+                "UUID": uid, "WFURL": url, "WFHTTPMethod": "POST", "ShowHeaders": True,
                 "WFHTTPHeaders": intestazioni, "WFHTTPBodyType": "File",
                 "WFRequestVariable": {"Value": {"Type": "ExtensionInput"}, "WFSerializationType": "WFTextTokenAttachment"}}},
             {"WFWorkflowActionIdentifier": "is.workflow.actions.notification", "WFWorkflowActionParameters": {
                 "WFNotificationActionTitle": "Riunione inviata",
-                "WFNotificationActionBody": testo("La trascrivo e ti mando il riassunto su Telegram."),
+                "WFNotificationActionBody": risposta,
                 "WFNotificationActionSound": True}},
         ]}
 

@@ -21,7 +21,7 @@
 # Non fa: il login di Claude, la chat del bot (il cliente deve prima scrivergli «ciao»), Google.
 
 set -uo pipefail
-NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione controllo riunioni"
+NOME=""; VAULT="$HOME/Vault"; GIRI="manutenzione daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione controllo riunioni"
 REPO="${METIS_REPO:-eugeniogotti-prog/metis}"; LOGIN=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -59,6 +59,7 @@ $CFG set METIS_VAULT "$VAULT" >/dev/null
 [ -n "$($CFG get METIS_LOG_DIR)" ] || $CFG set METIS_LOG_DIR "$HOME/.local/state/metis" >/dev/null
 [ -n "$($CFG get METIS_LABEL)" ] || $CFG set METIS_LABEL "com.metis.$(id -un)" >/dev/null
 $CFG set METIS_JOBS "$GIRI" >/dev/null
+[ -n "$($CFG get METIS_SESSIONE_NOME)" ] || $CFG set METIS_SESSIONE_NOME "Assistente di $NOME" >/dev/null   # il nome nell'app di Claude
 TOKF="$HOME/.config/metis/claude-oauth-token"
 COMPLETO=0; [ -s "$HOME/.claude/.credentials.json" ] && COMPLETO=1
 if [ -n "$LOGIN" ]; then
@@ -139,6 +140,28 @@ PY
     *) male "modulo «${m}» non gestito qui (si installa con la skill)"; ERR=1 ;;
   esac
 done
+
+passo "Regole del server nel CLAUDE.md del vault"
+# Fra due marcatori, riscritta a ogni lancio: dopo un aggiornamento del plugin i percorsi restano giusti.
+python3 - "$VAULT/CLAUDE.md" "$METIS_ROOT" <<'PY'
+import os, re, sys
+p, root = sys.argv[1], sys.argv[2]
+INIZIO, FINE = "<!-- metis-server: inizio -->", "<!-- metis-server: fine -->"
+sez = f"""{INIZIO}
+## Sul server
+
+- **Ogni file del vault che citi** in una risposta, su Telegram o nell'app, va con il suo link cliccabile al FileBrowser: `python3 {root}/scripts/server/link.py "<percorso>"` (uno o più percorsi). Il cliente non usa i percorsi del server: niente percorso senza link.
+- **Quando il cliente indica un file** incollando un percorso del suo computer, un link di Drive, OneDrive o SharePoint, o un link del FileBrowser: `python3 {root}/scripts/server/trova-file.py "<ciò che ha incollato>"` lo traduce nel file sul server. Se non trova niente, si cerca per nome, data, lavoro e contenuto; un file inoltrato al bot è già nell'Inbox.
+- I messaggi da Telegram arrivano con «[Telegram]» davanti: la risposta va con il comando indicato nel messaggio.
+{FINE}"""
+t = open(p, encoding="utf-8").read() if os.path.exists(p) else ""
+if INIZIO in t:
+    t = re.sub(re.escape(INIZIO) + r".*?" + re.escape(FINE), lambda m: sez, t, flags=re.S)
+else:
+    t = t.rstrip("\n") + "\n\n" + sez + "\n"
+open(p, "w", encoding="utf-8").write(t)
+print("  ✅ sezione «Sul server» aggiornata")
+PY
 
 passo "Controllo"
 bash "$S/doctor.sh" 2>&1 | grep -E "^Doctor|🔴|🟡|🟢" | tail -2 | sed 's/^/  /'

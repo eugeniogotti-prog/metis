@@ -11,10 +11,10 @@
 #   --chiave <file .pub>       chiave SSH dell'amministratore (default ~/.ssh/id_ed25519.pub)
 #   --cliente <utente>         utente del cliente sul server (default metis)
 #   --token-bot <file>         file locale con il token del bot (@BotFather); si copia sul server e si cancella là dopo l'uso
-#   --giri "<lavori>"          giri automatici (default «daily-digest inbox-processor daily-sera weekly-digest»)
+#   --giri "<lavori>"          giri automatici (default «manutenzione daily-digest inbox-processor daily-sera weekly-digest»)
 #   --utente-web <nome>        utente di FileBrowser (default ospite)
 #   --dominio <nome dns>       nome per l'HTTPS (default <ip-con-trattini>.sslip.io; su un server già configurato, quello che ha)
-#   --uscita <cartella>        dove lasciare la Scorciatoia firmata (default ~/Desktop/metis-<cliente>)
+#   --uscita <cartella>        dove lasciare la Scorciatoia firmata (default ~/Desktop/metis-<nome-del-cliente>)
 #   --senza-domande            non chiede niente: fa i passi automatici e dice quali passi umani mancano
 #   --sviluppo                 dopo l'installazione da GitHub, copia sul server questa copia locale di Metis (prove)
 # Uscita: 0 tutto fatto · 1 qualcosa da fare (lo dice in fondo) · 2 errore negli argomenti.
@@ -22,7 +22,7 @@
 set -uo pipefail
 QUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; RADICE="$(cd "$QUI/../.." && pwd)"
 IP=""; ADMIN=""; NOME=""; CHIAVE="$HOME/.ssh/id_ed25519.pub"; CLIENTE="metis"; TOKEN_BOT=""
-GIRI="daily-digest inbox-processor daily-sera weekly-digest"; UWEB="ospite"; DOMINIO=""; USCITA=""; DOMANDE=1; SVILUPPO=""
+GIRI="manutenzione daily-digest inbox-processor daily-sera weekly-digest"; UWEB="ospite"; DOMINIO=""; USCITA=""; DOMANDE=1; SVILUPPO=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --ip) IP="${2:-}"; shift 2 ;; --admin) ADMIN="${2:-}"; shift 2 ;; --nome-cliente) NOME="${2:-}"; shift 2 ;;
@@ -36,7 +36,7 @@ done
 [ -n "$IP" ] && [ -n "$ADMIN" ] && [ -n "$NOME" ] || { echo "metis-server: servono --ip, --admin e --nome-cliente (--help)" >&2; exit 2; }
 [ -f "$CHIAVE" ] || { echo "metis-server: chiave pubblica non trovata: $CHIAVE" >&2; exit 2; }
 [ -z "$TOKEN_BOT" ] || [ -f "$TOKEN_BOT" ] || { echo "metis-server: file del token del bot non trovato: $TOKEN_BOT" >&2; exit 2; }
-USCITA="${USCITA:-$HOME/Desktop/metis-$CLIENTE}"
+USCITA="${USCITA:-$HOME/Desktop/metis-$(printf '%s' "$NOME" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9-')}"
 MANCA=()
 
 passo() { printf '\n\033[1m== %s\033[0m\n' "$*"; }

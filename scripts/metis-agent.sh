@@ -39,6 +39,7 @@ case "$LAVORO" in
   daily-sera)      SKILL=daily-digest;    COMPITO="Esegui la skill daily-digest in modalità sera." ;;
   weekly-digest)   SKILL=weekly-digest;   COMPITO="Esegui la skill weekly-digest." ;;
   inbox-processor) SKILL=inbox-processor; COMPITO="Esegui la skill inbox-processor sulle note dell'Inbox." ;;
+  manutenzione)    SKILL=manutenzione;    COMPITO="Esegui la skill manutenzione: ripara ciò che il doctor ha trovato e manda il rendiconto." ;;
   *) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac
 

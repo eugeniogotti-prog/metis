@@ -166,8 +166,13 @@ EOF
   if sshd -t; then systemctl reload ssh && nuovo "password disattivate; entrano $ADMIN e root, solo con chiave"
   else rm -f "$SSHD_METIS"; male "configurazione SSH non valida: tolta, SSH invariato"; exit 1; fi
 else
-  grep -q "^AllowUsers.*\b$ADMIN\b" "$SSHD_METIS" && fatto "già impostato ($(grep -E '^(PermitRootLogin|AllowUsers)' "$SSHD_METIS" | tr '\n' ' '))" \
-    || { male "$SSHD_METIS esiste ma non ammette $ADMIN: controllarlo a mano"; exit 1; }
+  if grep -q "^AllowUsers.*\b$ADMIN\b" "$SSHD_METIS"; then fatto "già impostato ($(grep -E '^(PermitRootLogin|AllowUsers)' "$SSHD_METIS" | tr '\n' ' '))"
+  else
+    # Un amministratore nuovo (passaggio di consegne): si aggiunge agli ammessi, senza togliere nessuno.
+    cp "$SSHD_METIS" "$SSHD_METIS.prima"; sed -i "s/^AllowUsers .*/& $ADMIN/" "$SSHD_METIS"
+    if sshd -t; then systemctl reload ssh && nuovo "$ADMIN aggiunto agli utenti ammessi in SSH"
+    else mv "$SSHD_METIS.prima" "$SSHD_METIS"; male "configurazione SSH non valida: lasciata com'era"; exit 1; fi
+  fi
 fi
 
 passo "Firewall (ufw): solo la 22 in ingresso"

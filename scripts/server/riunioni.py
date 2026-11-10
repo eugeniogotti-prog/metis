@@ -95,7 +95,9 @@ def lavora(audio, titolo=""):
     istruzione = (f"[Riunione] È arrivata una riunione registrata dal telefono, {round(sec / 60)} minuti, trascritta in "
                   f"«{nota}». Lavorala come riunione secondo la skill inbox-processor: sintesi con partecipanti, decisioni "
                   f"(tenendo distinti orientamenti e decisioni), cose da fare con chi e quando, nota nel lavoro giusto, "
-                  f"impegni e stato aggiornati. Poi manda al cliente su Telegram un riassunto di 4-6 righe con il link alla nota, con:\n"
+                  f"impegni e stato aggiornati; la trascrizione va in trascrizioni/ accanto alla sintesi. Se nessun lavoro "
+                  f"corrisponde, non chiedere e non lasciarla nell'Inbox: crea il lavoro adatto (cartella e stato) e collocala lì, "
+                  f"poi dillo nel riassunto. Poi manda al cliente su Telegram un riassunto di 4-6 righe con il link alla nota, con:\n"
                   f"python3 {os.path.abspath(mt.__file__)} invia <<'FINE'\n<riassunto>\nFINE")
     if not mt.alla_sessione(dict(cfg, conversazione="sessione"), istruzione, grezzo=True):
         telegram(f"Riunione trascritta ({round(sec / 60)} minuti): la trovi nell'Inbox, «{nome}». La sintesi arriva con il prossimo giro dell'Inbox.")

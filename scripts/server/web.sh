@@ -162,3 +162,9 @@ caddy validate --config /etc/caddy/Caddyfile >/dev/null 2>&1 || { male "Caddyfil
 for p in 80 443; do ufw status | grep -qE "^$p/tcp" || { ufw allow "$p/tcp" >/dev/null && nuovo "porta $p aperta"; }; done
 systemctl reload caddy 2>/dev/null || systemctl restart caddy
 fatto "https://$NOME (il certificato arriva al primo accesso, entro un minuto)"
+# L'indirizzo va nella configurazione del cliente: i link ai file nelle risposte (link.py) lo usano.
+CFGC="/home/$CLIENTE/.config/metis/config"
+if [ -f "$CFGC" ]; then
+  sudo -u "$CLIENTE" sed -i '/^METIS_WEB_URL=/d' "$CFGC" && echo "METIS_WEB_URL=https://$NOME" | sudo -u "$CLIENTE" tee -a "$CFGC" >/dev/null
+  fatto "indirizzo dei link ai file nella configurazione del cliente"
+fi

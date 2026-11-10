@@ -6,7 +6,7 @@
 #   routine.sh controlla                     automatismi generati e caricati
 #   routine.sh togli <lavoro>                ferma un lavoro (il file resta, si ricarica con installa)
 # Lavori e orari di default (si cambiano con METIS_ORARI_<LAVORO> nella configurazione, orari HH:MM separati da spazi):
-#   doctor 06:45 · daily-digest 07:00 · inbox-processor 09:00 13:00 17:00 · daily-sera 21:00 · weekly-digest (lunedì) 07:30
+#   doctor 06:45 · manutenzione 06:55 (ripara ciò che il doctor trova) · daily-digest 07:00 · inbox-processor 09:00 13:00 17:00 · daily-sera 21:00 · weekly-digest (lunedì) 07:30
 # Il doctor è uno script; gli altri sono giri di Claude (metis-agent.sh).
 
 set -uo pipefail
@@ -21,7 +21,7 @@ orari() {  # orari <lavoro>: dalla configurazione o i default
   if [ -n "${!v:-}" ]; then echo "${!v}"; return; fi
   case "$1" in
     doctor) echo "06:45" ;; daily-digest) echo "07:00" ;; inbox-processor) echo "09:00 13:00 17:00" ;;
-    daily-sera) echo "21:00" ;; weekly-digest) echo "07:30" ;;
+    daily-sera) echo "21:00" ;; weekly-digest) echo "07:30" ;; manutenzione) echo "06:55" ;;
   esac
 }
 

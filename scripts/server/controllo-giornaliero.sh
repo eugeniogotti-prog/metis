@@ -28,8 +28,9 @@ if [ "${1:-}" = installa ]; then
 fi
 MUTO=""; [ "${1:-}" = --muto ] && MUTO=1
 
-OK=(); PROBLEMI=()
-ok() { OK+=("$1"); }; problema() { PROBLEMI+=("$1"); }
+OK=(); PROBLEMI=(); SISTEMATI=()
+ok() { OK+=("$1"); }; problema() { PROBLEMI+=("$1"); }; sistemato() { SISTEMATI+=("$1"); }
+# Principio (10/11/2026): ciò che si ripara senza decisioni si ripara qui, e al cliente arriva il rendiconto, non la domanda.
 giorni_a() { echo $(( ($1 - OGGI) / 86400 )); }   # giorni da oggi a un istante (secondi)
 
 # --- Claude: login completo (Remote Control, connettori) ---------------------------------------------------------
@@ -59,11 +60,19 @@ if [ -n "${METIS_CLAUDE_TOKEN_FILE:-}" ] && [ -f "$METIS_CLAUDE_TOKEN_FILE" ]; t
 fi
 # --- sessione principale e bot ----------------------------------------------------------------------------------------
 if bash "$SRV" esiste sessione 2>/dev/null; then
-  bash "$METIS_ROOT/scripts/sessione-principale.sh" stato >/dev/null 2>&1 && ok "sessione principale attiva" \
-    || problema "La sessione principale è ferma: il guardiano la sta rilanciando; se domani è ancora così, avvisa chi ti assiste."
+  if bash "$METIS_ROOT/scripts/sessione-principale.sh" stato >/dev/null 2>&1; then ok "sessione principale attiva"
+  else
+    bash "$SRV" carica sessione >/dev/null 2>&1; sleep "${METIS_ATTESA_RIAVVIO:-60}"   # il guardiano ricrea tmux e Claude
+    if bash "$METIS_ROOT/scripts/sessione-principale.sh" stato >/dev/null 2>&1; then sistemato "la sessione principale era ferma: l'ho riavviata"
+    else problema "La sessione principale è ferma e non riparte da sola: avvisa chi ti assiste."; fi
+  fi
 fi
 if bash "$SRV" esiste telegram 2>/dev/null; then
-  bash "$SRV" stato telegram >/dev/null 2>&1 && ok "ascoltatore del bot attivo" || problema "L'ascoltatore del bot è fermo."
+  if bash "$SRV" stato telegram >/dev/null 2>&1; then ok "ascoltatore del bot attivo"
+  else
+    bash "$SRV" carica telegram >/dev/null 2>&1; sleep 5
+    bash "$SRV" stato telegram >/dev/null 2>&1 && sistemato "il bot era fermo: l'ho riavviato" || problema "L'ascoltatore del bot è fermo e non riparte: avvisa chi ti assiste."
+  fi
 fi
 # --- Google (posta locale) --------------------------------------------------------------------------------------------
 if [ "${METIS_POSTA:-}" = locale ]; then
@@ -76,7 +85,10 @@ fi
 # --- sincronizzazione dei file (sync.sh scrive l'ora dell'ultimo giro riuscito) ---------------------------------------
 if [ -f "$CFG_DIR/sync-ultimo" ]; then
   ORE=$(( (OGGI - $(cat "$CFG_DIR/sync-ultimo")) / 3600 ))
-  if [ "$ORE" -gt 26 ]; then problema "I file non si sincronizzano da $ORE ore: avvisa chi ti assiste."; else ok "sincronizzazione riuscita $ORE ore fa"; fi
+  if [ "$ORE" -gt 26 ]; then
+    if bash "$METIS_ROOT/scripts/moduli/sync.sh" giro >/dev/null 2>&1; then sistemato "la sincronizzazione era ferma da $ORE ore: l'ho rifatta"
+    else problema "I file non si sincronizzano da $ORE ore e il nuovo tentativo non è riuscito: avvisa chi ti assiste."; fi
+  else ok "sincronizzazione riuscita $ORE ore fa"; fi
 fi
 # --- spazio ------------------------------------------------------------------------------------------------------------
 USO=$(df -P "$HOME" | awk 'NR==2 {gsub("%","",$5); print $5}')
@@ -84,15 +96,16 @@ if [ "${USO:-0}" -ge "${METIS_SPAZIO_MAX:-85}" ]; then problema "Il disco del se
 
 # --- esito ---------------------------------------------------------------------------------------------------------
 {
-  echo "[$(date '+%Y-%m-%d %H:%M')] ${#OK[@]} a posto, ${#PROBLEMI[@]} da fare"
+  echo "[$(date '+%Y-%m-%d %H:%M')] ${#OK[@]} a posto, ${#SISTEMATI[@]} sistemate, ${#PROBLEMI[@]} da fare"
   for x in "${OK[@]}"; do echo "  ✅ $x"; done
-  for x in "${PROBLEMI[@]}"; do echo "  ❌ $x"; done
+  for x in ${SISTEMATI[@]+"${SISTEMATI[@]}"}; do echo "  🔧 $x"; done
+  for x in ${PROBLEMI[@]+"${PROBLEMI[@]}"}; do echo "  ❌ $x"; done
 } | tee -a "$METIS_LOG_DIR/controllo.log"
-if [ "${#PROBLEMI[@]}" -gt 0 ]; then
-  if [ -z "$MUTO" ] && bash "$SRV" esiste telegram 2>/dev/null; then
-    { echo "Controllo del mattino: ${#PROBLEMI[@]} cosa da fare."; for x in "${PROBLEMI[@]}"; do echo "- $x"; done; } \
-      | python3 "$METIS_ROOT/scripts/telegram/metis_telegram.py" invia >/dev/null 2>&1 || echo "  (messaggio Telegram non riuscito)"
-  fi
-  exit 1
+if [ $(( ${#PROBLEMI[@]} + ${#SISTEMATI[@]} )) -gt 0 ] && [ -z "$MUTO" ] && bash "$SRV" esiste telegram 2>/dev/null; then
+  {
+    [ ${#SISTEMATI[@]} -gt 0 ] && { echo "Controllo del mattino: ho sistemato ${#SISTEMATI[@]} cose."; for x in "${SISTEMATI[@]}"; do echo "- $x"; done; }
+    [ ${#PROBLEMI[@]} -gt 0 ] && { echo "Da fare (${#PROBLEMI[@]}):"; for x in "${PROBLEMI[@]}"; do echo "- $x"; done; }
+  } | python3 "$METIS_ROOT/scripts/telegram/metis_telegram.py" invia >/dev/null 2>&1 || echo "  (messaggio Telegram non riuscito)"
 fi
+[ ${#PROBLEMI[@]} -gt 0 ] && exit 1
 exit 0
