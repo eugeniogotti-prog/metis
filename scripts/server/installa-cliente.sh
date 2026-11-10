@@ -12,6 +12,8 @@
 #   --moduli     quali moduli installare; google si aggiunge dopo, con il cliente (progetto Google Cloud e consenso)
 #                sessione = la sessione principale sempre accesa (Remote Control + messaggi del bot), scripts/sessione-principale.sh
 #                controllo = il controllo di ogni mattina (accessi, sessione, bot, spazio, sync) con avviso su Telegram
+#                riunioni = l'ingresso delle riunioni registrate dal telefono (scripts/server/riunioni.py; HTTPS con web.sh).
+#                  Chiave di Groq: ~/.config/metis/groq (voce.sh chiave) o ~/.config/metis/groq-api-key (la sola chiave).
 # Login di Claude: --login completo|token lo fa adesso, se manca (serve un terminale: ssh -t), con scripts/server/login-claude.sh.
 #   completo = claude auth login: Remote Control e connettori di claude.ai. token = claude setup-token, un anno, solo il lavoro
 #   di Claude (niente Remote Control né connettori). Il token in ~/.config/metis/claude-oauth-token diventa METIS_CLAUDE_TOKEN_FILE.
@@ -19,7 +21,7 @@
 # Non fa: il login di Claude, la chat del bot (il cliente deve prima scrivergli «ciao»), Google.
 
 set -uo pipefail
-NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione controllo"
+NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione controllo riunioni"
 REPO="${METIS_REPO:-eugeniogotti-prog/metis}"; LOGIN=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -125,6 +127,12 @@ print("  ✅ Claude Code senza domande alla prima apertura")
 PY
       bash "$S/sessione-principale.sh" installa 2>&1 | tail -1 | sed 's/^/  /' ;;
     controllo) bash "$S/server/controllo-giornaliero.sh" installa 2>&1 | tail -1 | sed 's/^/  /' ;;
+    riunioni)
+      [ -f "$HOME/.config/metis/groq-api-key" ] && [ ! -f "$HOME/.config/metis/groq" ] && $CFG set METIS_GROQ_FILE "$HOME/.config/metis/groq-api-key" >/dev/null
+      python3 "$S/server/riunioni.py" segreto >/dev/null && chmod 600 "$HOME/.config/metis/riunioni-segreto"
+      bash "$S/lib/servizi.sh" genera riunioni sempre /usr/bin/python3 "$S/server/riunioni.py" ascolta >/dev/null \
+        && bash "$S/lib/servizi.sh" carica riunioni 2>&1 | tail -1 | sed 's/^/  /'
+      echo "  ✅ ingresso delle riunioni; segreto per la Scorciatoia: python3 $S/server/riunioni.py segreto" ;;
     *) male "modulo «$m» non gestito qui (si installa con la skill)"; ERR=1 ;;
   esac
 done

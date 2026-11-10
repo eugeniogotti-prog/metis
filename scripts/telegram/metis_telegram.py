@@ -169,14 +169,15 @@ def trascrivi(cfg, percorso):
 
 
 # --- conversazione ----------------------------------------------------------------------------------------------
-def alla_sessione(cfg, testo):
-    """Consegna il testo alla sessione principale in tmux. Vero se consegnato (la risposta la manda la sessione)."""
+def alla_sessione(cfg, testo, grezzo=False):
+    """Consegna il testo alla sessione principale in tmux. Vero se consegnato (la risposta la manda la sessione).
+    grezzo=True: il testo va così com'è, senza l'intestazione dei messaggi del bot (lo usa l'ingresso delle riunioni)."""
     t = cfg["tmux"]
     if cfg["conversazione"] != "sessione" or not shutil.which("tmux"):
         return False
     if subprocess.run(["tmux", "has-session", "-t", t], capture_output=True).returncode != 0:
         log(cfg, f"sessione {t} assente: conversazione con un giro claude -p"); return False
-    msg = ("[Telegram] Messaggio del cliente dal telefono. Rispondigli in testo semplice e breve, adatto al telefono, con:\n"
+    msg = testo if grezzo else ("[Telegram] Messaggio del cliente dal telefono. Rispondigli in testo semplice e breve, adatto al telefono, con:\n"
            "python3 " + os.path.abspath(__file__) + " invia <<'FINE'\n<risposta>\nFINE\n\n" + testo)
     buf = "metis-tg-" + uuid.uuid4().hex[:8]
     subprocess.run(["tmux", "load-buffer", "-b", buf, "-"], input=msg, text=True, check=True)
