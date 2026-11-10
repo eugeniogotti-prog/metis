@@ -90,7 +90,7 @@ def segreti(nome):
         if "=" not in testo:   # file con la sola chiave (gsk_…), senza CHIAVE=
             return {"KEY": testo}
         kv = leggi_kv(c["METIS_GROQ_FILE"])
-        return {"KEY": next((v for k, v in kv.items() if "GROQ" in k.upper()), "")}
+        return {"KEY": next((v for k, v in kv.items() if "GROQ" in k.upper() or k.upper() == "KEY"), "")}   # KEY=: il formato di voce.sh chiave
     return leggi_kv(protetto(os.path.join(CFG_DIR, nome)))
 
 
