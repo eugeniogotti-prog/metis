@@ -80,13 +80,16 @@ def protetto(p):
 def segreti(nome):
     """Segreti del bot e della voce. Di default in ~/.config/metis/<nome>; la configurazione può indicare file
     esistenti da leggere a ogni uso, senza copiarli: METIS_TELEGRAM_TOKEN_FILE e METIS_TELEGRAM_CHAT_FILE (un valore
-    per file), METIS_GROQ_FILE (righe CHIAVE=valore: si usa la prima chiave che contiene «GROQ»)."""
+    per file), METIS_GROQ_FILE (righe CHIAVE=valore: si usa la prima chiave che contiene «GROQ»; oppure la sola chiave)."""
     c = {k: os.path.expanduser(v) for k, v in leggi_kv(os.environ.get("METIS_CONFIG", os.path.join(CFG_DIR, "config"))).items()}
     if nome == "telegram" and c.get("METIS_TELEGRAM_TOKEN_FILE"):
         leggi = lambda k: open(protetto(c[k]), encoding="utf-8").read().strip() if c.get(k) and os.path.exists(c[k]) else ""
         return {"TOKEN": leggi("METIS_TELEGRAM_TOKEN_FILE"), "CHAT_ID": leggi("METIS_TELEGRAM_CHAT_FILE")}
     if nome == "groq" and c.get("METIS_GROQ_FILE"):
-        kv = leggi_kv(protetto(c["METIS_GROQ_FILE"]))
+        testo = open(protetto(c["METIS_GROQ_FILE"]), encoding="utf-8").read().strip()
+        if "=" not in testo:   # file con la sola chiave (gsk_…), senza CHIAVE=
+            return {"KEY": testo}
+        kv = leggi_kv(c["METIS_GROQ_FILE"])
         return {"KEY": next((v for k, v in kv.items() if "GROQ" in k.upper()), "")}
     return leggi_kv(protetto(os.path.join(CFG_DIR, nome)))
 
