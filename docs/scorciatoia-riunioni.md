@@ -11,8 +11,8 @@ Sul server servono `web.sh` (HTTPS) e il modulo `riunioni` di `installa-cliente.
 
 ## Due modi, e quale scegliere
 
-1. **Memo vocali, poi Condividi** (consigliato per le riunioni lunghe). Si registra con l'app Memo vocali, che continua anche a schermo bloccato. Alla fine si tocca Condividi e si sceglie «Manda riunione». La registrazione resta anche sul telefono.
-2. **Tutto nella Scorciatoia** (per le riunioni brevi). Un tocco sul tasto Azione o sul widget della schermata di blocco avvia la registrazione; un secondo tocco la ferma e la manda. Non è verificato che la registrazione continui a schermo bloccato: per una riunione lunga è meglio il primo modo.
+1. **Memo vocali, poi Condividi: è il modo per le riunioni, sempre.** Si registra con l'app Memo vocali, che continua anche a schermo spento. Alla fine si tocca Condividi e si sceglie «Manda riunione». La registrazione resta anche sul telefono.
+2. **Tutto nella Scorciatoia: solo per vocali brevi, a schermo acceso.** Un tocco sul tasto Azione o sul widget della schermata di blocco avvia la registrazione; un secondo tocco la ferma e la manda. **A schermo spento la registrazione si ferma** (verificato il 10/11/2026 su iPhone): per una riunione non va usato.
 
 ## Creare la Scorciatoia «Manda riunione» (modo 1)
 
@@ -27,14 +27,14 @@ App **Comandi rapidi** → **+** → nome **Manda riunione**.
 
 Prova: registra dieci secondi con Memo vocali, Condividi → **Manda riunione**. Entro un paio di minuti arriva il messaggio su Telegram.
 
-## Creare la Scorciatoia «Registra riunione» (modo 2)
+## Creare la Scorciatoia «Registra vocale» (modo 2, solo vocali brevi a schermo acceso)
 
-App **Comandi rapidi** → **+** → nome **Registra riunione**.
+App **Comandi rapidi** → **+** → nome **Registra vocale**.
 1. **Registra audio**: Qualità *Normale*; Avvio *Immediatamente*; Fine *Al tocco*.
 2. **Ottieni contenuto dell'URL**, come sopra, con il corpo **File** → *Audio registrato*.
 3. **Mostra notifica** con il *Contenuto dell'URL*.
 
-Poi: Impostazioni → **Tasto Azione** → Comando rapido → *Registra riunione* (iPhone 15 Pro e successivi). Su altri modelli: un widget Comandi rapidi nella schermata di blocco, oppure **Indietro tocco** (Impostazioni → Accessibilità → Tocco).
+Poi: Impostazioni → **Tasto Azione** → Comando rapido → *Registra vocale* (iPhone 15 Pro e successivi). Su altri modelli: un widget Comandi rapidi nella schermata di blocco, oppure **Indietro tocco** (Impostazioni → Accessibilità → Tocco).
 
 ## Che cosa succede sul server
 
@@ -47,4 +47,6 @@ Poi: Impostazioni → **Tasto Azione** → Comando rapido → *Registra riunione
 ## Da verificare alla prima prova vera
 
 - Quanto tempo concede iOS a «Ottieni contenuto dell'URL» per un file grande su rete cellulare. Per un'ora di riunione, in AAC qualità normale, il file è attorno ai 30-60 MB.
-- Con la registrazione nella Scorciatoia (modo 2), se continua a schermo bloccato. Il modo 2 funziona da capo a fondo: provato il 10/11/2026 con un iPhone, riassunto arrivato su Telegram.
+- Il modo 1 con una riunione vera e lunga (Memo vocali a schermo spento, poi Condividi).
+
+Già verificato il 10/11/2026 su iPhone: il modo 2 funziona da capo a fondo a schermo acceso (riassunto arrivato su Telegram) e si ferma a schermo spento.
