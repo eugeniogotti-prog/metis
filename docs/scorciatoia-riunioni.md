@@ -47,4 +47,4 @@ Poi: Impostazioni → **Tasto Azione** → Comando rapido → *Registra riunione
 ## Da verificare alla prima prova vera
 
 - Quanto tempo concede iOS a «Ottieni contenuto dell'URL» per un file grande su rete cellulare. Per un'ora di riunione, in AAC qualità normale, il file è attorno ai 30-60 MB.
-- Con la registrazione nella Scorciatoia (modo 2), se continua a schermo bloccato.
+- Con la registrazione nella Scorciatoia (modo 2), se continua a schermo bloccato. Il modo 2 funziona da capo a fondo: provato il 10/11/2026 con un iPhone, riassunto arrivato su Telegram.
