@@ -188,6 +188,8 @@ Valgono dalla sessione successiva: lo script la riavvia. Provato sul server di p
 **Risultato atteso:** `bash <plugin>/scripts/moduli/telegram.sh controlla` dà tutte righe ✅, e un messaggio del cliente riceve risposta.
 **Se non va:** se la chat non viene trovata, il cliente riscrive «ciao» e si rilancia. Se il token non è valido, BotFather `/token` lo mostra di nuovo.
 
+**Come il cliente porta cose nel vault da Telegram:** inoltra al proprio bot messaggi, link, file, foto e vocali, oppure scrive un testo che comincia con «nota». Finiscono in `0 - Inbox/telegram` (i file in `0 - Inbox/files`) e il giro dell'Inbox li colloca. I «Messaggi salvati» dell'account personale non si usano: leggerli richiede le credenziali API dell'account del cliente, e inoltrare al bot fa la stessa cosa.
+
 **Il bot ascolta e scrive solo alla chat del cliente.** Un solo ascoltatore per bot: lo stesso bot non può girare anche su un altro computer.
 
 **Proprietà del bot:** se l'ha creato il cliente, è suo. Se l'ha creato chi installa, BotFather permette di trasferirlo [da verificare: la procedura di trasferimento di BotFather non è stata provata].
