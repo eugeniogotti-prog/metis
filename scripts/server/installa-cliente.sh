@@ -11,13 +11,15 @@
 #   --token-bot  file con il token del bot (dato da @BotFather), letto e poi cancellato: il token non passa dalla riga di comando
 #   --moduli     quali moduli installare; google si aggiunge dopo, con il cliente (progetto Google Cloud e consenso)
 #                sessione = la sessione principale sempre accesa (Remote Control + messaggi del bot), scripts/sessione-principale.sh
-# Login di Claude: se c'è ~/.config/metis/claude-oauth-token (claude setup-token, 600), diventa METIS_CLAUDE_TOKEN_FILE.
+# Login di Claude: --login completo|token lo fa adesso, se manca (serve un terminale: ssh -t), con scripts/server/login-claude.sh.
+#   completo = claude auth login: Remote Control e connettori di claude.ai. token = claude setup-token, un anno, solo il lavoro
+#   di Claude (niente Remote Control né connettori). Il token in ~/.config/metis/claude-oauth-token diventa METIS_CLAUDE_TOKEN_FILE.
 # Prima: il plugin (claude plugin marketplace add … e claude plugin install metis@metis): lo fa questo script se manca.
 # Non fa: il login di Claude, la chat del bot (il cliente deve prima scrivergli «ciao»), Google.
 
 set -uo pipefail
 NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione"
-REPO="${METIS_REPO:-eugeniogotti-prog/metis}"
+REPO="${METIS_REPO:-eugeniogotti-prog/metis}"; LOGIN=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --nome) NOME="${2:-}"; shift 2 ;;
@@ -25,6 +27,7 @@ while [ $# -gt 0 ]; do
     --giri) GIRI="${2:-}"; shift 2 ;;
     --token-bot) TOKEN="${2:-}"; shift 2 ;;
     --moduli) MODULI="${2:-}"; shift 2 ;;
+    --login) LOGIN="${2:-}"; shift 2 ;;
     -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "installa-cliente: opzione sconosciuta «$1» (--help)" >&2; exit 2 ;;
   esac
@@ -54,8 +57,17 @@ $CFG set METIS_VAULT "$VAULT" >/dev/null
 [ -n "$($CFG get METIS_LABEL)" ] || $CFG set METIS_LABEL "com.metis.$(id -un)" >/dev/null
 $CFG set METIS_JOBS "$GIRI" >/dev/null
 TOKF="$HOME/.config/metis/claude-oauth-token"
+COMPLETO=0; [ -s "$HOME/.claude/.credentials.json" ] && COMPLETO=1
+if [ -n "$LOGIN" ]; then
+  case "$LOGIN" in
+    completo) [ "$COMPLETO" = 1 ] && echo "  ✅ login completo già fatto" || { bash "$METIS_ROOT/scripts/server/login-claude.sh" completo && COMPLETO=1; } ;;
+    token) [ -f "$TOKF" ] && echo "  ✅ token già salvato" || bash "$METIS_ROOT/scripts/server/login-claude.sh" token ;;
+    *) male "--login vuole completo o token"; exit 2 ;;
+  esac
+fi
+[ "$COMPLETO" = 1 ] && echo "  ✅ login completo di Claude (Remote Control e connettori)"
 if [ -f "$TOKF" ]; then chmod 600 "$TOKF"; $CFG set METIS_CLAUDE_TOKEN_FILE "$TOKF" >/dev/null; echo "  ✅ login di Claude dal token di lunga durata"
-else echo "  ⏳ login di Claude non ancora fatto (claude setup-token, salvato in $TOKF)"; fi
+elif [ "$COMPLETO" = 0 ]; then echo "  ⏳ login di Claude non ancora fatto: bash $METIS_ROOT/scripts/server/login-claude.sh completo (o token)"; fi
 echo "  ✅ vault $VAULT · giri: $GIRI"
 bash "$S/verifica-dotazione.sh" fondamenta $MODULI | grep -E '❌|⚠️' && { male "manca qualcosa (sopra): prepara-vps.sh"; ERR=1; } || echo "  ✅ dotazione completa"
 
@@ -117,5 +129,5 @@ done
 
 passo "Controllo"
 bash "$S/doctor.sh" 2>&1 | grep -E "^Doctor|🔴|🟡|🟢" | tail -2 | sed 's/^/  /'
-echo "  Manca ancora: login di Claude (claude, poi /login, oppure claude setup-token), Google (modulo google con il cliente)."
+echo "  Manca ancora: Google (modulo google con il cliente)."
 exit "$ERR"

@@ -56,7 +56,8 @@ lancia() {
   else sid=$(python3 -c 'import uuid; print(uuid.uuid4())'); echo "$sid" > "$SID_FILE"; az="--session-id $sid"; log "sessione nuova ${sid:0:8}"; fi
   # Il token (se c'è) passa nell'ambiente della shell di tmux, non sulla riga di comando: non compare in ps né nello schermo.
   local pre="unset CLAUDE_CODE_OAUTH_TOKEN; "
-  if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+  # Con il login completo (Remote Control, connettori) il token non si passa: lo scavalcherebbe (config.sh).
+  if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ ! -s "$HOME/.claude/.credentials.json" ]; then
     tmux set-environment -t "$T" CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN"
     pre="export CLAUDE_CODE_OAUTH_TOKEN=\"\$(tmux show-environment CLAUDE_CODE_OAUTH_TOKEN | cut -d= -f2-)\"; "
   else tmux set-environment -u -t "$T" CLAUDE_CODE_OAUTH_TOKEN 2>/dev/null; fi

@@ -57,7 +57,8 @@ def config():
     if not CLAUDE:
         CLAUDE = c.get("METIS_CLAUDE") or "claude"
     tf = c.get("METIS_CLAUDE_TOKEN_FILE")   # login con un token di lunga durata (server): lo stesso di config.sh
-    if tf and not os.environ.get("CLAUDE_CODE_OAUTH_TOKEN") and os.path.exists(tf):
+    completo = os.path.getsize(os.path.expanduser("~/.claude/.credentials.json")) if os.path.exists(os.path.expanduser("~/.claude/.credentials.json")) else 0
+    if tf and not completo and not os.environ.get("CLAUDE_CODE_OAUTH_TOKEN") and os.path.exists(tf):   # il login completo prevale
         os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = "".join(open(protetto(tf), encoding="utf-8").read().split())
     return {
         "conversazione": c.get("METIS_CONVERSAZIONE", "giro"),

@@ -196,3 +196,5 @@ else come 'curl -LsSf https://astral.sh/uv/install.sh | sh' >/dev/null 2>&1; [ -
 passo "Fatto"
 echo "  Prova adesso, da un'altra finestra: ssh $ADMIN@<server> e poi sudo -iu $CLIENTE."
 echo "  Se entra: sudo $0 --chiudi-root (da $ADMIN). Controllo: $0 --controlla"
+echo "  Poi Metis per il cliente, con il login di Claude (serve un terminale, quindi ssh -t):"
+echo "    sudo -iu $CLIENTE bash installa-cliente.sh --nome \"<Nome del cliente>\" --token-bot <file> --login completo"
