@@ -3,6 +3,7 @@
 # Uso (uguale sui due sistemi):
 #   servizi.sh genera <nome> sempre <comando> [argomenti...]
 #   servizi.sh genera <nome> orari "<HH:MM ...>" <comando> [argomenti...]   («lun 07:30»: solo il lunedì)
+#   servizi.sh genera <nome> ogni <minuti> <comando> [argomenti...]        giro ripetuto ogni N minuti
 #   servizi.sh carica | scarica | stato | esiste <nome>
 #   servizi.sh file                 elenca i file degli automatismi di Metis (plist o servizi e timer)
 #   servizi.sh tipo                 «LaunchAgent» o «servizio systemd» (per i messaggi)

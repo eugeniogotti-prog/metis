@@ -45,6 +45,9 @@ METIS_TAG_PREFISSI=tipo argomento contenuto status
 METIS_ARCHIVIO_PER_ANNO=sì
 # Posta delle sessioni: «connettori» (default, connettore Gmail di claude.ai) o «locale» (server locale, google.sh posta).
 # METIS_POSTA=connettori
+# Mail nel vault con un'etichetta di Gmail (google.sh etichetta-installa, serve la posta locale): nome dell'etichetta e minuti fra un giro e l'altro.
+# METIS_ETICHETTA_VAULT=vault
+# METIS_ETICHETTA_MINUTI=30
 
 # Documenti: «accanto» (default: una cartella per lavoro con note e documenti insieme, nella struttura PARA del vault;
 # la cartella fonti è quella dei progetti) o «separati» (vault di Obsidian con sole note, documenti in METIS_FONTI fuori).

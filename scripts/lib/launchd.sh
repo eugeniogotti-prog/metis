@@ -4,6 +4,7 @@
 #   launchd.sh genera <nome> sempre <comando> [argomenti...]        processo sempre acceso (KeepAlive), es. l'ascoltatore del bot
 #   launchd.sh genera <nome> orari "<HH:MM HH:MM ...>" <comando> [argomenti...]   giri ad orari fissi, ogni giorno
 #              (con un giorno davanti agli orari, «lun 07:30», solo quel giorno della settimana: lun mar mer gio ven sab dom)
+#   launchd.sh genera <nome> ogni <minuti> <comando> [argomenti...]   giro ripetuto ogni N minuti (es. le mail etichettate)
 #   launchd.sh carica <nome>        carica (o ricarica) il LaunchAgent nella sessione dell'utente
 #   launchd.sh scarica <nome>       lo ferma e lo toglie dalla sessione (il file resta)
 #   launchd.sh stato <nome>         dice se è caricato
@@ -19,14 +20,15 @@ source "$METIS_ROOT/scripts/lib/config.sh"
 metis_carica_config || { echo "launchd: ${METIS_ERRORE}" >&2; exit 2; }
 DIR="${METIS_LAUNCHAGENTS:-$HOME/Library/LaunchAgents}"
 AZ="${1:-}"; NOME="${2:-}"
-[ -n "$NOME" ] && [[ "$NOME" =~ ^[a-z0-9-]+$ ]] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+[ -n "$NOME" ] && [[ "$NOME" =~ ^[a-z0-9-]+$ ]] || { sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 ETICHETTA="$METIS_LABEL.$NOME"; PLIST="$DIR/$ETICHETTA.plist"
 
 case "$AZ" in
   genera)
     TIPO="${3:-}"; shift 3
-    ORARI=""; [ "$TIPO" = orari ] && { ORARI="$1"; shift; }
-    [ "$TIPO" = sempre ] || [ "$TIPO" = orari ] || { echo "launchd: tipo «$TIPO» sconosciuto (sempre|orari)" >&2; exit 2; }
+    ORARI=""; { [ "$TIPO" = orari ] || [ "$TIPO" = ogni ]; } && { ORARI="$1"; shift; }
+    [ "$TIPO" = sempre ] || [ "$TIPO" = orari ] || [ "$TIPO" = ogni ] || { echo "launchd: tipo «${TIPO}» sconosciuto (sempre|orari|ogni)" >&2; exit 2; }
+    [ "$TIPO" != ogni ] || [[ "$ORARI" =~ ^[1-9][0-9]*$ ]] || { echo "launchd: «ogni» vuole i minuti (un numero), non «${ORARI}»" >&2; exit 2; }
     [ $# -ge 1 ] || { echo "launchd: manca il comando" >&2; exit 2; }
     mkdir -p "$DIR" "$METIS_LOG_DIR"
     export ETICHETTA PLIST TIPO ORARI METIS_LOG_DIR NOME CFG="${METIS_CONFIG:-$HOME/.config/metis/config}"
@@ -46,6 +48,8 @@ d = {
 }
 if e["TIPO"] == "sempre":
     d["KeepAlive"] = True; d["RunAtLoad"] = True; d["ThrottleInterval"] = 30
+elif e["TIPO"] == "ogni":
+    d["StartInterval"] = int(e["ORARI"]) * 60; d["RunAtLoad"] = True
 else:
     giorni = {"dom": 0, "lun": 1, "mar": 2, "mer": 3, "gio": 4, "ven": 5, "sab": 6}
     parti = e["ORARI"].split()
@@ -72,5 +76,5 @@ PY
     if launchctl print "gui/$(id -u)/$ETICHETTA" >/dev/null 2>&1; then echo "caricato"; else echo "non caricato"; exit 1; fi ;;
   esiste)
     [ -f "$PLIST" ] ;;
-  *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

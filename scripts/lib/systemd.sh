@@ -4,6 +4,7 @@
 #   systemd.sh genera <nome> sempre <comando> [argomenti...]        processo sempre acceso (riavviato se si ferma)
 #   systemd.sh genera <nome> orari "<HH:MM HH:MM ...>" <comando> [argomenti...]   giri ad orari fissi, ogni giorno
 #              (con un giorno davanti agli orari, «lun 07:30», solo quel giorno della settimana: lun mar mer gio ven sab dom)
+#   systemd.sh genera <nome> ogni <minuti> <comando> [argomenti...]   giro ripetuto ogni N minuti (es. le mail etichettate)
 #   systemd.sh carica <nome>        attiva (o riattiva) il servizio o il timer
 #   systemd.sh scarica <nome>       lo ferma e lo disattiva (i file restano)
 #   systemd.sh stato <nome>         dice se è attivo
@@ -20,7 +21,7 @@ export METIS_ROOT
 source "$METIS_ROOT/scripts/lib/config.sh"
 AZ="${1:-}"; NOME="${2:-}"
 SYSTEMCTL="${METIS_SYSTEMCTL:-systemctl}"
-uso() { sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+uso() { sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 if [ "$AZ" = permanenza ]; then
   [ -n "${METIS_LINGER:-}" ] && { [ "$METIS_LINGER" = yes ]; exit; }   # prove
@@ -38,8 +39,9 @@ sc() { "$SYSTEMCTL" --user "$@"; }
 case "$AZ" in
   genera)
     TIPO="${3:-}"; shift 3
-    ORARI=""; [ "$TIPO" = orari ] && { ORARI="$1"; shift; }
-    [ "$TIPO" = sempre ] || [ "$TIPO" = orari ] || { echo "systemd: tipo «$TIPO» sconosciuto (sempre|orari)" >&2; exit 2; }
+    ORARI=""; { [ "$TIPO" = orari ] || [ "$TIPO" = ogni ]; } && { ORARI="$1"; shift; }
+    [ "$TIPO" = sempre ] || [ "$TIPO" = orari ] || [ "$TIPO" = ogni ] || { echo "systemd: tipo «${TIPO}» sconosciuto (sempre|orari|ogni)" >&2; exit 2; }
+    [ "$TIPO" != ogni ] || [[ "$ORARI" =~ ^[1-9][0-9]*$ ]] || { echo "systemd: «ogni» vuole i minuti (un numero), non «${ORARI}»" >&2; exit 2; }
     [ $# -ge 1 ] || { echo "systemd: manca il comando" >&2; exit 2; }
     mkdir -p "$DIR" "$METIS_LOG_DIR"
     export ETICHETTA SERVIZIO TIMER TIPO ORARI METIS_LOG_DIR NOME METIS_PRODOTTO CFG="${METIS_CONFIG:-$HOME/.config/metis/config}"
@@ -79,6 +81,12 @@ if e["TIPO"] == "orari":
     t = ["[Unit]", f"Description={prod}: {e['NOME']} (orari)", "", "[Timer]"]
     t += [f"OnCalendar={pre}*-*-* {int(o.split(':')[0]):02d}:{int(o.split(':')[1]):02d}:00" for o in ore]
     t += ["Persistent=true", f"Unit={os.path.basename(e['SERVIZIO'])}", "", "[Install]", "WantedBy=timers.target"]
+    with open(e["TIMER"], "w") as f: f.write("\n".join(t) + "\n")
+    print(f"systemd: {e['TIMER']}")
+elif e["TIPO"] == "ogni":
+    t = ["[Unit]", f"Description={prod}: {e['NOME']} (ogni {e['ORARI']} minuti)", "", "[Timer]",
+         "OnActiveSec=1min", f"OnUnitActiveSec={int(e['ORARI'])}min",
+         f"Unit={os.path.basename(e['SERVIZIO'])}", "", "[Install]", "WantedBy=timers.target"]
     with open(e["TIMER"], "w") as f: f.write("\n".join(t) + "\n")
     print(f"systemd: {e['TIMER']}")
 else:

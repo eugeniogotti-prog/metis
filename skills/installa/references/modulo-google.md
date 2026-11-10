@@ -38,6 +38,14 @@ Che cosa serve: un progetto Google Cloud del cliente con l'API di Gmail, la sche
 
 **Chi ha già il modulo installato:** non cambia nulla finché non lancia `google.sh posta`. Con la posta locale, `google.sh server` dichiara per le routine lo stesso server in sola lettura (un solo consenso) invece del pacchetto delle routine; chi ha già dichiarato quel pacchetto lo tiene, e lo sostituisce rilanciando `google.sh server`.
 
+## 4. Mail nel vault con un'etichetta (facoltativo, richiede il § 3)
+
+Il cliente mette l'etichetta «vault» a una mail in Gmail, anche dal telefono; ogni 30 minuti un giro la scrive come nota nella cartella `Email/` dell'Inbox (mittente, data, testo, link al thread, allegati elencati e non scaricati) e cambia l'etichetta in «vault-fatto». Poi l'inbox-processor la lavora come le altre cose arrivate. Usa la stessa autorizzazione della posta locale (lo scope `gmail.modify` del pacchetto 3.4.4 comprende le etichette): nessun consenso in più. Sulla posta legge le mail etichettate e cambia due etichette; non invia, non cancella, non archivia.
+1. `bash scripts/moduli/google.sh etichetta --prova`: elenca le mail con l'etichetta senza toccare niente.
+2. `bash scripts/moduli/google.sh etichetta-installa`: crea il giro periodico (LaunchAgent su Mac, timer di systemd su Linux). Al primo giro l'etichetta viene creata in Gmail, se manca.
+3. **Controllo:** il cliente mette l'etichetta a una mail qualsiasi; dopo il giro (o subito con `google.sh etichetta`) la nota è in `Email/` e in Gmail la mail porta «vault-fatto». `google.sh controlla` dice se il giro è caricato.
+Nome dell'etichetta e intervallo: `METIS_ETICHETTA_VAULT` e `METIS_ETICHETTA_MINUTI` nella configurazione, poi di nuovo `etichetta-installa`. Per fermarlo: `google.sh etichetta-togli`.
+
 ## Microsoft 365
 
 Vedi `procedura-m365.md`: testo per l'IT e ripiego, nessun modulo in v1.

@@ -19,10 +19,12 @@ Le cartelle si leggono dalla tabella dei ruoli in `CLAUDE.md` (ingresso, progett
 | `telegram/` | link, testi «nota…», messaggi inoltrati, note che descrivono un file | bot Telegram |
 | `files/` | i file mandati al bot o posati a mano | bot Telegram, cliente |
 | `voicenotes/` | trascrizioni di vocali | bot Telegram (modulo voce) |
-| `Email/` | mail salvate come nota | cliente |
+| `Email/` | mail salvate come nota | cliente, o Gmail: le mail a cui il cliente mette l'etichetta «vault» (modulo Google, `google.sh etichetta-installa`) |
 | radice dell'Inbox | catture veloci | cliente |
 
 Sono escluse le note con «Digest» nel titolo.
+
+**`Email/` si lavora sempre**, anche quando il resto aspetta: il cliente ci ha messo la mail apposta. Le note che arrivano da Gmail hanno nel frontmatter `source: Gmail`, `gmail_id`, `thread_id` e il link al thread; gli allegati sono solo elencati. Se un allegato serve al lavoro, con il cliente si scarica con la posta locale e si colloca come un file ricevuto; nel giro automatico il riscontro dice quale allegato scaricare e dove andrebbe.
 
 ## Prima di cominciare
 

@@ -25,6 +25,10 @@ Metis fa lavorare Claude Code dentro il tuo vault con un metodo: Claude sa chi s
 - **La quota dell'abbonamento** è una sola per claude.ai e Claude Code: le conversazioni nell'app, il lavoro nel terminale e i giri automatici la consumano insieme. `/usage` in Claude Code mostra quanto ne resta.
 - Nei giri automatici Claude può **leggere** posta e calendario ma non inviare, rispondere o creare eventi.
 
+## Come mando una mail nel vault
+
+In Gmail, anche dal telefono, metti alla mail l'etichetta **vault**. Entro mezz'ora la mail diventa una nota nell'Inbox (cartella `Email/`) e l'etichetta in Gmail diventa **vault-fatto**: così vedi che è entrata. Poi il giro dell'Inbox la legge e la colloca con le altre cose arrivate. Gli allegati non vengono copiati: la nota li elenca, e se ti servono chiedi a Claude di scaricarli. Funziona se all'installazione è stata attivata la posta locale con questa funzione; il nome dell'etichetta si può cambiare.
+
 ## I giri automatici (se li hai attivati)
 
 Al mattino il controllo del sistema e il briefing della giornata; durante il giorno la sistemazione di ciò che arriva nell'Inbox; la sera la sintesi della giornata; il lunedì il riepilogo della settimana. Girano **solo con il Mac acceso** agli orari scelti: se il Mac dorme, partono al risveglio; se è spento, quel giro salta. L'esito di ogni giro è una riga sotto «Memo» nella nota del giorno.

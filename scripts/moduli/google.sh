@@ -26,6 +26,13 @@
 #   google.sh account-posta             consenso del cliente nel browser (una volta; di nuovo solo se revocato)
 #   google.sh posta                     installa il server, lo dichiara nel vault, METIS_POSTA=locale, permessi
 #   google.sh token                     controlla l'autorizzazione senza avviare il server (che altrimenti apre il browser)
+#
+# Mail nel vault con un'etichetta (10/11/2026): il cliente mette l'etichetta «vault» (METIS_ETICHETTA_VAULT) a una mail in
+# Gmail, anche dal telefono; un giro ogni 30 minuti (METIS_ETICHETTA_MINUTI) la scrive come nota in Email/ dell'Inbox e
+# cambia l'etichetta in «vault-fatto». Usa l'autorizzazione della posta locale (scripts/gmail-etichetta.py).
+#   google.sh etichetta [--prova]       un giro subito (--prova: elenca soltanto)
+#   google.sh etichetta-installa        genera e carica il giro periodico (serve la posta locale)
+#   google.sh etichetta-togli           ferma il giro periodico
 
 set -uo pipefail
 METIS_ROOT="${METIS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -126,6 +133,20 @@ case "${1:-}" in
     bash "$METIS_ROOT/scripts/installa-permessi.sh"
     echo "google: posta dal server locale ($S, solo Gmail) dichiarata nel vault; il connettore Gmail resta attivo per Cowork e le chat, ma nel vault la guardia lo rifiuta"
     echo "google: poi google.sh credenziali-posta <file>, google.sh account-posta, google.sh controlla; sessione nuova del cliente" ;;
+  etichetta)
+    INBOX="$(metis_ruolo INBOX)"; [ -n "$INBOX" ] || { echo "google: il ruolo ingresso (INBOX) non è assegnato" >&2; exit 2; }
+    python3 "$METIS_ROOT/scripts/gmail-etichetta.py" --dest "$INBOX/Email" --etichetta "${METIS_ETICHETTA_VAULT:-vault}" \
+      --dir "$PDIR" --up "$(basename "$INBOX")" ${2:+"$2"} ;;
+  etichetta-installa)
+    python3 "$METIS_ROOT/scripts/google-token.py" --dir "$PDIR" >/dev/null \
+      || { echo "google: serve l'autorizzazione della posta locale (google.sh credenziali-posta <file>, poi account-posta)" >&2; exit 1; }
+    MIN="${METIS_ETICHETTA_MINUTI:-30}"
+    bash "$METIS_ROOT/scripts/lib/servizi.sh" genera gmail-etichetta ogni "$MIN" /bin/bash "$METIS_ROOT/scripts/moduli/google.sh" etichetta || exit 1
+    bash "$METIS_ROOT/scripts/lib/servizi.sh" carica gmail-etichetta || exit 1
+    bash "$METIS_ROOT/scripts/configura.sh" aggiungi METIS_MODULI google
+    echo "google: mail con l'etichetta «${METIS_ETICHETTA_VAULT:-vault}» nell'Inbox ogni $MIN minuti (in Gmail diventano «${METIS_ETICHETTA_VAULT:-vault}-fatto»)" ;;
+  etichetta-togli)
+    bash "$METIS_ROOT/scripts/lib/servizi.sh" scarica gmail-etichetta ;;
   controlla)
     ERR=0
     bash "$0" connettori || ERR=1
@@ -143,6 +164,10 @@ case "${1:-}" in
       [ "$RT" = 0 ] || ERR=1
       grep -q '"gmail-locale"' "$METIS_VAULT/.mcp.json" 2>/dev/null && echo "✅ posta locale: server dichiarato nel vault" || { echo "❌ posta locale: server non dichiarato in $METIS_VAULT/.mcp.json (google.sh posta)"; ERR=1; }
     fi
+    if bash "$METIS_ROOT/scripts/lib/servizi.sh" esiste gmail-etichetta 2>/dev/null; then   # mail con l'etichetta, se installato
+      if bash "$METIS_ROOT/scripts/lib/servizi.sh" stato gmail-etichetta >/dev/null; then echo "✅ mail con l'etichetta «${METIS_ETICHETTA_VAULT:-vault}»: giro caricato"
+      else echo "❌ mail con l'etichetta: giro generato ma non caricato (google.sh etichetta-installa)"; ERR=1; fi
+    fi
     exit "$ERR" ;;
-  *) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '2,35p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

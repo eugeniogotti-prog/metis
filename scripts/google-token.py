@@ -11,6 +11,7 @@ Uso: google-token.py [--dir <cartella con credentials.json e tokens.json>]
      default: $XDG_CONFIG_HOME/google-workspace-mcp, altrimenti ~/.config/google-workspace-mcp
      (con un profilo: <cartella>/profiles/<nome>, che si passa con --dir).
 Uscita: 0 valida · 1 da rifare (manca, scaduta, revocata) · 2 errore di rete o di Google (si riprova più tardi).
+Per le prove: METIS_GOOGLE_TOKEN_URL sostituisce l'indirizzo di Google.
 """
 import json, os, sys, urllib.error, urllib.parse, urllib.request
 
@@ -47,7 +48,7 @@ if not rt: esci(1, "❌ autorizzazione senza refresh_token: va rifatta (google.s
 
 dati = {"client_id": cid, "refresh_token": rt, "grant_type": "refresh_token"}
 if csec: dati["client_secret"] = csec
-req = urllib.request.Request("https://oauth2.googleapis.com/token", data=urllib.parse.urlencode(dati).encode(), method="POST")
+req = urllib.request.Request(os.environ.get("METIS_GOOGLE_TOKEN_URL", "https://oauth2.googleapis.com/token"), data=urllib.parse.urlencode(dati).encode(), method="POST")
 try:
     with urllib.request.urlopen(req, timeout=20) as r:
         risp = json.load(r)
