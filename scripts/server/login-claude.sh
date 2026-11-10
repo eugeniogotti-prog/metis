@@ -15,6 +15,7 @@
 
 set -uo pipefail
 export PATH="$HOME/.local/bin:$PATH"
+QUI="$(cd "$(dirname "$0")" && pwd)"   # prima del cd: $0 può essere relativo
 cd "$HOME/Vault" 2>/dev/null || cd "$HOME"
 case "${1:-}" in
   token)
@@ -26,7 +27,7 @@ case "${1:-}" in
     shred -u "$L" 2>/dev/null || rm -f "$L"
     if [ ${#T} -gt 90 ]; then
       ( umask 077; printf '%s\n' "$T" > "$HOME/.config/metis/claude-oauth-token" ); chmod 600 "$HOME/.config/metis/claude-oauth-token"
-      if printf 'Rispondi solo: ok' | CLAUDE_CODE_OAUTH_TOKEN="$T" timeout 120 claude -p >/dev/null 2>&1; then
+      if printf 'Rispondi solo: ok' | CLAUDE_CODE_OAUTH_TOKEN="$T" bash "$QUI/../con-timeout.sh" 120 claude -p >/dev/null 2>&1; then
         echo "✅ token salvato (${#T} caratteri) e provato: Claude risponde. Si può chiudere."
       else echo "⚠️ token salvato (${#T} caratteri), ma la prova non risponde: rifare il login"; exit 1; fi
     else echo "❌ token non trovato o incompleto (${#T} caratteri): non ho salvato niente. Rilanciare."; exit 1; fi ;;

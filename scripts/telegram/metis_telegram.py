@@ -216,6 +216,28 @@ def conversa(cfg, stato, testo):
     return risposta
 
 
+# --- rinnovo del login di Claude da Telegram (server) -----------------------------------------------------------
+def accesso(cfg, stato, testo):
+    """«/accesso»: avvia il login di Claude e manda il link; il messaggio dopo, se ha la forma di un codice, lo completa.
+    None se il messaggio non riguarda il login. Il codice non si registra da nessuna parte."""
+    s = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server", "rinnovo-accesso.sh")
+    t = testo.strip()
+    if t.lower() in ("/accesso", "/login"):
+        r = subprocess.run(["bash", s, "avvia"], capture_output=True, text=True, timeout=120)
+        if r.returncode != 0:
+            return r.stdout.strip() or "Il login non è partito."
+        stato["accesso_atteso"] = time.time()
+        log(cfg, "accesso: login avviato, link mandato")
+        return ("Per rinnovare il login di Claude:\n1. apri questo link e autorizza con il tuo account Claude;\n"
+                "2. la pagina ti mostra un codice: copialo e mandamelo qui, da solo.\n\n" + r.stdout.strip())
+    if stato.get("accesso_atteso") and time.time() - stato["accesso_atteso"] < 900 and re.fullmatch(r"\S{20,}", t):
+        stato.pop("accesso_atteso", None)
+        r = subprocess.run(["bash", s, "codice"], input=t, capture_output=True, text=True, timeout=120)
+        log(cfg, f"accesso: codice consegnato, esito {r.returncode}")
+        return r.stdout.strip() or "Login non riuscito."
+    return None
+
+
 # --- smistamento ------------------------------------------------------------------------------------------------
 def smista(cfg, token, chat, stato, msg):
     quando = datetime.datetime.fromtimestamp(msg.get("date", time.time()))
@@ -248,6 +270,9 @@ def smista(cfg, token, chat, stato, msg):
         return f"File salvato nell'Inbox: {os.path.basename(dest)}"
     if not testo:
         return "Messaggio non riconosciuto: mando al vault testi, link, file e vocali."
+    r = accesso(cfg, stato, testo)
+    if r is not None:
+        return r
     solo_link = re.fullmatch(r"\s*https?://\S+\s*", testo) is not None
     inoltrato = any(msg.get(k) for k in ("forward_origin", "forward_date", "forward_from", "forward_from_chat", "forward_sender_name"))
     if inoltrato or solo_link or re.match(r"^\W*nota\b", testo, re.I):

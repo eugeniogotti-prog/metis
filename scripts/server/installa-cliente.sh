@@ -11,6 +11,7 @@
 #   --token-bot  file con il token del bot (dato da @BotFather), letto e poi cancellato: il token non passa dalla riga di comando
 #   --moduli     quali moduli installare; google si aggiunge dopo, con il cliente (progetto Google Cloud e consenso)
 #                sessione = la sessione principale sempre accesa (Remote Control + messaggi del bot), scripts/sessione-principale.sh
+#                controllo = il controllo di ogni mattina (accessi, sessione, bot, spazio, sync) con avviso su Telegram
 # Login di Claude: --login completo|token lo fa adesso, se manca (serve un terminale: ssh -t), con scripts/server/login-claude.sh.
 #   completo = claude auth login: Remote Control e connettori di claude.ai. token = claude setup-token, un anno, solo il lavoro
 #   di Claude (niente Remote Control né connettori). Il token in ~/.config/metis/claude-oauth-token diventa METIS_CLAUDE_TOKEN_FILE.
@@ -18,7 +19,7 @@
 # Non fa: il login di Claude, la chat del bot (il cliente deve prima scrivergli «ciao»), Google.
 
 set -uo pipefail
-NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione"
+NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione controllo"
 REPO="${METIS_REPO:-eugeniogotti-prog/metis}"; LOGIN=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -123,6 +124,7 @@ aggiorna(os.path.expanduser("~/.claude.json"), lambda d: (d.update(hasCompletedO
 print("  ✅ Claude Code senza domande alla prima apertura")
 PY
       bash "$S/sessione-principale.sh" installa 2>&1 | tail -1 | sed 's/^/  /' ;;
+    controllo) bash "$S/server/controllo-giornaliero.sh" installa 2>&1 | tail -1 | sed 's/^/  /' ;;
     *) male "modulo «$m» non gestito qui (si installa con la skill)"; ERR=1 ;;
   esac
 done
