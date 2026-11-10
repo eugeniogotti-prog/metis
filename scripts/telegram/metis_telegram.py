@@ -13,6 +13,9 @@ Che cosa fa l'ascoltatore con un messaggio della chat del cliente (gli altri si 
     altrimenti il testo trascritto entra nella conversazione;
   - ogni altro testo → conversazione: un giro `claude -p` nel vault, che riprende la conversazione precedente se è
     di meno di sei ore (con «/nuova» se ne comincia una nuova); la risposta torna nella stessa chat.
+    Con METIS_CONVERSAZIONE=sessione (server con la sessione principale, scripts/sessione-principale.sh) il testo va
+    invece alla sessione sempre accesa, che risponde da sé con «invia»: Telegram e app di Claude vedono la stessa
+    conversazione. Se la sessione non c'è, si torna al giro `claude -p`.
 
 Configurazione: ~/.config/metis/config (METIS_VAULT, ruoli, METIS_LOG_DIR) e i segreti in file con permessi 600:
   ~/.config/metis/telegram   TOKEN=… e CHAT_ID=…
@@ -53,7 +56,12 @@ def config():
     global CLAUDE
     if not CLAUDE:
         CLAUDE = c.get("METIS_CLAUDE") or "claude"
+    tf = c.get("METIS_CLAUDE_TOKEN_FILE")   # login con un token di lunga durata (server): lo stesso di config.sh
+    if tf and not os.environ.get("CLAUDE_CODE_OAUTH_TOKEN") and os.path.exists(tf):
+        os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = "".join(open(protetto(tf), encoding="utf-8").read().split())
     return {
+        "conversazione": c.get("METIS_CONVERSAZIONE", "giro"),
+        "tmux": c.get("METIS_SESSIONE_TMUX", "metis-principale"),
         "vault": vault,
         "inbox": ruolo("INBOX", "0 - Inbox"),
         "log": os.path.join(c.get("METIS_LOG_DIR", os.path.expanduser("~/Library/Logs/metis")), "telegram.log"),
@@ -157,7 +165,30 @@ def trascrivi(cfg, percorso):
 
 
 # --- conversazione ----------------------------------------------------------------------------------------------
+def alla_sessione(cfg, testo):
+    """Consegna il testo alla sessione principale in tmux. Vero se consegnato (la risposta la manda la sessione)."""
+    t = cfg["tmux"]
+    if cfg["conversazione"] != "sessione" or not shutil.which("tmux"):
+        return False
+    if subprocess.run(["tmux", "has-session", "-t", t], capture_output=True).returncode != 0:
+        log(cfg, f"sessione {t} assente: conversazione con un giro claude -p"); return False
+    msg = ("[Telegram] Messaggio del cliente dal telefono. Rispondigli in testo semplice e breve, adatto al telefono, con:\n"
+           "python3 " + os.path.abspath(__file__) + " invia <<'FINE'\n<risposta>\nFINE\n\n" + testo)
+    buf = "metis-tg-" + uuid.uuid4().hex[:8]
+    subprocess.run(["tmux", "load-buffer", "-b", buf, "-"], input=msg, text=True, check=True)
+    subprocess.run(["tmux", "paste-buffer", "-d", "-b", buf, "-t", t], check=True)
+    time.sleep(1); subprocess.run(["tmux", "send-keys", "-t", t, "Enter"])
+    time.sleep(2)   # un testo lungo incollato resta «[Pasted text]» nel campo: serve un secondo Invio
+    schermo = subprocess.run(["tmux", "capture-pane", "-p", "-t", t], capture_output=True, text=True).stdout
+    if "Pasted text" in "\n".join(schermo.splitlines()[-8:]):
+        subprocess.run(["tmux", "send-keys", "-t", t, "Enter"])
+    log(cfg, f"conversazione consegnata alla sessione {t}")
+    return True
+
+
 def conversa(cfg, stato, testo):
+    if alla_sessione(cfg, testo):
+        return None
     ora = time.time()
     nuova = testo.strip().lower().startswith("/nuova") or ora - stato.get("ultimo", 0) > ORE_CONVERSAZIONE * 3600
     if testo.strip().lower().startswith("/nuova"):
@@ -205,7 +236,8 @@ def smista(cfg, token, chat, stato, msg):
         if re.match(r"^\W*nota\b", trascritto, re.I):
             p = scrivi_nota(os.path.join(cfg["inbox"], "voicenotes"), trascritto, quando, "Vocale", "vocale")
             return f"Nota vocale salvata nell'Inbox: {os.path.basename(p)}"
-        return f"Ho capito: «{trascritto}»\n\n" + conversa(cfg, stato, trascritto)
+        r = conversa(cfg, stato, trascritto)
+        return f"Ho capito: «{trascritto}»" + (f"\n\n{r}" if r else "")
     if doc:
         nome = doc.get("file_name") or f"{quando:%Y-%m-%d %H%M%S} foto.jpg"
         os.makedirs(os.path.join(cfg["inbox"], "files"), exist_ok=True)
@@ -253,7 +285,8 @@ def ascolta(una_volta=False):
             except Exception as e:
                 risposta = f"Non ci sono riuscito: {e}"
                 log(cfg, f"errore su update {u['update_id']}: {e}")
-            invia(token, chat, risposta)
+            if risposta:
+                invia(token, chat, risposta)
             log(cfg, f"update {u['update_id']} gestito")
         with open(cfg["stato"] + ".tmp", "w") as f:
             json.dump(stato, f)

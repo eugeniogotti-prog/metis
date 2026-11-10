@@ -80,6 +80,11 @@ metis_carica_config() {
   export METIS_LABEL="${METIS_LABEL:-com.metis.$(id -un)}"
   export METIS_JOBS="${METIS_JOBS-daily-digest inbox-processor}"
   export METIS_LOG_DIR="${METIS_LOG_DIR:-$HOME/Library/Logs/metis}"
+  # Login di Claude con un token di lunga durata (claude setup-token, server senza schermo): il file indicato da
+  # METIS_CLAUDE_TOKEN_FILE (600) diventa CLAUDE_CODE_OAUTH_TOKEN per i giri, il doctor e i moduli.
+  if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -n "${METIS_CLAUDE_TOKEN_FILE:-}" ] && [ -r "$METIS_CLAUDE_TOKEN_FILE" ]; then
+    CLAUDE_CODE_OAUTH_TOKEN="$(tr -d '[:space:]' < "$METIS_CLAUDE_TOKEN_FILE")"; export CLAUDE_CODE_OAUTH_TOKEN
+  fi
   return 0
 }
 

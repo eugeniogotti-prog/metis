@@ -65,7 +65,9 @@ righe = [
     f"StandardOutput=append:{log}", f"StandardError=append:{log}",
 ]
 if e["TIPO"] == "sempre":
-    righe += ["Restart=always", "RestartSec=30", "", "[Install]", "WantedBy=default.target"]
+    # KillMode=process: al riavvio si ferma solo il processo principale. Serve alla sessione principale, che vive in
+    # tmux: senza, systemd chiuderebbe anche tmux e la conversazione in corso.
+    righe += ["Restart=always", "RestartSec=30", "KillMode=process", "", "[Install]", "WantedBy=default.target"]
 with open(e["SERVIZIO"], "w") as f: f.write("\n".join(righe) + "\n")
 print(f"systemd: {e['SERVIZIO']}")
 if e["TIPO"] == "orari":

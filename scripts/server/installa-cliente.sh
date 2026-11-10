@@ -10,11 +10,13 @@
 #                          [--token-bot <file>] [--moduli "markitdown docx telegram routine"]
 #   --token-bot  file con il token del bot (dato da @BotFather), letto e poi cancellato: il token non passa dalla riga di comando
 #   --moduli     quali moduli installare; google si aggiunge dopo, con il cliente (progetto Google Cloud e consenso)
+#                sessione = la sessione principale sempre accesa (Remote Control + messaggi del bot), scripts/sessione-principale.sh
+# Login di Claude: se c'è ~/.config/metis/claude-oauth-token (claude setup-token, 600), diventa METIS_CLAUDE_TOKEN_FILE.
 # Prima: il plugin (claude plugin marketplace add … e claude plugin install metis@metis): lo fa questo script se manca.
 # Non fa: il login di Claude, la chat del bot (il cliente deve prima scrivergli «ciao»), Google.
 
 set -uo pipefail
-NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine"
+NOME=""; VAULT="$HOME/Vault"; GIRI="daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione"
 REPO="${METIS_REPO:-eugeniogotti-prog/metis}"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -51,6 +53,9 @@ $CFG set METIS_VAULT "$VAULT" >/dev/null
 [ -n "$($CFG get METIS_LOG_DIR)" ] || $CFG set METIS_LOG_DIR "$HOME/.local/state/metis" >/dev/null
 [ -n "$($CFG get METIS_LABEL)" ] || $CFG set METIS_LABEL "com.metis.$(id -un)" >/dev/null
 $CFG set METIS_JOBS "$GIRI" >/dev/null
+TOKF="$HOME/.config/metis/claude-oauth-token"
+if [ -f "$TOKF" ]; then chmod 600 "$TOKF"; $CFG set METIS_CLAUDE_TOKEN_FILE "$TOKF" >/dev/null; echo "  ✅ login di Claude dal token di lunga durata"
+else echo "  ⏳ login di Claude non ancora fatto (claude setup-token, salvato in $TOKF)"; fi
 echo "  ✅ vault $VAULT · giri: $GIRI"
 bash "$S/verifica-dotazione.sh" fondamenta $MODULI | grep -E '❌|⚠️' && { male "manca qualcosa (sopra): prepara-vps.sh"; ERR=1; } || echo "  ✅ dotazione completa"
 
@@ -90,6 +95,22 @@ for m in $MODULI; do
         echo "  ⏳ chat del cliente non ancora nota: il cliente scrive «ciao» al bot, poi si rilancia questo script"
       fi ;;
     routine) bash "$S/moduli/routine.sh" installa 2>&1 | tail -3 | sed 's/^/  /' ;;
+    sessione)
+      # Una sessione che nessuno guarda non deve fermarsi su una domanda: prima configurazione già fatta, modalità
+      # senza permessi già accettata, niente suggerimenti di prompt.
+      python3 - <<'PY'
+import json, os
+def aggiorna(p, f):
+    try: d = json.load(open(p))
+    except (OSError, ValueError): d = {}
+    f(d); t = p + ".tmp"; json.dump(d, open(t, "w"), indent=2); os.chmod(t, 0o600); os.replace(t, p)
+os.makedirs(os.path.expanduser("~/.claude"), exist_ok=True)
+aggiorna(os.path.expanduser("~/.claude/settings.json"),
+         lambda d: d.update(skipDangerousModePermissionPrompt=True, promptSuggestionEnabled=False))
+aggiorna(os.path.expanduser("~/.claude.json"), lambda d: (d.update(hasCompletedOnboarding=True), d.setdefault("theme", "dark")))
+print("  ✅ Claude Code senza domande alla prima apertura")
+PY
+      bash "$S/sessione-principale.sh" installa 2>&1 | tail -1 | sed 's/^/  /' ;;
     *) male "modulo «$m» non gestito qui (si installa con la skill)"; ERR=1 ;;
   esac
 done
