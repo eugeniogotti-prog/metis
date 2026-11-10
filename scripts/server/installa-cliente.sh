@@ -72,7 +72,8 @@ fi
 if [ -f "$TOKF" ]; then chmod 600 "$TOKF"; $CFG set METIS_CLAUDE_TOKEN_FILE "$TOKF" >/dev/null; echo "  ✅ login di Claude dal token di lunga durata"
 elif [ "$COMPLETO" = 0 ]; then echo "  ⏳ login di Claude non ancora fatto: bash $METIS_ROOT/scripts/server/login-claude.sh completo (o token)"; fi
 echo "  ✅ vault $VAULT · giri: $GIRI"
-bash "$S/verifica-dotazione.sh" fondamenta $MODULI | grep -E '❌|⚠️' && { male "manca qualcosa (sopra): prepara-vps.sh"; ERR=1; } || echo "  ✅ dotazione completa"
+NOTI=$(for m in $MODULI; do case "$m" in (markitdown|docx|google|microsoft|telegram|voce|routine) printf '%s ' "$m" ;; esac; done)   # i moduli del server non sono nella verifica
+bash "$S/verifica-dotazione.sh" fondamenta $NOTI | grep -E '❌|⚠️' && { male "manca qualcosa (sopra): prepara-vps.sh"; ERR=1; } || echo "  ✅ dotazione completa"
 
 passo "Struttura del vault (blocco 1)"
 bash "$S/installa-struttura.sh" crea | sed 's/^/  /'
@@ -104,7 +105,9 @@ for m in $MODULI; do
       if [ -n "$TOKEN" ] && [ -f "$TOKEN" ]; then
         bash "$S/moduli/telegram.sh" token < "$TOKEN" 2>&1 | sed 's/^/  /' && rm -f "$TOKEN" && echo "  ✅ file del token cancellato"
       fi
-      if bash "$S/moduli/telegram.sh" chat 2>/dev/null | sed 's/^/  /'; then
+      if grep -q '^CHAT_ID=' "$HOME/.config/metis/telegram" 2>/dev/null; then
+        echo "  ✅ chat del cliente già salvata"; bash "$S/moduli/telegram.sh" ascoltatore 2>&1 | tail -1 | sed 's/^/  /'
+      elif bash "$S/moduli/telegram.sh" chat 2>/dev/null | sed 's/^/  /'; then
         bash "$S/moduli/telegram.sh" ascoltatore 2>&1 | tail -1 | sed 's/^/  /'
       else
         echo "  ⏳ chat del cliente non ancora nota: il cliente scrive «ciao» al bot, poi si rilancia questo script"
@@ -133,7 +136,7 @@ PY
       bash "$S/lib/servizi.sh" genera riunioni sempre /usr/bin/python3 "$S/server/riunioni.py" ascolta >/dev/null \
         && bash "$S/lib/servizi.sh" carica riunioni 2>&1 | tail -1 | sed 's/^/  /'
       echo "  ✅ ingresso delle riunioni; segreto per la Scorciatoia: python3 $S/server/riunioni.py segreto" ;;
-    *) male "modulo «$m» non gestito qui (si installa con la skill)"; ERR=1 ;;
+    *) male "modulo «${m}» non gestito qui (si installa con la skill)"; ERR=1 ;;
   esac
 done
 

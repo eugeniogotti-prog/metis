@@ -86,7 +86,7 @@ case "${1:-}" in
     bash "$METIS_ROOT/scripts/lib/servizi.sh" genera sessione sempre /bin/bash "$METIS_ROOT/scripts/sessione-principale.sh" guarda || exit 1
     bash "$METIS_ROOT/scripts/configura.sh" set METIS_CONVERSAZIONE sessione >/dev/null
     bash "$METIS_ROOT/scripts/lib/servizi.sh" carica sessione || exit 1
-    echo "sessione: sessione principale «$NOME» sempre accesa (tmux $T); i messaggi del bot vanno a lei" ;;
+    echo "sessione: sessione principale «${NOME}» sempre accesa (tmux $T); i messaggi del bot vanno a lei" ;;
   stato)
     if claude_vivo; then echo "✅ sessione principale attiva (tmux $T)"; else echo "❌ sessione principale ferma (tmux $T)"; exit 1; fi ;;
   scrivi)

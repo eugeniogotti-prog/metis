@@ -12,9 +12,10 @@
 #       lanciare comandi; ha una password casuale che nessuno conosce, finché non la imposta chi assiste il cliente:
 #   sudo filebrowser-password <utente-web>     chiede la password senza mostrarla (almeno 12 caratteri) e la imposta.
 #   web.sh --controlla --nome <nome dns>       servizi attivi, certificato, ACL, risposta da fuori.
+#   --cambia-nome                              necessario per cambiare il nome di un server già configurato.
 
 set -uo pipefail
-NOME=""; CLIENTE="metis"; UWEB="ospite"; AZ=prepara
+NOME=""; CLIENTE="metis"; UWEB="ospite"; AZ=prepara; CAMBIA=""
 FB_VER="v2.63.23"; FB_PORTA=8081; RIU_PORTA=8765
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -22,6 +23,7 @@ while [ $# -gt 0 ]; do
     --cliente) CLIENTE="${2:-}"; shift 2 ;;
     --utente-web) UWEB="${2:-}"; shift 2 ;;
     --controlla) AZ=controlla; shift ;;
+    --cambia-nome) CAMBIA=1; shift ;;
     -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "web: opzione sconosciuta «$1»" >&2; exit 2 ;;
   esac
@@ -47,6 +49,15 @@ if [ "$AZ" = controlla ]; then
   c "filebrowser fuori dal servizio non entra nella home" '! sudo -u filebrowser ls /home/'"$CLIENTE"'/'
   c "HTTPS risponde" 'curl -fsS -o /dev/null https://'"$NOME"'/'
   exit "$ERR"
+fi
+
+# Un server già configurato con un altro nome non si rinomina per sbaglio: l'indirizzo vecchio smetterebbe di funzionare
+# (successo il 10/11/2026 in una prova). Per cambiarlo davvero: --cambia-nome.
+if [ -f /etc/caddy/Caddyfile ] && grep -q "Scritto da web.sh" /etc/caddy/Caddyfile; then
+  ATTUALE=$(awk '/^[^#[:space:]].*\{$/ {print $1; exit}' /etc/caddy/Caddyfile)
+  if [ -n "$ATTUALE" ] && [ "$ATTUALE" != "$NOME" ] && [ -z "$CAMBIA" ]; then
+    male "il server risponde già come ${ATTUALE}: per passare a $NOME aggiungere --cambia-nome (l'indirizzo vecchio smette di funzionare)"; exit 1
+  fi
 fi
 
 echo "== Pacchetti"

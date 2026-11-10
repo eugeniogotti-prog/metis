@@ -14,6 +14,9 @@
 #   sudo prepara-vps.sh --chiudi-root
 #       da lanciare collegati come amministratore (ssh <admin>@server, poi sudo): che il comando arrivi fin qui dimostra
 #       che l'accesso dell'amministratore e il suo sudo funzionano. Solo allora toglie a root l'accesso SSH.
+#   prepara-vps.sh --ip-fidato <ip>|-
+#       durante l'installazione: fail2ban non blocca l'indirizzo di chi installa (ignoreip), anche dopo molte prove di
+#       accesso fallite; con «-» si toglie, a installazione finita (metis-server.sh lo fa da solo).
 #   prepara-vps.sh --controlla
 #       dice che cosa è a posto e che cosa manca, senza cambiare niente (uscita 1 se manca qualcosa).
 #
@@ -23,7 +26,7 @@
 set -uo pipefail
 export DEBIAN_FRONTEND=noninteractive NEEDRESTART_SUSPEND=1 LC_ALL=C.UTF-8
 
-ADMIN=""; CHIAVE=""; CLIENTE="metis"; FUSO="Europe/Rome"; SWAP="2G"; AZIONE=prepara
+ADMIN=""; CHIAVE=""; CLIENTE="metis"; FUSO="Europe/Rome"; SWAP="2G"; AZIONE=prepara; FIDATO=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --admin) ADMIN="${2:-}"; shift 2 ;;
@@ -32,6 +35,7 @@ while [ $# -gt 0 ]; do
     --fuso) FUSO="${2:-}"; shift 2 ;;
     --swap) SWAP="${2:-}"; shift 2 ;;
     --chiudi-root) AZIONE=chiudi; shift ;;
+    --ip-fidato) AZIONE=fidato; FIDATO="${2:-}"; shift 2 ;;
     --controlla) AZIONE=controlla; shift ;;
     -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "prepara-vps: opzione sconosciuta «$1» (--help)" >&2; exit 2 ;;
@@ -71,6 +75,17 @@ if [ "$AZIONE" = controlla ]; then
   if [ "$(sshd -T | awk '/^permitrootlogin/{print $2}')" = no ]; then fatto "root senza accesso SSH"
   else echo "  ⚠️ root entra ancora con la chiave (si chiude con: sudo prepara-vps.sh --chiudi-root, da amministratore)"; fi
   exit "$ERR"
+fi
+
+# ---------------------------------------------------------------- indirizzo fidato (fail2ban)
+if [ "$AZIONE" = fidato ]; then
+  F=/etc/fail2ban/jail.d/metis-fidato.local
+  if [ "$FIDATO" = - ]; then rm -f "$F"; fatto "nessun indirizzo fidato in fail2ban"
+  else
+    [[ "$FIDATO" =~ ^[0-9a-fA-F.:/]+$ ]] || { male "indirizzo non valido: ${FIDATO}"; exit 2; }
+    printf '[DEFAULT]\nignoreip = 127.0.0.1/8 ::1 %s\n' "$FIDATO" > "$F"; fatto "fail2ban non blocca ${FIDATO} (togliere a fine installazione: --ip-fidato -)"
+  fi
+  systemctl reload fail2ban 2>/dev/null || systemctl restart fail2ban; exit 0
 fi
 
 # ---------------------------------------------------------------- chiudi root
