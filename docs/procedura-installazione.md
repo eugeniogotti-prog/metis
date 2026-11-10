@@ -149,6 +149,33 @@ Dalla 0.5.0 lo stesso plugin funziona anche su Linux (provato su Ubuntu 24.04 co
 - **Un posto solo per automatismi e bot.** Con il vault allineato fra Mac e server, un giro che parte sui due scrive due volte; Telegram ammette un solo ascoltatore per bot. Nel passaggio: sul Mac `routine.sh togli <lavoro>` per ogni giro e `servizi.sh scarica telegram`; si allinea il vault; sul server `installa routine` e, per il bot già esistente, la copia di `telegram` e `telegram-stato.json` (modulo Telegram, «Un solo ascoltatore per bot») e `telegram.sh ascoltatore`.
 - **Prova:** `tests/test-linux.sh` (ovunque, con un systemctl finto) e `PROVA_VERA=1 bash tests/test-linux.sh` (su Linux, con il systemd vero: genera, carica, fa partire un giro e l'ascoltatore, poi toglie tutto).
 
+## Metis gestito su un server del cliente
+
+Per il cliente che non usa il terminale: lavora dall'app di Claude (Remote Control) e da Telegram, e chi lo assiste entra nel server con la propria chiave. Il server e l'abbonamento Claude sono intestati al cliente. Provato il 10/11/2026 su un server di prova (Ubuntu 24.04, 2 vCPU, 4 GB).
+
+1. **Server** (da root, una volta): `scripts/server/prepara-vps.sh --admin <utente> --chiave <file .pub>`.
+   - Cosa prepara: pacchetti, sicurezza (SSH solo con chiave, ufw con la sola 22, fail2ban, aggiornamenti di sicurezza automatici), lingua e fuso, swap, Node 22, rclone.
+   - Utenti: l'amministratore (sudo, solo chiave) e l'utente del cliente (`metis`, senza password né SSH, con il linger), con Claude Code e uv.
+   - Si può rilanciare: ripete solo ciò che manca. Con `--controlla` si verifica che sia tutto a posto.
+   - Dopo una prova d'accesso come amministratore: `sudo prepara-vps.sh --chiudi-root`.
+2. **Metis per il cliente**, collegati con `ssh -t`, poi `sudo -iu metis bash <percorso assoluto>/installa-cliente.sh --nome "<Nome>" --token-bot <file> --login completo`.
+   - Installa plugin, struttura, memoria, permessi, la fiducia nella cartella e i moduli: markitdown, docx, telegram, routine, sessione, controllo.
+   - Il token del bot si legge da un file, che poi si cancella. Se la chat del bot non è ancora nota, il cliente scrive «ciao» al bot e si rilancia.
+3. **Login di Claude** (`scripts/server/login-claude.sh`, verificato il 10/11/2026 con Claude Code 2.1.322):
+   - **completo** (`claude auth login`): dà Remote Control e i connettori di claude.ai. Claude Code lo rinnova da solo; la scadenza dichiarata (`loginExpiresAt`) è un mese dopo. Se si sposti in avanti con l'uso lo dice il registro `scadenze.log` del controllo giornaliero;
+   - **token** (`claude setup-token`, un anno): solo il lavoro di Claude, senza Remote Control né connettori («Remote Control requires a full-scope login token»). Fa da riserva per giri e bot. Lo script lo cattura da solo e lo salva solo se è intero.
+   - Se c'è il login completo, prevale sul token, che altrimenti lo scavalcherebbe.
+4. **Sessione principale** (`scripts/sessione-principale.sh`): una sola sessione sempre accesa in tmux, con Remote Control. Un guardiano systemd la rilancia sulla stessa conversazione. Il bot le consegna i messaggi (`METIS_CONVERSAZIONE=sessione`) e lei risponde su Telegram.
+5. **Connettori:** il login completo porta sul server tutti i connettori dell'account, anche quelli che il lavoro non prevede (per esempio un broker). Quelli non previsti si spengono per il vault con `/mcp`, oppure in `disabledMcpServers` del progetto in `~/.claude.json`, prima di dare il bot a chi scrive.
+6. **Controllo di ogni mattina** (`scripts/server/controllo-giornaliero.sh`, alle 7:15): login e scadenza, un giro vero di Claude, token di riserva, sessione, bot, Google, sincronizzazione, spazio.
+   - Se qualcosa non va, o un accesso scade entro 7 giorni, scrive al cliente su Telegram.
+   - Il login si rinnova dal telefono: il cliente scrive «/accesso» al bot, apre il link, autorizza e rimanda il codice (`scripts/server/rinnovo-accesso.sh`).
+7. **File di lavoro** (`scripts/moduli/sync.sh`): per le cartelle che stanno in un cloud, rclone bisync nei due versi ogni 5 minuti.
+   - Versioni locali per 30 giorni; esclusioni dei file temporanei; in caso di conflitto vince il più recente e l'altro resta accanto. Prova: `tests/test-sync.sh`.
+   - Il remoto si crea con il cliente (`rclone config`, con il suo consenso), poi `sync.sh aggiungi <remoto:percorso> <cartella>` e `sync.sh installa`.
+   - Per i file che stanno solo sul computer del cliente: Syncthing fra il computer e il server, con versioni, da progettare quando serve.
+8. **Backup:** le istantanee del fornitore del server (Hetzner: giornaliere, sette giorni), più una copia cifrata dei dati in un posto diverso, intestato al cliente (per esempio restic su uno spazio di archiviazione suo). La copia è da progettare con il primo cliente vero: a oggi non c'è uno script.
+
 ## Che cosa c'è
 
 - `skills/` — installa, onboarding, definizione-obiettivi, impegni, autorevisione, archiviazione, daily-digest, weekly-digest, inbox-processor.
