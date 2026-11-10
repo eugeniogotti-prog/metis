@@ -25,6 +25,7 @@ SEGRETO = os.path.join(CFG_DIR, "riunioni-segreto")
 ARRIVI = os.path.expanduser("~/.local/share/metis/riunioni")
 PORTA = int(os.environ.get("METIS_RIUNIONI_PORTA", "8765"))
 MAX_BYTE = 400 * 1024 * 1024
+MIN_BYTE = 4096   # sotto non è una registrazione: si rifiuta subito, senza lavoro né messaggi
 PEZZO_SEC = 1200
 ESTENSIONI = {"audio/x-m4a": ".m4a", "audio/m4a": ".m4a", "audio/mp4": ".m4a", "audio/mpeg": ".mp3", "audio/wav": ".wav",
               "audio/x-wav": ".wav", "audio/aac": ".aac", "audio/ogg": ".ogg", "audio/webm": ".webm"}
@@ -119,22 +120,59 @@ class Gestore(http.server.BaseHTTPRequestHandler):
         atteso = segreto()
         if not atteso or not hmac.compare_digest(self.headers.get("X-Metis-Segreto", ""), atteso):
             time.sleep(1); return self.rispondi(403, "Non autorizzato.")
+        a_pezzi = "chunked" in (self.headers.get("Transfer-Encoding") or "").lower()
         n = int(self.headers.get("Content-Length") or 0)
-        if n <= 0 or n > MAX_BYTE:
-            return self.rispondi(413, "Registrazione vuota o troppo grande.")
+        if not a_pezzi and n <= 0:
+            print(f"rifiutata: corpo vuoto (nessuna Content-Length, nessun invio a pezzi)", flush=True)
+            return self.rispondi(400, "Registrazione vuota: riprova da Condividi.")
+        if n > MAX_BYTE:
+            print(f"rifiutata: {n} byte, oltre il limite", flush=True)
+            return self.rispondi(413, "Registrazione troppo grande.")
         os.makedirs(ARRIVI, mode=0o700, exist_ok=True)
         tipo = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
-        f = os.path.join(ARRIVI, f"{datetime.datetime.now():%Y%m%d-%H%M%S}{ESTENSIONI.get(tipo, '.m4a')}")
+        f = os.path.join(ARRIVI, f"{datetime.datetime.now():%Y%m%d-%H%M%S}-{secrets.token_hex(3)}{ESTENSIONI.get(tipo, '.m4a')}")
         fd = os.open(f, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        resto = n
+        scritti, completo = 0, True
         with os.fdopen(fd, "wb") as out:
-            while resto > 0:
-                blocco = self.rfile.read(min(1 << 20, resto))
-                if not blocco:
-                    break
-                out.write(blocco); resto -= len(blocco)
-        if resto:
-            os.remove(f); return self.rispondi(400, "Registrazione arrivata a metà: riprova.")
+            if a_pezzi:   # Transfer-Encoding: chunked (dimensione non dichiarata in anticipo)
+                while True:
+                    riga = self.rfile.readline(65537).strip()
+                    try:
+                        dim = int(riga.split(b";")[0], 16)
+                    except ValueError:
+                        completo = False; break
+                    if dim == 0:
+                        while self.rfile.readline(65537).strip():   # eventuali intestazioni finali
+                            pass
+                        break
+                    if scritti + dim > MAX_BYTE:
+                        completo = False; break
+                    resto = dim
+                    while resto > 0:
+                        blocco = self.rfile.read(min(1 << 20, resto))
+                        if not blocco:
+                            break
+                        out.write(blocco); resto -= len(blocco); scritti += len(blocco)
+                    self.rfile.readline(3)   # il CRLF dopo ogni pezzo
+                    if resto:
+                        completo = False; break
+            else:
+                resto = n
+                while resto > 0:
+                    blocco = self.rfile.read(min(1 << 20, resto))
+                    if not blocco:
+                        break
+                    out.write(blocco); resto -= len(blocco); scritti += len(blocco)
+                completo = resto == 0
+        if completo and scritti < MIN_BYTE:
+            os.remove(f)
+            print(f"rifiutata: {scritti} byte, troppo pochi per una registrazione (a pezzi: {a_pezzi})", flush=True)
+            return self.rispondi(400, "Registrazione vuota o troppo corta.")
+        if not completo or scritti == 0:
+            os.remove(f)
+            print(f"rifiutata: arrivata a metà o troppo grande ({scritti} byte, a pezzi: {a_pezzi})", flush=True)
+            return self.rispondi(400, "Registrazione arrivata a metà o troppo grande: riprova.")
+        print(f"ricevuta: {scritti} byte, tipo {tipo or '?'}, a pezzi: {a_pezzi}", flush=True)
         titolo = self.headers.get("X-Titolo", "")[:60]
         self.rispondi(200, "Ricevuta. La trascrivo e ti scrivo su Telegram.")
         threading.Thread(target=lavora_e_avvisa, args=(f, titolo), daemon=True).start()

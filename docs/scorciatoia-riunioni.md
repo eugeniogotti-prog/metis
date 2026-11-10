@@ -16,6 +16,12 @@ Sul server servono `web.sh` (HTTPS) e il modulo `riunioni` di `installa-cliente.
 
 ## Creare la Scorciatoia «Manda riunione» (modo 1)
 
+**Il modo più semplice: farla già pronta dal Mac.** Chi assiste il cliente lancia, sul suo Mac:
+`python3 <plugin>/scripts/server/scorciatoia.py --url https://<nome del server>/riunione --segreto <file con il segreto>`
+Lo script crea la Scorciatoia con indirizzo e segreto già dentro, la firma con `shortcuts sign --mode anyone` e la lascia sulla Scrivania. Si manda al cliente via AirDrop o con una mail a se stesso: un tocco sull'iPhone e la Scorciatoia è installata. Il file contiene il segreto: va mandato solo al cliente. Provato il 10/11/2026 con una riunione vera di 47 minuti.
+
+Altrimenti, a mano:
+
 App **Comandi rapidi** → **+** → nome **Manda riunione**.
 1. Tocca **ⓘ** (dettagli) e attiva **Mostra nel foglio di condivisione**. Come tipo accettato lascia solo **File multimediali**, oppure **Audio** se compare.
 2. Aggiungi l'azione **Ottieni contenuto dell'URL**:
