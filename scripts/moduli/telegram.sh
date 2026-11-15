@@ -2,7 +2,10 @@
 # telegram.sh — modulo Telegram: il bot del cliente.
 # Uso:
 #   telegram.sh token          legge il token del bot dallo stdin (non si vede a schermo) e lo salva in ~/.config/metis/telegram (600)
-#   telegram.sh chat           dopo che il cliente ha scritto al bot: trova la sua chat privata e la salva
+#   telegram.sh codice         il codice di abbinamento (sei cifre, creato al primo uso e tenuto nel file dei segreti)
+#   telegram.sh chat           dopo che il cliente ha mandato il codice al bot: trova la sua chat privata e la salva.
+#                              Il codice è la prova che la chat è del cliente: senza, chiunque scrivesse per primo al bot
+#                              ne diventerebbe il padrone (revisione di sicurezza del 15/11/2026).
 #   telegram.sh prova          manda un messaggio di prova alla chat del cliente (unico destinatario ammesso)
 #   telegram.sh ascoltatore [--senza-caricare]   genera l'automatismo sempre acceso che ascolta il bot e lo carica
 #                                                (LaunchAgent su Mac, servizio systemd su Linux: un solo ascoltatore per bot)
@@ -36,11 +39,17 @@ case "${1:-}" in
     [[ "$T" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] || { echo "telegram: non sembra un token di bot (numero:lettere)" >&2; exit 1; }
     scrivi_segreto TOKEN "$T"
     token_valido && echo "telegram: token salvato e valido" || { echo "telegram: token salvato, ma Telegram non lo riconosce" >&2; exit 1; } ;;
+  codice)
+    C=$(leggi_segreto CODICE)
+    if [ -z "$C" ]; then C=$(python3 -c 'import secrets; print("%06d" % secrets.randbelow(10**6))'); scrivi_segreto CODICE "$C"; fi
+    echo "$C" ;;
   chat)
-    OUT=$("${TG[@]}" trova-chat) || { echo "telegram: nessun messaggio privato al bot. Scrivi «ciao» al bot dal telefono e rilancia." >&2; exit 1; }
+    C=$(bash "$0" codice) || exit 1
+    OUT=$("${TG[@]}" trova-chat "$C") || { echo "telegram: il codice non è ancora arrivato. Il cliente mandi al suo bot, dal telefono, questo messaggio: $C — poi rilancia." >&2; exit 1; }
     N=$(printf '%s\n' "$OUT" | grep -c .)
-    [ "$N" = 1 ] || { echo "telegram: più chat hanno scritto al bot; scegli la tua:" >&2; printf '%s\n' "$OUT" >&2; exit 1; }
+    [ "$N" = 1 ] || { echo "telegram: più chat hanno mandato il codice al bot; non ne salvo nessuna (controlla chi altro conosce il bot):" >&2; printf '%s\n' "$OUT" >&2; exit 1; }
     scrivi_segreto CHAT_ID "$(printf '%s' "$OUT" | cut -f1)"
+    grep -v '^CODICE=' "$SEG" > "$SEG.tmp"; chmod 600 "$SEG.tmp"; mv "$SEG.tmp" "$SEG"   # usato: non serve più
     echo "telegram: chat salvata ($(printf '%s' "$OUT" | cut -f2))" ;;
   prova)
     "${TG[@]}" invia "Messaggio di prova di $METIS_PRODOTTO: il bot funziona." && echo "telegram: messaggio di prova mandato" ;;

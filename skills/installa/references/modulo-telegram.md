@@ -12,7 +12,7 @@ Il bot scrive soltanto alla chat del cliente e ascolta soltanto lei: i messaggi 
 
 1. **Il bot.** Il cliente apre Telegram, cerca @BotFather, scrive `/newbot`, sceglie un nome e un nome utente (deve finire in «bot»), e riceve un token. Claude non vede lo schermo del telefono: lo guida a parole.
 2. **Il token.** `bash scripts/moduli/telegram.sh token`: il cliente incolla il token, che non compare a schermo e va in `~/.config/metis/telegram` con permessi 600. Lo script verifica con Telegram che il token sia valido.
-3. **La chat.** Il cliente scrive «ciao» al suo bot dal telefono; poi `bash scripts/moduli/telegram.sh chat`.
+3. **La chat.** `bash scripts/moduli/telegram.sh codice` mostra un codice di sei cifre; il cliente lo manda al suo bot dal telefono; poi `bash scripts/moduli/telegram.sh chat`. Il codice prova che la chat è del cliente: si salva solo la chat che l'ha mandato, e se l'hanno mandato più chat non se ne salva nessuna.
 4. **Uscita e prova.** `bash scripts/moduli/telegram.sh installa`: manda un messaggio di prova. Il cliente conferma di averlo ricevuto.
 5. **Inbox e conversazione** (se li vuole). `bash scripts/moduli/telegram.sh ascoltatore`: genera e carica l'automatismo sempre acceso che ascolta il bot (LaunchAgent sul Mac, servizio systemd su Linux). Si prova dal telefono: un link (atteso: «Salvato nell'Inbox» e la nota in `<Inbox>/telegram`), poi una domanda sui suoi lavori (attesa: la risposta di Claude).
 6. **Voce** (se la vuole). Il cliente crea un account su console.groq.com e una chiave API; `bash scripts/moduli/voce.sh chiave`; `bash scripts/moduli/voce.sh controlla`. Dal telefono: un vocale che comincia con «nota…».

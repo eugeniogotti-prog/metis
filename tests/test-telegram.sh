@@ -103,6 +103,16 @@ check "vocale che Whisper riduce a «Grazie a tutti.»: scartato" 'grep -q "Non 
 check "nessuna conversazione dai vocali scartati" '[ "$(wc -l < "$T/claude-chiamate.txt")" = "$N1" ]'
 check "inoltro da un canale (forward_from_chat) → Inbox" 'grep -rlq "Testo inoltrato da un gruppo" "$I/telegram"'
 
+echo "5c. File ricevuti: nomi d'istruzioni e omonimi (revisione di sicurezza del 15/11/2026)"
+for f in doc2 doc3 doc4; do printf 'contenuto %s' "$f" > "$T/finto/file/$f"; done
+{ echo "["; upd 50 4242 '"document":{"file_id":"doc2","file_name":"CLAUDE.md"},"forward_date":1790000000'; echo ","
+  upd 51 4242 '"document":{"file_id":"doc3","file_name":"preventivo.pdf"},"caption":"seconda versione"'; echo ","
+  upd 52 4242 '"document":{"file_id":"doc4","file_name":".claude"}'; echo "]"; } > "$T/finto/aggiornamenti.json"
+$TG ascolta --una-volta >/dev/null 2>&1
+check "file inoltrato di nome CLAUDE.md: salvato con un altro nome (prima no)" '[ ! -e "$I/files/CLAUDE.md" ] && [ -f "$I/files/ricevuto - CLAUDE.md" ]'
+check "file con il nome di uno già ricevuto: non lo sovrascrive (prima sì)" '[ -f "$I/files/preventivo (2).pdf" ] && [ -f "$I/files/preventivo.pdf" ]'
+check "file che comincia con un punto: salvato visibile" '[ ! -e "$I/files/.claude" ] && [ -f "$I/files/ricevuto - claude" ]'
+
 echo "6. Script del modulo telegram (configurazione guidata)"
 export METIS_LAUNCHAGENTS="$T/LaunchAgents"
 rm -f "$T/cfg/telegram"
@@ -112,8 +122,13 @@ check "token non valido nella forma: rifiutato" '! printf "non-un-token\n" | $M 
 check "token sbagliato per Telegram: segnalato" '! printf "555:sbagliato\n" | $M token 2>/dev/null'
 printf '123:finto\n' | $M token >/dev/null 2>&1
 check "token giusto: salvato con permessi 600" '[ "$(stat -f %Lp "$T/cfg/telegram")" = 600 ] && grep -q "^TOKEN=123:finto" "$T/cfg/telegram"'
-echo "[$(upd 20 4242 '"text":"ciao"')]" > "$T/finto/aggiornamenti.json"
-check "chat trovata dal primo messaggio" '$M chat >/dev/null && grep -q "^CHAT_ID=4242" "$T/cfg/telegram"'
+echo "[$(upd 19 999 '"text":"ciao"')]" > "$T/finto/aggiornamenti.json"
+check "abbinamento: una chat estranea senza codice non viene salvata (prima sì)" '! $M chat >/dev/null 2>&1 && ! grep -q "^CHAT_ID=" "$T/cfg/telegram"'
+check "abbinamento: il messaggio d'errore mostra il codice da mandare" '$M chat 2>&1 | grep -q "$($M codice)"'
+COD=$($M codice)
+echo "[$(upd 19 999 '"text":"ciao"'),$(upd 20 4242 "\"text\":\"$COD\"")]" > "$T/finto/aggiornamenti.json"
+check "abbinamento: salvata la sola chat che ha mandato il codice" '$M chat >/dev/null && grep -q "^CHAT_ID=4242" "$T/cfg/telegram" && ! grep -q "^CODICE=" "$T/cfg/telegram"'
+check "abbinamento: file dei segreti ancora 600" '[ "$(stat -f %Lp "$T/cfg/telegram")" = 600 ]'
 check "installa: regola d'invio aggiunta alle regole delle routine" '$M installa >/dev/null && grep -q "metis_telegram.py invia" "$T/cfg/permessi-routine.json"'
 check "installa: prova mandata e modulo registrato" '$M installa >/dev/null && grep -q "Messaggio di prova di" "$T/finto/inviati.jsonl" && bash "$ROOT/scripts/configura.sh" get METIS_MODULI | grep -qw telegram'
 check "ascoltatore: LaunchAgent generato e valido (non caricato)" '$M ascoltatore --senza-caricare >/dev/null && plutil -lint "$T/LaunchAgents/"*.telegram.plist >/dev/null'

@@ -2,7 +2,7 @@
 # metis-server.sh — dal Mac di chi installa: porta un server Ubuntu 24.04 appena creato fino a Metis «gestito» pronto per il
 # cliente. Fa da solo tutto ciò che può e si ferma, chiedendo, solo dove serve una persona:
 #   👤 login di Claude (link e codice) · 👤 connettori da tenere · 👤 chiave di Groq · 👤 password di FileBrowser ·
-#   👤 il «ciao» del cliente al suo bot. (Creare il server e aprire la Scorciatoia sull'iPhone restano fuori dallo script.)
+#   👤 il codice di abbinamento che il cliente manda al suo bot. (Creare il server e aprire la Scorciatoia sull'iPhone restano fuori dallo script.)
 # Si può rilanciare quante volte si vuole: ogni passo controlla prima che cosa c'è già. Guida: docs/server-da-zero.md.
 #
 # Uso:
@@ -166,10 +166,10 @@ passo "9. Bot Telegram"
 bot_ok() { cliente "bash $PLUGIN/scripts/moduli/telegram.sh controlla" 2>/dev/null | grep -q 'chat.*salvat\|✅ chat'; }
 if cliente "test -s ~/.config/metis/telegram"; then
   if ! cliente "grep -q '^CHAT_ID=' ~/.config/metis/telegram"; then
-    umano "Il cliente scriva «ciao» al suo bot dal telefono."
+    umano "Il cliente mandi al suo bot, dal telefono, questo messaggio: $(cliente "bash $PLUGIN/scripts/moduli/telegram.sh codice" 2>/dev/null) (è la prova che la chat è sua)."
     if chiedi "Fatto? Salvo la chat e accendo l'ascoltatore"; then cliente "$ESEGUI --moduli telegram" | grep -E '✅|⏳|❌|chat' | sed 's/^/ /'; fi
   fi
-  cliente "grep -q '^CHAT_ID=' ~/.config/metis/telegram" && ok "chat del cliente salvata" || MANCA+=("chat del bot: il cliente scrive «ciao», poi rilanciare")
+  cliente "grep -q '^CHAT_ID=' ~/.config/metis/telegram" && ok "chat del cliente salvata" || MANCA+=("chat del bot: il cliente manda al bot il codice di abbinamento, poi rilanciare")
 else no "token del bot mancante (--token-bot <file>)"; MANCA+=("bot: --token-bot <file con il token di @BotFather>"); fi
 
 # --- 10. collaudo ---------------------------------------------------------------------------------------------------------

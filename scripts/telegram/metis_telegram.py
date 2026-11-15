@@ -118,6 +118,25 @@ def scarica(token, file_id, destinazione):
     return destinazione
 
 
+# Nomi che Claude Code legge come istruzioni se il file sta in una cartella del vault (revisione di sicurezza del
+# 15/11/2026): un file inoltrato al bot con uno di questi nomi, o che comincia con un punto, si salva con «ricevuto - »
+# davanti. Il nome viene dal mittente originale del messaggio inoltrato, non dal cliente.
+NOMI_ISTRUZIONI = {"claude.md", "claude.local.md", "agents.md", "gemini.md", "kimi.md", ".mcp.json", "settings.json",
+                   "settings.local.json"}
+
+
+def nome_ricevuto(cartella, nome):
+    """Il percorso dove salvare un file ricevuto: nome ripulito, mai un nome di istruzioni, mai sopra un file che c'è già."""
+    nome = os.path.basename(nome.replace("\\", "/")).strip() or "file"
+    if nome.lower() in NOMI_ISTRUZIONI or nome.startswith("."):
+        nome = "ricevuto - " + nome.lstrip(".")
+    base, est = os.path.splitext(nome)
+    dest, n = os.path.join(cartella, nome), 2
+    while os.path.exists(dest):
+        dest = os.path.join(cartella, f"{base} ({n}){est}"); n += 1
+    return dest
+
+
 def invia(token, chat, testo):
     testo = testo.strip() or "(risposta vuota)"
     for i in range(0, len(testo), MAX_MSG):
@@ -268,7 +287,7 @@ def smista(cfg, token, chat, stato, msg):
     if doc:
         nome = doc.get("file_name") or f"{quando:%Y-%m-%d %H%M%S} foto.jpg"
         os.makedirs(os.path.join(cfg["inbox"], "files"), exist_ok=True)
-        dest = os.path.join(cfg["inbox"], "files", os.path.basename(nome))
+        dest = nome_ricevuto(os.path.join(cfg["inbox"], "files"), nome)
         scarica(token, doc["file_id"], dest)
         p = scrivi_nota(inbox_tg, testo or nome, quando, "File", "telegram", f"\nFile: `{dest}`\n")
         return f"File salvato nell'Inbox: {os.path.basename(dest)}"
@@ -344,11 +363,15 @@ def main(a):
         if not s.get("CHAT_ID"):
             print("chat del cliente non salvata"); return 2
         print("chat del cliente salvata"); return 0
-    if a[0] == "trova-chat":
+    if a[0] == "trova-chat":   # trova-chat [codice]: con il codice, solo le chat che l'hanno mandato (abbinamento)
         s = segreti("telegram")
+        codice = a[1].strip() if len(a) > 1 else ""
         viste = {}
         for u in tg(s["TOKEN"], "getUpdates", {"timeout": 0}):
-            c = (u.get("message") or {}).get("chat") or {}
+            m = u.get("message") or {}
+            c = m.get("chat") or {}
+            if codice and codice not in (m.get("text") or ""):
+                continue
             if c.get("type") == "private":
                 viste[c["id"]] = c.get("first_name", "") + " " + c.get("last_name", "")
         for i, n in viste.items():

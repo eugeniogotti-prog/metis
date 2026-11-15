@@ -18,7 +18,7 @@
 #   completo = claude auth login: Remote Control e connettori di claude.ai. token = claude setup-token, un anno, solo il lavoro
 #   di Claude (niente Remote Control né connettori). Il token in ~/.config/metis/claude-oauth-token diventa METIS_CLAUDE_TOKEN_FILE.
 # Prima: il plugin (claude plugin marketplace add … e claude plugin install metis@metis): lo fa questo script se manca.
-# Non fa: il login di Claude, la chat del bot (il cliente deve prima scrivergli «ciao»), Google.
+# Non fa: il login di Claude, la chat del bot (il cliente deve prima mandargli il codice di abbinamento), Google.
 
 set -uo pipefail
 NOME=""; VAULT="$HOME/Vault"; GIRI="manutenzione daily-digest inbox-processor"; TOKEN=""; MODULI="markitdown docx telegram routine sessione controllo riunioni"
@@ -111,7 +111,7 @@ for m in $MODULI; do
       elif bash "$S/moduli/telegram.sh" chat 2>/dev/null | sed 's/^/  /'; then
         bash "$S/moduli/telegram.sh" ascoltatore 2>&1 | tail -1 | sed 's/^/  /'
       else
-        echo "  ⏳ chat del cliente non ancora nota: il cliente scrive «ciao» al bot, poi si rilancia questo script"
+        echo "  ⏳ chat del cliente non ancora nota: il cliente manda al bot il codice $(bash "$S/moduli/telegram.sh" codice), poi si rilancia questo script"
       fi ;;
     routine) bash "$S/moduli/routine.sh" installa 2>&1 | tail -3 | sed 's/^/  /' ;;
     sessione)

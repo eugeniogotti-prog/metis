@@ -68,7 +68,7 @@ Claude installa protezioni e regole: sessioni **senza richieste di permesso** (`
 - **Posta e calendario.** Google: su claude.ai → Impostazioni → Connettori si attivano Gmail, Calendar e Drive; prova «che cosa ho in calendario domani?»; poi `installa google` mette le routine in sola lettura. Microsoft 365: il connettore di claude.ai, con il consenso di un amministratore dell'IT una volta (testo per l'IT in `skills/installa/references/procedura-m365.md`); poi `installa microsoft`.
 - **Documenti Office e PDF**: `installa markitdown`.
 - **Consegne in Word**: `installa docx` (serve `brew install pandoc`; facoltativo il modello Word del cliente in `METIS_DOCX_MODELLO`).
-- **Telefono**: `installa telegram`. Il cliente crea il bot con @BotFather (Claude lo guida a parole) e incolla il token nel comando che Claude gli indica: il token non compare a schermo e non passa dalla chat. Scrive «ciao» al bot; Claude trova la chat e manda una prova. Se vuole, l'ascoltatore: ciò che manda al bot finisce nell'Inbox e può parlare con Claude. Voce: `installa voce`, con una chiave creata dal cliente su console.groq.com.
+- **Telefono**: `installa telegram`. Il cliente crea il bot con @BotFather (Claude lo guida a parole) e incolla il token nel comando che Claude gli indica: il token non compare a schermo e non passa dalla chat. Manda al bot il codice di sei cifre che Claude gli mostra (`telegram.sh codice`); Claude salva la chat che l'ha mandato e manda una prova. Se vuole, l'ascoltatore: ciò che manda al bot finisce nell'Inbox e può parlare con Claude. Voce: `installa voce`, con una chiave creata dal cliente su console.groq.com.
 - **Giri automatici**: `installa routine`, con gli orari del cliente. Controllo: un briefing di prova scrive la sua riga nella nota del giorno. Costi da dire: Mac acceso agli orari, quota dell'abbonamento.
 
 ### H. Avvio dell'onboarding (dieci minuti del cliente)
@@ -160,7 +160,7 @@ Per il cliente che non usa il terminale: lavora dall'app di Claude (Remote Contr
    - Dopo una prova d'accesso come amministratore: `sudo prepara-vps.sh --chiudi-root`.
 2. **Metis per il cliente**, collegati con `ssh -t`, poi `sudo -iu metis bash <percorso assoluto>/installa-cliente.sh --nome "<Nome>" --token-bot <file> --login completo`.
    - Installa plugin, struttura, memoria, permessi, la fiducia nella cartella e i moduli: markitdown, docx, telegram, routine, sessione, controllo.
-   - Il token del bot si legge da un file, che poi si cancella. Se la chat del bot non è ancora nota, il cliente scrive «ciao» al bot e si rilancia.
+   - Il token del bot si legge da un file, che poi si cancella. Se la chat del bot non è ancora nota, il cliente manda al bot il codice di abbinamento che lo script mostra e si rilancia.
 3. **Login di Claude** (`scripts/server/login-claude.sh`, verificato il 10/11/2026 con Claude Code 2.1.322):
    - **completo** (`claude auth login`): dà Remote Control e i connettori di claude.ai. Claude Code lo rinnova da solo; la scadenza dichiarata (`loginExpiresAt`) è un mese dopo. Se si sposti in avanti con l'uso lo dice il registro `scadenze.log` del controllo giornaliero;
    - **token** (`claude setup-token`, un anno): solo il lavoro di Claude, senza Remote Control né connettori («Remote Control requires a full-scope login token»). Fa da riserva per giri e bot. Lo script lo cattura da solo e lo salva solo se è intero.

@@ -22,7 +22,7 @@ La pagina da lasciare al cliente, senza nulla di tecnico, è `docs/server-guida-
 |---|---|---|---|
 | 1 | Creare il server (§ 1) | installatore, con l'account del cliente | 10 minuti |
 | 2 | Login di Claude: aprire un link, autorizzare, incollare il codice (§ 5) | cliente, con il suo abbonamento | 2 minuti |
-| 3 | Creare il bot con @BotFather e scrivergli «ciao» (§ 7) | cliente, guidato | 5 minuti |
+| 3 | Creare il bot con @BotFather; più tardi, mandargli il codice di abbinamento che lo script mostra (§ 7) | cliente, guidato | 5 minuti |
 | 4 | Chiave di Groq (§ 12) | cliente, guidato | 3 minuti |
 | 5 | Password di FileBrowser (§ 11) | chi la userà | 1 minuto |
 | 6 | Aprire la Scorciatoia sull'iPhone (§ 13) | cliente | 1 minuto |
@@ -86,7 +86,7 @@ Lo script, in ordine:
 9. registra la chat del bot 👤;
 10. fa il collaudo.
 
-Ogni passo controlla prima che cosa c'è già: lo script **si può rilanciare** quante volte si vuole, per esempio dopo il «ciao» del cliente al bot.
+Ogni passo controlla prima che cosa c'è già: lo script **si può rilanciare** quante volte si vuole, per esempio dopo che il cliente ha mandato al bot il codice di abbinamento.
 
 **Opzioni utili:**
 - `--senza-domande`: fa i passi automatici e alla fine elenca i passi umani che mancano;
@@ -183,10 +183,10 @@ Valgono dalla sessione successiva: lo script la riavvia. Provato sul server di p
 
 1. Il cliente, su Telegram, scrive a **@BotFather**: `/newbot`, un nome, un nome utente che finisce in `bot`. BotFather risponde con il **token**.
 2. Il token va in un file sul Mac (600) e si passa allo script con `--token-bot <file>`. Non passa mai dalla chat né dalla riga di comando: sul server si copia leggendolo dallo standard input, e il file d'appoggio si cancella dopo l'uso.
-3. Il cliente scrive **«ciao»** al suo bot. Si rilancia lo script: la chat viene salvata e l'ascoltatore si accende.
+3. Lo script mostra un **codice di sei cifre**: il cliente lo manda al suo bot dal telefono. Si rilancia lo script: si salva la sola chat che ha mandato il codice e l'ascoltatore si accende. Il codice è la prova che la chat è del cliente: senza, chi scrivesse per primo al bot ne diventerebbe il padrone. [da collaudare: introdotto il 15/11/2026, provato solo con il Telegram finto dei test]
 
 **Risultato atteso:** `bash <plugin>/scripts/moduli/telegram.sh controlla` dà tutte righe ✅, e un messaggio del cliente riceve risposta.
-**Se non va:** se la chat non viene trovata, il cliente riscrive «ciao» e si rilancia. Se il token non è valido, BotFather `/token` lo mostra di nuovo.
+**Se non va:** se la chat non viene trovata, il cliente rimanda il codice (`telegram.sh codice` lo mostra di nuovo) e si rilancia. Se più chat hanno mandato il codice, lo script non ne salva nessuna: qualcun altro conosce il bot, e conviene crearne uno nuovo. Se il token non è valido, BotFather `/token` lo mostra di nuovo.
 
 **Come il cliente porta cose nel vault da Telegram:** inoltra al proprio bot messaggi, link, file, foto e vocali, oppure scrive un testo che comincia con «nota». Finiscono in `0 - Inbox/telegram` (i file in `0 - Inbox/files`) e il giro dell'Inbox li colloca. I «Messaggi salvati» dell'account personale non si usano: leggerli richiede le credenziali API dell'account del cliente, e inoltrare al bot fa la stessa cosa.
 
