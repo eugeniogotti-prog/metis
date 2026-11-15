@@ -1,6 +1,7 @@
 #!/bin/bash
-# guardia.sh — hook PreToolUse di Metis. Tre protezioni (più l'instradamento della posta), solo dentro il vault configurato:
-#   1. cartella riservata: ogni strumento che la tocca viene bloccato (deny);
+# guardia.sh — hook PreToolUse di Metis. Tre protezioni (più l'instradamento della posta e i limiti dei giri automatici),
+# nelle sessioni del vault configurato; nelle altre cartelle del Mac solo la prima:
+#   1. percorsi protetti (riservata.py): la cartella riservata e i file delle credenziali di Metis → bloccati (deny);
 #   2. azioni irreversibili: cancellazioni ricorsive, cestino di Obsidian, push, reset, scaricamento dei LaunchAgent → conferma (ask);
 #   3. invii verso l'esterno: strumenti di posta e messaggistica che mandano, inoltrano o rispondono; eventi di calendario
 #      con invitati e risposte agli inviti; condivisioni di file e cartelle (Drive); cancellazioni e cestino degli
@@ -27,7 +28,8 @@ if ! python3 -c '' >/dev/null 2>&1; then
   metis_dentro_vault "${CWD:-${CLAUDE_PROJECT_DIR:-$PWD}}" || exit 0
   chiuso() { printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' "$1" "$2"; exit 0; }
   if [ -n "${METIS_RUOLO_RISERVATA:-}" ]; then
-    case "$INPUT" in *"${METIS_RUOLO_RISERVATA%/}"*) chiuso deny "Cartella riservata (${METIS_RUOLO_RISERVATA%/}): Claude non la legge, non la cerca e non la elenca." ;; esac
+    piano=$(printf '%s' "$INPUT" | tr -d "\"'\\\\" | tr '[:upper:]' '[:lower:]'); rpiano=$(printf '%s' "${METIS_RUOLO_RISERVATA%/}" | tr '[:upper:]' '[:lower:]')
+    case "$piano" in *"$rpiano"*) chiuso deny "Cartella riservata (${METIS_RUOLO_RISERVATA%/}): Claude non la legge, non la cerca e non la elenca." ;; esac
   fi
   case "$TOOL" in
     Bash|mcp__*|"") chiuso ask "Manca python3, quindi la guardia non riesce a controllare ${TOOL:-questo strumento}: serve la conferma del cliente. Rimedio: xcode-select --install, poi riaprire Claude Code." ;;
@@ -45,102 +47,65 @@ print("TOOL=" + shlex.quote(d.get("tool_name", "")))
 print("CWD=" + shlex.quote(d.get("cwd", "")))
 print("CMD=" + shlex.quote(ti.get("command", "") if isinstance(ti, dict) else ""))
 print("TESTO=" + shlex.quote(json.dumps(ti, ensure_ascii=False)))
-inv = [ti.get(k) for k in ("attendees", "attendee", "invitees", "guests", "addAttendees")] if isinstance(ti, dict) else []
-print("INVITATI=" + ("1" if any(v for v in inv) else ""))
+# Invitati: ogni campo il cui nome parla di invitati, a qualunque profondità (attendees, addAttendees, addedAttendees,
+# addedAttendeeEmails, attendeeEmails, invitees, guests…): i connettori cambiano i nomi (revisione del 15/11/2026).
+def invitati(x):
+    if isinstance(x, dict):
+        return any((re.search(r"attendee|invitee|guest", str(k), re.I) and v) or invitati(v) for k, v in x.items())
+    if isinstance(x, list):
+        return any(invitati(v) for v in x)
+    return False
+import re
+print("INVITATI=" + ("1" if invitati(ti) else ""))
+print("URL=" + shlex.quote(str(ti.get("url", "")) if isinstance(ti, dict) else ""))
 ' 2>/dev/null)"
 
-metis_dentro_vault "${CWD:-${CLAUDE_PROJECT_DIR:-$PWD}}" || exit 0
+# La sessione è del vault se lavora nel vault (cartella di lavoro dell'evento o cartella del progetto di Claude Code) o
+# nella cartella fonti fuori dal vault (METIS_DOCUMENTI=separati). Prima del 15/11/2026 la guardia guardava solo la
+# cartella di lavoro: dopo un «cd» nella cartella fonti si spegneva del tutto. Nelle altre cartelle del Mac restano solo
+# i percorsi protetti (modo «fuori»): la cartella riservata del vault raggiunta per percorso e i file delle credenziali.
+MODO=fuori
+if metis_dentro_vault "${CWD:-${CLAUDE_PROJECT_DIR:-$PWD}}" || { [ -n "${CLAUDE_PROJECT_DIR:-}" ] && metis_dentro_vault "$CLAUDE_PROJECT_DIR"; }; then
+  MODO=dentro
+elif [ "${METIS_DOCUMENTI:-}" = separati ] && [ -n "${METIS_FONTI:-}" ] && [ -d "$METIS_FONTI" ]; then
+  F_=$(cd "$METIS_FONTI" && pwd -P); C_=$(cd "${CWD:-$PWD}" 2>/dev/null && pwd -P)
+  case "$C_/" in "$F_"/*) MODO=dentro ;; esac
+fi
+# File delle credenziali che Metis e i suoi moduli creano (rilievo della revisione del 15/11/2026).
+CFGD="$(dirname "${METIS_CONFIG:-$HOME/.config/metis/config}")"
+SEGRETI="$CFGD/telegram:$CFGD/claude-oauth-token:$CFGD/groq:$CFGD/groq-api-key:$CFGD/riunioni-segreto:$HOME/.config/metis-attesa:${XDG_CONFIG_HOME:-$HOME/.config}/google-workspace-mcp:$HOME/.config/rclone:$HOME/.claude/.credentials.json${METIS_GROQ_FILE:+:$METIS_GROQ_FILE}${METIS_CLAUDE_TOKEN_FILE:+:$METIS_CLAUDE_TOKEN_FILE}"
 
 decidi() {  # decidi deny|ask "motivo"
   python3 -c 'import json,sys; print(json.dumps({"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":sys.argv[1],"permissionDecisionReason":sys.argv[2]}}, ensure_ascii=False))' "$1" "$2"
   exit 0
 }
 
-# 1. Cartella riservata: percorso assoluto o relativo al vault, in qualunque campo dell'input.
-if [ -n "${METIS_RUOLO_RISERVATA:-}" ]; then
-  RIS_ABS="$METIS_VAULT/$METIS_RUOLO_RISERVATA"
-  case "$TESTO" in
-    *"$RIS_ABS"*|*"$METIS_RUOLO_RISERVATA/"*|*"$METIS_RUOLO_RISERVATA\""*)
-      decidi deny "Cartella riservata ($METIS_RUOLO_RISERVATA): Claude non la legge, non la cerca e non la elenca. Se il cliente lo chiede esplicitamente, va chiesta conferma e l'accesso lo fa lui." ;;
-  esac
-fi
-
-# 1b. Ricerche ricorsive nella shell (grep -r, rg, ag, find) che partono da una cartella che contiene quella riservata
-# senza escluderla. Gli strumenti Grep e Glob di Claude la escludono già con le regole deny (verificato il 29/9/2026).
-if [ -n "${METIS_RUOLO_RISERVATA:-}" ] && [ "$TOOL" = "Bash" ] && [ -n "$CMD" ]; then
-  ESITO=$(python3 - "$CMD" "${CWD:-$PWD}" "$METIS_VAULT" "${METIS_RUOLO_RISERVATA%/}" <<'PY2'
-import os, shlex, sys
-cmd, cwd, vault, ris = sys.argv[1:]
-ris_abs = os.path.realpath(os.path.join(vault, ris))
-try:
-    parole = shlex.split(cmd, posix=True)
-except ValueError:
-    parole = cmd.split()
-# si spezza la riga in comandi semplici
-comandi, cur = [], []
-for p in parole:
-    if p in ("|", "||", "&&", ";", "&"):
-        comandi.append(cur); cur = []
-    else:
-        cur.append(p)
-comandi.append(cur)
-def contiene(percorso):
-    a = os.path.realpath(os.path.join(cwd, os.path.expanduser(percorso)))
-    return ris_abs == a or ris_abs.startswith(a.rstrip("/") + "/")
-def svolgi(c):
-    """Toglie gli involucri davanti al comando vero (6/10/2026): con-timeout.sh SECONDI, bash/sh <script>, env VAR=…,
-    nice, command, time, sudo è già bloccato altrove. Senza, `bash con-timeout.sh 90 find …` non veniva controllato."""
-    while c:
-        b = os.path.basename(c[0])
-        if b in ("bash", "sh", "zsh") and len(c) > 1 and os.path.basename(c[1]) == "con-timeout.sh":
-            c = c[3:]
-        elif b == "con-timeout.sh":
-            c = c[2:]
-        elif b in ("env", "nice", "command", "time", "nohup"):
-            c = c[1:]
-            while c and ("=" in c[0] and not c[0].startswith("-") or c[0].startswith("-")):
-                c = c[1:]
-        elif "=" in c[0] and not c[0].startswith("-") and os.path.basename(c[0].split("=")[0]) == c[0].split("=")[0]:
-            c = c[1:]                     # VAR=valore davanti al comando
-        else:
-            return c
-    return c
-for c in comandi:
-    c = svolgi(c)
-    if not c: continue
-    nome = os.path.basename(c[0])
-    if nome not in ("grep", "egrep", "rg", "ag", "find"): continue
-    if ris in " ".join(c[1:]):          # la cartella è nominata: è un'esclusione (o la regola 1 ha già deciso)
-        continue
-    if nome == "find":
-        percorsi, args = [], c[1:]
-        # opzioni che stanno PRIMA dei percorsi (BSD e GNU): -H -L -P -E -X -d -s -x, -f <percorso>, -O<livello>
-        while args and (args[0] in ("-H", "-L", "-P", "-E", "-X", "-d", "-s", "-x") or args[0].startswith("-O") or args[0] == "-f"):
-            if args[0] == "-f" and len(args) > 1:
-                percorsi.append(args[1]); args = args[2:]
-            else:
-                args = args[1:]
-        for a in args:
-            if a.startswith("-") or a in ("(", "!", ")"): break
-            percorsi.append(a)
-        percorsi = percorsi or ["."]
-    else:
-        ricorsivo = nome in ("rg", "ag") or any(a.startswith("-") and not a.startswith("--") and ("r" in a or "R" in a) for a in c[1:]) or "--recursive" in c
-        if not ricorsivo: continue
-        non_opz = [a for a in c[1:] if not a.startswith("-")]
-        percorsi = non_opz[1:] or ["."]      # il primo argomento non opzione è il pattern
-    if any(contiene(p) for p in percorsi):
-        print("nega"); sys.exit(0)
-PY2
-)
-  [ "$ESITO" = nega ] && decidi deny "Ricerca che attraversa la cartella riservata (${METIS_RUOLO_RISERVATA%/}). Escluderla (grep --exclude-dir=${METIS_RUOLO_RISERVATA%/}, find … -not -path '*${METIS_RUOLO_RISERVATA%/}*', rg -g '!${METIS_RUOLO_RISERVATA%/}'), cercare in una sottocartella, oppure usare lo strumento Grep, che la esclude già."
-fi
+# 1. Percorsi protetti (riservata.py): la cartella riservata, in qualunque forma il comando ci arrivi (virgolette, caratteri
+# jolly, maiuscole, collegamenti, cd), e le ricerche ricorsive nella shell che la attraversano senza escluderla; i file
+# delle credenziali di Metis. Gli strumenti Grep e Glob di Claude la escludono già con le regole deny (verificato il 29/9/2026).
+ESITO=$(GUARDIA_EVENTO="$INPUT" GUARDIA_SEGRETI="$SEGRETI" python3 "$METIS_ROOT/hooks/riservata.py" "$TOOL" "${CWD:-$PWD}" "$METIS_VAULT" "${METIS_RUOLO_RISERVATA:-}" "$MODO" 2>/dev/null)
+RIS="${METIS_RUOLO_RISERVATA%/}"
+case "$ESITO" in
+  nega) decidi deny "Cartella riservata ($RIS): Claude non la legge, non la cerca e non la elenca. Se il cliente lo chiede esplicitamente, va chiesta conferma e l'accesso lo fa lui." ;;
+  ricerca) decidi deny "Ricerca che attraversa la cartella riservata ($RIS). Escluderla (grep --exclude-dir=$RIS, find … -not -path '*$RIS*', rg -g '!$RIS'), cercare in una sottocartella, oppure usare lo strumento Grep, che la esclude già." ;;
+  segreto) decidi deny "File delle credenziali (token di Claude e del bot, chiavi, posta, sincronizzazione): Claude non li legge e non li copia. Gli script del plugin li usano per conto loro." ;;
+esac
+[ "$MODO" = dentro ] || exit 0
 
 # 2. Azioni irreversibili nei comandi di shell.
 if [ "$TOOL" = "Bash" ] && [ -n "$CMD" ]; then
   C=" $(printf '%s' "$CMD" | tr '\n' ' ') "
-  if printf '%s' "$C" | grep -Eq '[[:space:];&|(]rm[[:space:]]+(-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)'; then
-    decidi ask "Cancellazione ricorsiva: serve la conferma del cliente. Alternativa: spostare in una cartella di quarantena."
+  # Cancellazioni ricorsive o di massa in ogni forma (revisione del 15/11/2026): «rm -f -r», «/bin/rm -rf», «\rm -r»,
+  # «xargs rm», «find … -delete», «find … -exec rm». Il rm di un singolo file resta libero.
+  if printf '%s' "$C" | grep -Eq '[[:space:];&|(`/\\]rm([[:space:]]+[^;&|[:space:]]+)*[[:space:]]+(-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)[[:space:];&|)]' \
+     || printf '%s' "$C" | grep -Eq '(^|[[:space:];&|(`/])find[[:space:]].*(-delete|-exec(dir)?[[:space:]]+[^[:space:]]*rm([[:space:]]|$)|-ok[[:space:]]+[^[:space:]]*rm[[:space:]])' \
+     || printf '%s' "$C" | grep -Eq '(^|[[:space:];&|(`/])xargs([[:space:]]+[^[:space:]]+)*[[:space:]]+[^[:space:]]*rm([[:space:]]|$)'; then
+    decidi ask "Cancellazione ricorsiva o di molti file: serve la conferma del cliente. Alternativa: spostare in una cartella di quarantena."
+  fi
+  # Giri automatici (METIS_GIRO, da metis-agent.sh): nessun comando di rete. Le regole delle routine già non li ammettono;
+  # questo vale anche se una regola li ammettesse per sbaglio.
+  if [ -n "${METIS_GIRO:-}" ] && printf '%s' "$C" | grep -Eq '(^|[[:space:];&|(`/])(curl|wget|nc|ncat|netcat|socat|telnet|ssh|scp|sftp|ftp|rsync|aria2c|http|https)[[:space:]]'; then
+    decidi deny "Giro automatico: niente comandi di rete. Le pagine dei link si leggono con WebFetch, solo per i link già nell'Inbox."
   fi
   printf '%s' "$C" | grep -Eq 'obsidian[[:space:]]+delete' && decidi ask "obsidian delete manda una nota nel cestino: serve la conferma del cliente."
   printf '%s' "$C" | grep -Eq 'git[[:space:]]+(push|reset[[:space:]]+--hard|clean[[:space:]]+-[a-z]*f)' && decidi ask "Operazione git che pubblica o cancella: serve la conferma del cliente."
@@ -167,6 +132,40 @@ if [ "${METIS_POSTA:-connettori}" = locale ]; then
       fi ;;
   esac
   [ -n "${CONN_GMAIL:-}" ] && decidi deny "La posta di questo vault passa dal server locale (strumenti mcp__gmail-locale__…: search_emails, read_email, download_attachment, draft_email; bozze con allegati: scripts/gmail-bozza.mjs del plugin), non dal connettore Gmail di claude.ai."
+fi
+
+# 2c. WebFetch nei giri automatici (revisione del 15/11/2026): un contenuto di terzi lavorato dal giro potrebbe chiedere
+# di aprire un indirizzo costruito apposta, con dentro dati del vault. Nel giro si aprono solo i link che erano già scritti
+# in una nota dell'Inbox prima che il giro partisse (METIS_GIRO_INIZIO), più gli indirizzi di METIS_RETE_CONSENTITI
+# (nomi di host separati da spazi). Nelle sessioni con il cliente WebFetch resta libero.
+if [ -n "${METIS_GIRO:-}" ] && [ "$TOOL" = WebFetch ]; then
+  OK_=$(python3 - "$URL" "$(metis_ruolo INBOX)" "${METIS_GIRO_INIZIO:-0}" "${METIS_RETE_CONSENTITI:-}" <<'PYW' 2>/dev/null
+import os, sys, urllib.parse
+url, inbox, inizio, consentiti = sys.argv[1], sys.argv[2], float(sys.argv[3] or 0), sys.argv[4].split()
+u = urllib.parse.urlsplit(url)
+host = (u.hostname or "").lower()
+if host and any(host == h.lower() or host.endswith("." + h.lower()) for h in consentiti):
+    print("si"); sys.exit()
+senza = url.split("#")[0]
+varianti = {senza, senza.rstrip("/"), senza.replace("https://", "http://", 1), senza.replace("http://", "https://", 1)}
+varianti |= {v.rstrip("/") for v in list(varianti)}
+varianti = {v for v in varianti if len(v) > 10}
+for d, _, fs in os.walk(inbox):
+    for f in fs:
+        if not f.endswith(".md"):
+            continue
+        p = os.path.join(d, f)
+        try:
+            if inizio and os.path.getmtime(p) >= inizio:
+                continue
+            t = open(p, encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        if any(v in t for v in varianti):
+            print("si"); sys.exit()
+PYW
+)
+  [ "$OK_" = si ] || decidi deny "Giro automatico: si aprono solo i link già scritti in una nota dell'Inbox prima del giro. Lascia la nota con il solo link e dillo nel riscontro."
 fi
 
 # 3. Invii: strumenti MCP di posta e messaggistica che mandano, inoltrano o rispondono. Le bozze passano.

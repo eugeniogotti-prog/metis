@@ -66,7 +66,16 @@ if fonti:
 deny = ["Bash(sudo *)", "Bash(rm -rf /*)", "Bash(rm -rf ~*)",
         # cartelle del Mac con chiavi e credenziali: Claude non le legge mai, in nessuna modalità
         "Read(~/.ssh/**)", "Read(~/.aws/**)", "Read(~/.gnupg/**)", "Read(~/Library/Keychains/**)",
-        "Read(~/.config/gh/**)", "Read(~/.netrc)", "Read(~/.claude/.credentials.json)", "Edit(~/.ssh/**)", "Edit(~/.aws/**)", "Edit(~/.gnupg/**)"]
+        "Read(~/.config/gh/**)", "Read(~/.netrc)", "Read(~/.claude/.credentials.json)", "Edit(~/.ssh/**)", "Edit(~/.aws/**)", "Edit(~/.gnupg/**)",
+        # credenziali che Metis e i suoi moduli creano (revisione del 15/11/2026): token di Claude e del bot, chiave Groq,
+        # segreto delle riunioni, token d'attesa dell'installazione, posta locale, sincronizzazione. La configurazione si
+        # legge con configura.sh get; la guardia blocca anche i comandi di shell che aprono questi file.
+        "Read(~/.config/metis/**)", "Edit(~/.config/metis/**)", "Read(~/.config/metis-attesa/**)", "Edit(~/.config/metis-attesa/**)",
+        "Read(~/.config/google-workspace-mcp/**)", "Edit(~/.config/google-workspace-mcp/**)",
+        "Read(~/.config/rclone/**)", "Edit(~/.config/rclone/**)", "Edit(~/.claude/.credentials.json)"]
+for f in (env.get("METIS_GROQ_FILE", ""), env.get("METIS_CLAUDE_TOKEN_FILE", "")):
+    if f:
+        deny += [f"Read({ass(os.path.expanduser(f))})", f"Edit({ass(os.path.expanduser(f))})"]
 if ris:
     deny += [f"Read({ass(vault)}/{ris}/**)", f"Edit({ass(vault)}/{ris}/**)"]
 # cartelle che Claude legge ma non modifica (METIS_SOLA_LETTURA, relative al vault, separate da «|»)

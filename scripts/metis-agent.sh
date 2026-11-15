@@ -95,6 +95,8 @@ STRUMENTI="$(bash "$METIS_ROOT/scripts/configura.sh" get METIS_ROUTINE_STRUMENTI
 [ -n "$STRUMENTI" ] && ARGS+=(--allowedTools $STRUMENTI)
 
 INIZIO=$(date +%s)
+# La guardia riconosce il giro da queste due variabili: niente comandi di rete, WebFetch solo sui link già nell'Inbox.
+export METIS_GIRO="$LAVORO" METIS_GIRO_INIZIO="$INIZIO"
 OUT=$(cd "$METIS_VAULT" && printf '%s\n\n%s\n' "$REGOLA" "$COMPITO" | "$CLAUDE" "${ARGS[@]}" 2>>"$METIS_LOG_DIR/$LAVORO.log"); RC=$?
 DURATA=$(( $(date +%s) - INIZIO ))
 RESOCONTO=$(printf '%s' "$OUT" | python3 -c 'import json,sys

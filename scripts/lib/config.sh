@@ -69,7 +69,10 @@ metis_carica_config() {
   # vault. Con METIS_DOCUMENTI=separati (chi usa Obsidian e vuole un vault di sole note) il default resta fuori dal vault.
   # Installazioni precedenti: senza METIS_DOCUMENTI ma con una cartella fonti fuori dal vault, valeva «separati» e resta così.
   if [ -z "${METIS_DOCUMENTI:-}" ] && [ -n "${METIS_FONTI:-}" ]; then
-    case "$(eval echo "$METIS_FONTI")/" in "$METIS_VAULT"/*) METIS_DOCUMENTI=accanto ;; *) METIS_DOCUMENTI=separati ;; esac
+    # Il valore è un dato: si sostituisce solo $HOME, mai con eval (una $( ) nel file verrebbe eseguita a ogni
+    # caricamento, contro la regola in testa a questo file; revisione di sicurezza del 15/11/2026).
+    local f_="${METIS_FONTI//\$\{HOME\}/$HOME}"; f_="${f_//\$HOME/$HOME}"
+    case "$f_/" in "$METIS_VAULT"/*) METIS_DOCUMENTI=accanto ;; *) METIS_DOCUMENTI=separati ;; esac
   fi
   export METIS_DOCUMENTI="${METIS_DOCUMENTI:-accanto}"
   if [ "$METIS_DOCUMENTI" = separati ]; then export METIS_FONTI="${METIS_FONTI:-$HOME/Documents/Fonti}"
